@@ -3,14 +3,7 @@
 
       <div class="footer-brand">
         <a href="#" class="footer-logo" aria-label="REAP433 Home">
-          <svg class="logo-mark-lg" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M20 20C20 11.164 14.163 5 5.5 5S0 11.164 0 20s5.837 15 14.5 15c5.867 0 10.933-3.467 13.333-8.667C30.233 31.533 35.3 35 41.167 35 49.83 35 56 29.163 56 20S49.83 5 41.167 5c-5.867 0-10.933 3.467-13.333 8.667C25.433 8.467 20.367 5 14.5 5" stroke="#C9A227" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <path d="M39 20C36.667 14 31.667 11 27 11S15 16 15 20s4 9 12 9 12-5 13-9c1 4 6 9 13 9s12-5 12-9-4-9-12-9-12 5-13 9" stroke="#C9A227" stroke-width="1.8" fill="none" opacity="0.5"/>
-          </svg>
-          <div class="footer-logo-text">
-            <span class="footer-brand-name">REAP<span class="footer-accent">433</span></span>
-            <span class="footer-tagline">Infinite Impact™</span>
-          </div>
+          <img src="{{ asset('assets/web/images/logo.png') }}" alt="REAP433 Logo">
         </a>
         <p class="footer-brand-desc">
           A bold lifestyle and civic leadership brand from Grand Prairie, Texas. 
