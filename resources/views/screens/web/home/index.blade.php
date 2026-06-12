@@ -190,217 +190,42 @@
         </div>
 
         <!-- Product Filters -->
+        @php
+            $productCategories = \App\Models\ProductCategory::query()
+                ->where('parent_id', 0)
+                ->where('status', 'active')
+                ->where('slug', '!=', 'all-products')
+                ->orderBy('name')
+                ->get();
+
+            $shopProducts = \App\Models\Product::query()
+                ->with(['category', 'images', 'productType'])
+                ->where('status', 'active')
+                ->latest()
+                ->limit(6)
+                ->get();
+        @endphp
         <div class="product-filters" role="group" aria-label="Filter products">
           <button class="filter-btn active" data-filter="all" aria-pressed="true">All Pieces</button>
-          <button class="filter-btn" data-filter="tops" aria-pressed="false">Tops</button>
-          <button class="filter-btn" data-filter="headwear" aria-pressed="false">Headwear</button>
-          <button class="filter-btn" data-filter="footwear" aria-pressed="false">Footwear</button>
-          <button class="filter-btn" data-filter="limited" aria-pressed="false">Limited Edition</button>
+          @foreach ($productCategories as $category)
+            <button class="filter-btn" data-filter="{{ $category->slug }}" aria-pressed="false">{{ $category->name }}</button>
+          @endforeach
         </div>
 
         <!-- Product Grid -->
         <div class="product-grid" role="list" aria-label="Products">
-
-          <!-- Product 1 -->
-          <article class="product-card" role="listitem" data-category="tops limited" data-scroll-reveal data-delay="0">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Infinity Hoodie in Charcoal Black"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Infinity Hoodie">Quick View</button>
-              </div>
-              <span class="product-badge badge-limited">Limited</span>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">Hoodies</span>
-                <div class="product-rating" aria-label="4.9 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>4.9</span>
-                </div>
-              </div>
-              <h3 class="product-name">Infinity Signature Hoodie</h3>
-              <p class="product-desc">Premium heavyweight fleece, embroidered infinity mark, oversized silhouette.</p>
-              <div class="product-footer">
-                <span class="product-price">$89.00</span>
-                <button class="btn btn-gold-sm" aria-label="Add Infinity Signature Hoodie to cart">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 2 -->
-          <article class="product-card" role="listitem" data-category="headwear" data-scroll-reveal data-delay="80">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Legacy Cap in Black and Gold"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Legacy Cap">Quick View</button>
-              </div>
-              <span class="product-badge badge-new">New</span>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">Headwear</span>
-                <div class="product-rating" aria-label="4.8 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>4.8</span>
-                </div>
-              </div>
-              <h3 class="product-name">Legacy Structured Cap</h3>
-              <p class="product-desc">6-panel structured fit, gold embroidered R433 mark, premium wool blend.</p>
-              <div class="product-footer">
-                <span class="product-price">$48.00</span>
-                <button class="btn btn-gold-sm" aria-label="Add Legacy Structured Cap to cart">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 3 -->
-          <article class="product-card" role="listitem" data-category="tops" data-scroll-reveal data-delay="160">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Civic Statement Tee in Off-White"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Civic Statement Tee">Quick View</button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">T-Shirts</span>
-                <div class="product-rating" aria-label="5.0 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>5.0</span>
-                </div>
-              </div>
-              <h3 class="product-name">Civic Statement Tee</h3>
-              <p class="product-desc">400gsm pima cotton, screen-printed infinity mark, relaxed premium fit.</p>
-              <div class="product-footer">
-                <span class="product-price">$52.00</span>
-                <button class="btn btn-gold-sm" aria-label="Add Civic Statement Tee to cart">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 4 -->
-          <article class="product-card" role="listitem" data-category="footwear limited" data-scroll-reveal data-delay="240">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Infinity Runner Shoes"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Infinity Runner">Quick View</button>
-              </div>
-              <span class="product-badge badge-limited">Drops Soon</span>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">Footwear</span>
-                <div class="product-rating" aria-label="4.9 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>4.9</span>
-                </div>
-              </div>
-              <h3 class="product-name">Infinity Runner</h3>
-              <p class="product-desc">Premium collab sneaker, hand-finished gold R433 accent, limited 433 pairs.</p>
-              <div class="product-footer">
-                <span class="product-price">$165.00</span>
-                <button class="btn btn-outline-sm" aria-label="Notify me when Infinity Runner drops">
-                  Notify Me
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 5 -->
-          <article class="product-card" role="listitem" data-category="tops" data-scroll-reveal data-delay="0">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Movement Crew Sweater"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Movement Crew Sweater">Quick View</button>
-              </div>
-              <span class="product-badge badge-best">Bestseller</span>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">Sweaters</span>
-                <div class="product-rating" aria-label="4.9 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>4.9</span>
-                </div>
-              </div>
-              <h3 class="product-name">Movement Crew Sweater</h3>
-              <p class="product-desc">French terry crew neck, tone-on-tone jacquard infinity weave, relaxed premium cut.</p>
-              <div class="product-footer">
-                <span class="product-price">$74.00</span>
-                <button class="btn btn-gold-sm" aria-label="Add Movement Crew Sweater to cart">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
-
-          <!-- Product 6 -->
-          <article class="product-card" role="listitem" data-category="headwear limited" data-scroll-reveal data-delay="80">
-            <div class="product-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=600&q=80&auto=format&fit=crop"
-                alt="REAP433 Gold Label Snapback"
-                class="product-image"
-                loading="lazy"
-              />
-              <div class="product-overlay" aria-hidden="true">
-                <button class="product-quick-view" aria-label="Quick view Gold Label Snapback">Quick View</button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-meta">
-                <span class="product-category">Headwear</span>
-                <div class="product-rating" aria-label="4.7 out of 5 stars">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="#C9A227" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                  <span>4.7</span>
-                </div>
-              </div>
-              <h3 class="product-name">Gold Label Snapback</h3>
-              <p class="product-desc">Flat-brim snapback with metallic gold embroidered logo, premium woven tag.</p>
-              <div class="product-footer">
-                <span class="product-price">$54.00</span>
-                <button class="btn btn-gold-sm" aria-label="Add Gold Label Snapback to cart">
-                  Add to Cart
-                </button>
-              </div>
-            </div>
-          </article>
-
+          @forelse ($shopProducts as $product)
+            @include('screens.web.artifacts.partials.product-card', [
+                'product' => $product,
+                'delay' => ($loop->index % 4) * 80,
+            ])
+          @empty
+            <p class="product-grid-empty">No products available yet.</p>
+          @endforelse
         </div>
 
         <div class="shop-cta-row" data-scroll-reveal>
-          <a href="#shop" class="btn btn-gold">
+          <a href="{{ route('artifacts.index') }}" class="btn btn-gold">
             View Full Collection
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
           </a>
@@ -432,118 +257,23 @@
 
         <!-- Hub Categories -->
         <div class="hub-categories" role="tablist" aria-label="Blog categories">
-          <button class="hub-cat active" role="tab" aria-selected="true" data-cat="all">All Articles</button>
-          <button class="hub-cat" role="tab" aria-selected="false" data-cat="voting">Voting Rights</button>
-          <button class="hub-cat" role="tab" aria-selected="false" data-cat="education">Education Reform</button>
-          <button class="hub-cat" role="tab" aria-selected="false" data-cat="community">Community Leadership</button>
-          <button class="hub-cat" role="tab" aria-selected="false" data-cat="policy">Policy Watch</button>
+          <button class="hub-cat active" role="tab" aria-selected="true" data-cat="all">{{ __('All Articles') }}</button>
+          @foreach ($blogCategories as $category)
+            <button class="hub-cat" role="tab" aria-selected="false" data-cat="{{ $category->slug }}">{{ $category->name }}</button>
+          @endforeach
         </div>
 
         <!-- Blog Grid -->
         <div class="blog-grid" id="blog" role="list" aria-label="Blog articles">
-
-          <!-- Featured Article -->
-          <article class="blog-card blog-featured" role="listitem" data-cat="voting" data-scroll-reveal data-delay="0">
-            <div class="blog-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?w=900&q=80&auto=format&fit=crop"
-                alt="Voting booth with American flag, representing voting rights advocacy"
-                class="blog-image"
-                loading="lazy"
-              />
-              <span class="blog-category-badge">Voting Rights</span>
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <span class="blog-author">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&q=80&auto=format&fit=crop&crop=face" alt="Author Marcus J. Williams" class="author-avatar" />
-                  Marcus J. Williams
-                </span>
-                <time class="blog-date" datetime="2024-11-15">Nov 15, 2024</time>
-                <span class="blog-read-time">8 min read</span>
-              </div>
-              <h3 class="blog-title">Texas Voter Suppression Laws: What Every Grand Prairie Resident Needs to Know Before 2025</h3>
-              <p class="blog-excerpt">A deep-dive analysis of SB1 and its compounding effects on Black and Brown communities across Dallas County — and the grassroots organizations fighting back on every front.</p>
-              <a href="#" class="blog-read-more">
-                Read Full Article
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- Standard Articles -->
-          <article class="blog-card blog-standard" role="listitem" data-cat="education" data-scroll-reveal data-delay="80">
-            <div class="blog-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=600&q=80&auto=format&fit=crop"
-                alt="Students in classroom representing education reform"
-                class="blog-image"
-                loading="lazy"
-              />
-              <span class="blog-category-badge cat-education">Education</span>
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <time class="blog-date" datetime="2024-11-10">Nov 10, 2024</time>
-                <span class="blog-read-time">5 min read</span>
-              </div>
-              <h3 class="blog-title">Defunding Public Schools: How GISD and Grand Prairie ISD Are Responding</h3>
-              <p class="blog-excerpt">An honest look at budget cuts hitting the Grand Prairie Independent School District and the parent coalitions mobilizing to push back.</p>
-              <a href="#" class="blog-read-more">
-                Read More
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-              </a>
-            </div>
-          </article>
-
-          <article class="blog-card blog-standard" role="listitem" data-cat="community" data-scroll-reveal data-delay="160">
-            <div class="blog-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&q=80&auto=format&fit=crop"
-                alt="Community members gathered for a civic meeting"
-                class="blog-image"
-                loading="lazy"
-              />
-              <span class="blog-category-badge cat-community">Community</span>
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <time class="blog-date" datetime="2024-11-05">Nov 5, 2024</time>
-                <span class="blog-read-time">6 min read</span>
-              </div>
-              <h3 class="blog-title">Rising Leaders: 10 Grand Prairie Changemakers Under 35 You Need to Know</h3>
-              <p class="blog-excerpt">From school board members to nonprofit founders — meet the next generation of civic leaders reshaping the DFW landscape from the ground up.</p>
-              <a href="#" class="blog-read-more">
-                Read More
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-              </a>
-            </div>
-          </article>
-
-          <article class="blog-card blog-standard" role="listitem" data-cat="policy" data-scroll-reveal data-delay="240">
-            <div class="blog-image-wrap">
-              <img
-                src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80&auto=format&fit=crop"
-                alt="Policy documents and gavel representing policy watch"
-                class="blog-image"
-                loading="lazy"
-              />
-              <span class="blog-category-badge cat-policy">Policy Watch</span>
-            </div>
-            <div class="blog-content">
-              <div class="blog-meta">
-                <time class="blog-date" datetime="2024-10-28">Oct 28, 2024</time>
-                <span class="blog-read-time">4 min read</span>
-              </div>
-              <h3 class="blog-title">Breaking: Texas Legislature's New Education Voucher Bill — Full Analysis</h3>
-              <p class="blog-excerpt">What HB174 means for public education funding in Texas, which communities it targets, and how to make your voice heard before it passes.</p>
-              <a href="#" class="blog-read-more">
-                Read More
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
-              </a>
-            </div>
-          </article>
-
+          @forelse ($hubBlogs as $blog)
+            @include('screens.web.home.partials.blog-card', [
+              'blog' => $blog,
+              'isFeatured' => $loop->first,
+              'delay' => $loop->index * 80,
+            ])
+          @empty
+            <p class="blog-grid-empty">{{ __('No articles published yet. Check back soon.') }}</p>
+          @endforelse
         </div>
 
         <div class="hub-cta-row" data-scroll-reveal>

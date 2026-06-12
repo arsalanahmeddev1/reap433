@@ -1,6 +1,9 @@
+@php
+    $cartCount = \App\Models\Cart::itemCount();
+@endphp
 <header class="nav-header" id="nav-header" role="banner">
     <nav class="nav-container" aria-label="Primary navigation">
-      <a href="#" class="nav-logo" aria-label="REAP433 Home">
+      <a href="{{ route('home') }}" class="nav-logo" aria-label="REAP433 Home">
         <img src="{{ asset('assets/web/images/logo.png') }}" alt="REAP433 Logo">
       </a>
 
@@ -27,13 +30,26 @@
       </ul>
 
       <div class="nav-actions">
+        @auth
+          <a href="{{ route('profile.edit') }}" class="nav-auth-link nav-auth-link--user" title="{{ auth()->user()->name }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="nav-auth-name">{{ auth()->user()->name }}</span>
+          </a>
+          <form method="POST" action="{{ route('logout') }}" class="nav-logout-form">
+            @csrf
+            <button type="submit" class="nav-auth-link nav-auth-link--logout">Log out</button>
+          </form>
+        @else
+          <a href="{{ route('login') }}" class="nav-auth-link">Log in</a>
+          <a href="{{ route('register') }}" class="btn btn-gold-sm nav-signup-btn">Sign up</a>
+        @endauth
         <button class="nav-icon-btn" aria-label="Search">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
-        <button class="nav-icon-btn cart-btn" aria-label="Shopping cart, 2 items">
+        <a href="{{ route('cart.index') }}" class="nav-icon-btn cart-btn" aria-label="Shopping cart, {{ $cartCount }} items">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          <span class="cart-badge" aria-label="2 items">2</span>
-        </button>
+          <span class="cart-badge" data-cart-count @if ($cartCount <= 0) hidden @endif>{{ $cartCount }}</span>
+        </a>
         <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
           <span></span><span></span><span></span>
         </button>
@@ -57,6 +73,18 @@
       </ul>
     </nav>
     <div class="mobile-menu-footer">
+      <div class="mobile-auth-links">
+        @auth
+          <a href="{{ route('profile.edit') }}" class="mobile-nav-link">My account</a>
+          <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="mobile-nav-link mobile-logout-btn">Log out</button>
+          </form>
+        @else
+          <a href="{{ route('login') }}" class="mobile-nav-link">Log in</a>
+          <a href="{{ route('register') }}" class="btn btn-gold mobile-signup-btn">Sign up</a>
+        @endauth
+      </div>
       <div class="mobile-mode-toggle">
         <button class="mode-btn active" data-mode="shop">Shop</button>
         <button class="mode-btn" data-mode="impact">Impact</button>

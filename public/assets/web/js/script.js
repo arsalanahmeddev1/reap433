@@ -150,17 +150,19 @@
         const cats = card.dataset.category || '';
         const show = filter === 'all' || cats.includes(filter);
 
-        card.style.transition = `opacity 300ms ease ${i * 40}ms, transform 300ms ease ${i * 40}ms`;
-
         if (show) {
+          card.hidden = false;
+          card.style.display = '';
+          card.style.transition = `opacity 300ms ease ${i * 40}ms, transform 300ms ease ${i * 40}ms`;
           card.style.opacity = '1';
           card.style.transform = '';
           card.style.pointerEvents = '';
-          card.removeAttribute('hidden');
         } else {
-          card.style.opacity  = '0';
+          card.style.opacity = '0';
           card.style.transform = 'scale(0.95)';
           card.style.pointerEvents = 'none';
+          card.style.display = 'none';
+          card.hidden = true;
         }
       });
     });
@@ -403,6 +405,10 @@
 // ─────────────────────────────────────────
 (function initQuickView() {
   document.querySelectorAll('.product-quick-view').forEach(btn => {
+    if (btn.tagName === 'A' && btn.getAttribute('href')) {
+      return;
+    }
+
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const card  = btn.closest('.product-card');
@@ -451,37 +457,5 @@
         setTimeout(() => toast.remove(), 350);
       }, 3000);
     });
-  });
-})();
-
-// ─────────────────────────────────────────
-// ADD TO CART — Micro animation
-// ─────────────────────────────────────────
-(function initAddToCart() {
-  let cartCount = 2;
-  const cartBadge = document.querySelector('.cart-badge');
-
-  document.querySelectorAll('.btn-gold-sm').forEach(btn => {
-    if (btn.textContent.trim() === 'Add to Cart') {
-      btn.addEventListener('click', () => {
-        const orig = btn.textContent;
-        btn.textContent = '✓ Added!';
-        btn.style.background = 'linear-gradient(135deg, #4ade80, #16a34a)';
-        btn.disabled = true;
-
-        cartCount++;
-        if (cartBadge) {
-          cartBadge.textContent = cartCount;
-          cartBadge.style.transform = 'scale(1.4)';
-          setTimeout(() => { cartBadge.style.transform = ''; }, 200);
-        }
-
-        setTimeout(() => {
-          btn.textContent = orig;
-          btn.style.background = '';
-          btn.disabled = false;
-        }, 2200);
-      });
-    }
   });
 })();

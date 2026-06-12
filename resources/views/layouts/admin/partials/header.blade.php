@@ -1,66 +1,112 @@
 <div class="page-header">
-  <div class="header-wrapper row m-0">
-    <div class="header-logo-wrapper col-auto p-0">
-      <div class="logo-wrapper">
-        <a href="index.html"><img
-            class="img-fluid for-light"
-            src="{{ asset('assets/admin/images/logo/logo.png') }}"
-            alt="" /><img
-            class="img-fluid for-dark"
-            src="{{ asset('assets/admin/images/logo/logo_dark.png') }}"
-            alt="" /></a>
-      </div>
-      <div class="toggle-sidebar">
-        <i
-          class="status_toggle middle sidebar-toggle"
-          data-feather="align-center"></i>
-      </div>
-    </div>
-    <div
-      class="nav-right col-xxl-7 col-xl-6 col-md-7 col-8 pull-right right-header p-0 ms-auto">
-      <ul class="nav-menus">
-        <li>
-          <div class="mode">
-            <svg>
-              <use href="{{ asset('assets/admin/svg/icon-sprite.svg#moon') }}"></use>
-            </svg>
-          </div>
-        </li>
-        <li class="profile-nav onhover-dropdown pe-0 py-0">
-          <div class="d-flex profile-media">
-            <img
-              class="b-r-10"
-              src="{{ asset('assets/admin/images/dashboard/profile.png') }}"
-              alt="" />
-            <div class="flex-grow-1">
-              <span>Emay Walter</span>
-              <p class="mb-0">
-                Admin <i class="middle fa-solid fa-angle-down"></i>
-              </p>
-            </div>
-          </div>
-          <ul class="profile-dropdown onhover-show-div">
-            <li>
-              <a href="sign-up.html"><i data-feather="user"></i><span>Account </span></a>
+    <div class="header-wrapper row m-0">
+        <div class="col-4">
+            {{-- @php
+                $userRole = Auth::user()->roles->first();
+                $roleName = $userRole ? $userRole->name : 'user';
+            @endphp --}}
+            {{-- <h3 class="">{{ \Illuminate\Support\Str::title(str_replace('_', ' ', $roleName)) }}</h3> --}}
+        </div>
+        <div class="nav-right col-xxl-7 col-xl-6 col-md-7 col-8 pull-right right-header p-0 ms-auto">
+            <ul class="nav-menus">
+                <!-- <li class="onhover-dropdown">
+                    <div class="notification-box">
+                        <svg>
+                            <use href="{{ asset('assets/libs/svg/icon-sprite.svg#notification') }}"></use>
+                        </svg><span class="badge rounded-pill badge-success">4 </span>
+                    </div>
+                    <div class="onhover-show-div notification-dropdown">
+                        <h6 class="f-18 mb-0 dropdown-title">Notifications</h6>
+                        <ul>
+                            <li class="b-l-primary border-4 toast default-show-toast align-items-center text-light border-0 fade show"
+                                aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                                <div class="d-flex justify-content-between">
+                                    <div class="toast-body">
+                                        <p>Delivery processing</p>
+                                    </div>
+                                    <button class="btn-close btn-close-white me-2 m-auto" type="button"
+                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </li>
+                            <li class="b-l-success border-4 toast default-show-toast align-items-center text-light border-0 fade show"
+                                aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                                <div class="d-flex justify-content-between">
+                                    <div class="toast-body">
+                                        <p>Order Complete</p>
+                                    </div>
+                                    <button class="btn-close btn-close-white me-2 m-auto" type="button"
+                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </li>
+                            <li class="b-l-secondary border-4 toast default-show-toast align-items-center text-light border-0 fade show"
+                                aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                                <div class="d-flex justify-content-between">
+                                    <div class="toast-body">
+                                        <p>Tickets Generated</p>
+                                    </div>
+                                    <button class="btn-close btn-close-white me-2 m-auto" type="button"
+                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </li>
+                            <li class="b-l-warning border-4 toast default-show-toast align-items-center text-light border-0 fade show"
+                                aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+                                <div class="d-flex justify-content-between">
+                                    <div class="toast-body">
+                                        <p>Delivery Complete</p>
+                                    </div>
+                                    <button class="btn-close btn-close-white me-2 m-auto" type="button"
+                                        data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </li> -->
+                <li class="profile-nav onhover-dropdown pe-0 py-0">
+                    <div class="d-flex profile-media">
+                        <img class="b-r-10" src="{{ asset('assets/libs/images/dashboard/profile.png') }}" alt="" />
+                        <div class="flex-grow-1 d-flex align-items-center justify-content-between gap-1">
+                            <span>
+                                {{ Auth::user()?->name }}
+                            </span>
+                            <i class="middle fa-solid fa-angle-down"></i>
+                        </div>
+                    </div>
+                    <ul class="profile-dropdown onhover-show-div">
+                        <li>
+                            <a href="{{ route('home') }}" target="_blank"><i data-feather="globe"></i><span>Website </span></a>
+                        </li>
+                        {{-- <li>
+                            <a href="{{ route('profile') }}"><i data-feather="user"></i><span>Update Profile
+                        </span></a>
+                </li> --}}
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="dropdown-item"><i data-feather="log-in"> </i><span>Log
+                                out</span></button>
+                    </form>
+                </li>
+            </ul>
             </li>
-            <li>
-              <a href="mail-box.html"><i data-feather="mail"></i><span>Inbox</span></a>
+            <li class="theme-toggle-wrap d-flex align-items-center ps-2 ms-1">
+                <button
+                    type="button"
+                    id="themeToggle"
+                    class="theme-toggle-btn toggleThemeBtn"
+                    aria-label="Toggle color theme"
+                    title="Theme">
+                    <span class="theme-toggle-track" aria-hidden="true">
+                        <span class="theme-toggle-thumb">
+                            <i class="fa-solid fa-sun"></i>
+                            <i class="fa-solid fa-moon"></i>
+                        </span>
+                    </span>
+                </button>
             </li>
-            <li>
-              <a href="task.html"><i data-feather="file-text"></i><span>Taskboard</span></a>
-            </li>
-            <li>
-              <a href="add-user.html"><i data-feather="settings"></i><span>Settings</span></a>
-            </li>
-            <li>
-              <a href="login.html"><i data-feather="log-in"> </i><span>Log out</span></a>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    <script class="result-template" type="text/x-handlebars-template">
-      <div class="ProfileCard u-cf">
+            </ul>
+        </div>
+        <script class="result-template" type="text/x-handlebars-template">
+            <div class="ProfileCard u-cf">
               <div class="ProfileCard-avatar"><svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -82,9 +128,9 @@
               </div>
             </div>
           </script>
-    <script class="empty-template" type="text/x-handlebars-template">
-      <div class="EmptyMessage">Your search turned up 0 results. This most
+        <script class="empty-template" type="text/x-handlebars-template">
+            <div class="EmptyMessage">Your search turned up 0 results. This most
               likely means the backend is down, yikes!</div>
           </script>
-  </div>
+    </div>
 </div>

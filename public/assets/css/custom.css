@@ -1,0 +1,575 @@
+:root {
+    /* REAP433 brand — aligned with public site (assets/web/css/style.css) */
+    --c-gold: #bf8834;
+    --c-gold-light: #d4a24a;
+    --c-gold-dark: #a67428;
+    --c-gold-muted: rgba(191, 136, 52, 0.15);
+    --c-black: #0f0f0f;
+    --c-black-soft: #1a1a1a;
+    --c-cream: #f8f4ed;
+
+    --theme-default: #bf8834;
+    --rgb-primary: 191, 136, 52;
+    --primary-theme: #1a1a1a;
+    --secondary-theme: #0f0f0f;
+    --default-color: #f8f4ed;
+    --primary-theme-web: #bf8834;
+}
+
+/* REAP433 admin logo (same asset as storefront header) */
+.reap433-admin-logo {
+    max-width: 180px;
+    width: 100%;
+    height: auto;
+}
+
+/* Primary actions — gold gradient like storefront .btn-gold */
+.btn-primary,
+.btn-primary-gradien {
+    background: linear-gradient(135deg, var(--c-gold-light) 0%, var(--c-gold) 50%, var(--c-gold-dark) 100%) !important;
+    border-color: transparent !important;
+    color: var(--c-black) !important;
+    box-shadow: 0 4px 20px rgba(191, 136, 52, 0.3);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary-gradien:hover,
+.btn-primary-gradien:focus,
+.btn-primary-gradien:active {
+    background: linear-gradient(135deg, var(--c-gold-light) 0%, var(--c-gold) 50%, var(--c-gold-dark) 100%) !important;
+    border-color: transparent !important;
+    color: var(--c-black) !important;
+    box-shadow: 0 8px 32px rgba(191, 136, 52, 0.45);
+}
+
+.btn-outline-primary {
+    color: var(--c-gold) !important;
+    border-color: var(--c-gold) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    color: var(--c-black) !important;
+    background: var(--c-gold-muted) !important;
+    border-color: var(--c-gold) !important;
+}
+
+.doted-list {
+    margin-bottom: 20px;
+}
+
+.doted-list li {
+    list-style: disc;
+}
+
+.toggle-sidebar {
+    top: 45px;
+}
+
+.dark-only .sidebar-list .sidebar-link .theme-icons {
+    color: var(--theme-default);
+}
+
+.page-wrapper .page-header .header-wrapper .nav-right .profile-dropdown {
+    top: 30px;
+    left: -120px;
+    width: 100%;
+    min-width: 230px;
+
+}
+
+.loader {
+    width: 40px;
+    aspect-ratio: 1;
+    --c: linear-gradient(var(--default-color) 0 0);
+    --r1: radial-gradient(farthest-side at bottom, var(--default-color) 93%, var(--default-color));
+    --r2: radial-gradient(farthest-side at top, var(--default-color) 93%, var(--default-color));
+    background: var(--c), var(--r1), var(--r2), var(--c), var(--r1), var(--r2),
+        var(--c), var(--r1), var(--r2);
+    background-repeat: no-repeat;
+    animation: l1 1s infinite alternate;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* right: 0; */
+    z-index: 1;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes l1 {
+
+    0%,
+    10% {
+        background-size: 8px 0, 8px 4px, 8px 4px;
+        background-position: 0 50%, 0 calc(50% - 2px), 0 calc(50% + 2px),
+            50% 50%, 50% calc(50% - 2px), 50% calc(50% + 2px), 100% 50%,
+            100% calc(50% - 2px), 100% calc(50% + 2px);
+    }
+
+    90%,
+    100% {
+        background-size: 8px 100%, 8px 4px, 8px 4px;
+        background-position: 0 50%, 0 -2px, 0 calc(100% + 2px), 50% 50%,
+            50% -2px, 50% calc(100% + 2px), 100% 50%, 100% -2px,
+            100% calc(100% + 2px);
+    }
+}
+
+.loader-wrapper {
+    width: 100%;
+    height: 100%;
+    background-color: var(--secondary-theme);
+}
+
+.action-btns {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-color: transparent;
+    color: hsla(0, 0%, 100%, 0.6);
+}
+
+.table.dataTable td:last-child {
+    display: flex;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-list i.fa-solid.fa-thumbtack {
+    display: none !important;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .pin-title {
+    display: none !important;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active .according-menu i,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active span,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li:hover .sidebar-link:not(.active):hover .according-menu i,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li:hover .sidebar-link:not(.active):hover span,
+a:hover {
+    color: var(--default-color);
+}
+
+.page-wrapper .page-header .header-wrapper .nav-right .profile-dropdown li:hover a svg {
+    stroke: var(--default-color);
+}
+
+.swal2-container .swal2-actions .swal2-confirm.custom-confirm-btn {
+    background: linear-gradient(135deg, var(--c-gold-light), var(--c-gold)) !important;
+    color: var(--c-black) !important;
+    border: none !important;
+    border-radius: 5px !important;
+}
+
+.custom-cancel-btn {
+    background: transparent !important;
+    color: var(--c-gold) !important;
+    border: 1px solid var(--c-gold) !important;
+    border-radius: 5px !important;
+}
+
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active {
+    background-color: var(--secondary-theme) !important;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link:after {
+    background-color: var(--c-gold) !important;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li.sidebar-list:hover>a:hover {
+    background-color: var(--secondary-theme) !important;
+}
+
+body.dark-only .toggle-sidebar svg {
+    stroke: #ffffff99;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links {
+    margin-top: 0;
+}
+
+body.dark-only .dropdown.custom-dropdown .dropdown-menu .dropdown-item:hover,
+.dark-only .dropdown.custom-dropdown .dropdown-toggle::after,
+.dark-only .user-list-wrapper .user-list-table table tbody tr td a:hover,
+.dark-only .nav-pills.nav-primary .nav-link,
+.nav-primary .nav-link {
+    color: var(--default-color);
+}
+
+.row-gap-20 {
+    row-gap: 20px;
+}
+
+body.dark-only .alert-warning.custom-alert {
+    background-color: var(--primary-theme) !important;
+}
+
+body.dark-only .custom-switch .form-check-input {}
+
+body.dark-only .custom-switch .form-check-input:checked {
+    background-color: var(--primary-theme-web);
+}
+
+.swal2-container .swal2-actions .swal2-confirm {
+    background: linear-gradient(135deg, var(--c-gold-light), var(--c-gold)) !important;
+    color: var(--c-black) !important;
+}
+
+a[aria-disabled="true"] {
+    pointer-events: none;
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+body.dark-only .form-control {
+    color: #fff;
+}
+
+table .square-white,
+form .square-white {
+    all: unset;
+}
+
+table .square-white:hover,
+form .square-white:hover {
+    color: #fff;
+}
+
+.dashboard-sm-img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+}
+
+.image-preview {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+.custom-tab-wrapper {
+    border-bottom: 2px solid rgb(55, 69, 88);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+.custom-tab-wrapper .nav-link {
+    color: var(--default-color);
+}
+.form-check-input {
+    width: 20px;
+    height: 20px;
+}
+.form-check-input {
+    margin-top: 0;
+}
+.custom-form-wrapper .form-check-input {
+    margin-right: 10px;
+}
+/* responsive */
+.user-list-wrapper .user-list-table div.dt-container .dt-layout-row .dt-search {
+    right: 215px; 
+}
+.page-body .card-header {
+    height: 80px;
+}
+.form-switch .form-check-input.custom-toggle {
+    width: 2.2rem;
+}
+table.dataTable input.custom-toggle {
+    height: 17px;
+}
+.dataTable .check-size {
+    height: 1rem;
+}
+.product-toggle-wrapper {
+    margin-left: 1rem;
+}
+.dim-white {
+    color: #ffffff99;
+}
+
+/* Header: light / dark theme toggle (pill + sliding thumb; high specificity vs theme defaults) */
+.page-wrapper .page-header .header-wrapper .nav-right > ul > li.theme-toggle-wrap {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+.page-wrapper .page-header .header-wrapper .nav-right .theme-toggle-btn.toggleThemeBtn {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    cursor: pointer;
+    line-height: 0;
+    vertical-align: middle;
+    appearance: none;
+    -webkit-appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-wrapper .page-header .header-wrapper .nav-right .theme-toggle-btn.toggleThemeBtn:hover,
+.page-wrapper .page-header .header-wrapper .nav-right .theme-toggle-btn.toggleThemeBtn:focus {
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+}
+
+.page-wrapper .page-header .header-wrapper .nav-right .theme-toggle-btn.toggleThemeBtn:focus-visible {
+    outline: 2px solid rgba(191, 136, 52, 0.85);
+    outline-offset: 4px;
+    border-radius: 999px;
+}
+
+/* Track */
+.page-wrapper .page-header .theme-toggle-track {
+    position: relative;
+    width: 56px;
+    height: 32px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.42);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.page-wrapper .page-header .theme-toggle-btn.toggleThemeBtn:hover .theme-toggle-track {
+    border-color: rgba(191, 136, 52, 0.45);
+    box-shadow:
+        inset 0 2px 6px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(191, 136, 52, 0.2);
+}
+
+/* Sliding thumb */
+.page-wrapper .page-header .theme-toggle-thumb {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(165deg, #ffffff 0%, #e8edf3 55%, #d1d9e6 100%);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.35),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--c-gold);
+}
+
+/* Light mode → thumb right, moon icon */
+body:not(.dark-only) .page-wrapper .page-header .theme-toggle-thumb {
+    transform: translateX(24px);
+    color: #4f46e5;
+}
+
+/* Stacked icons inside thumb: only one visible */
+.page-wrapper .page-header .theme-toggle-thumb .fa-sun,
+.page-wrapper .page-header .theme-toggle-thumb .fa-moon {
+    position: absolute;
+    font-size: 13px;
+    line-height: 1;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body.dark-only .page-wrapper .page-header .theme-toggle-thumb .fa-moon {
+    opacity: 0;
+    transform: scale(0.65);
+    pointer-events: none;
+}
+
+body.dark-only .page-wrapper .page-header .theme-toggle-thumb .fa-sun {
+    opacity: 1;
+    transform: scale(1);
+}
+
+body:not(.dark-only) .page-wrapper .page-header .theme-toggle-thumb .fa-sun {
+    opacity: 0;
+    transform: scale(0.65);
+    pointer-events: none;
+}
+
+body:not(.dark-only) .page-wrapper .page-header .theme-toggle-thumb .fa-moon {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Light app theme: track reads clearly on brighter header/surfaces */
+body:not(.dark-only) .page-wrapper .page-header .theme-toggle-track {
+    background: rgba(15, 23, 42, 0.1);
+    border-color: rgba(15, 23, 42, 0.14);
+    box-shadow:
+        inset 0 2px 5px rgba(15, 23, 42, 0.08),
+        0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+body:not(.dark-only) .page-wrapper .page-header .theme-toggle-btn.toggleThemeBtn:hover .theme-toggle-track {
+    border-color: rgba(191, 136, 52, 0.4);
+}
+body.dark-only .page-wrapper .page-header .header-wrapper .theme-toggle-wrap .fa-sun {
+    color: #000;
+}
+.text-area {
+    min-height: 100px !important;
+    resize: none;
+}
+.form-940-wrapper label,
+.w2-forms .form-label {
+    margin-bottom: 10px !important;
+}
+.w2-form-table td {
+    color: var(--default-color);
+}
+
+/* REAP433 gold accents across admin UI */
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active,
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active span,
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-link.active .theme-icons {
+    color: var(--c-gold) !important;
+}
+
+body.dark-only .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li .sidebar-submenu li a.active {
+    color: var(--c-gold) !important;
+    font-weight: 600;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li:hover .sidebar-link:not(.active):hover span,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper .simplebar-mask .simplebar-content-wrapper .simplebar-content>li:hover .sidebar-link:not(.active):hover .theme-icons {
+    color: var(--c-gold) !important;
+}
+
+.badge-primary,
+.label-primary {
+    background-color: var(--c-gold) !important;
+    color: var(--c-black) !important;
+}
+
+.font-primary,
+a:not(.btn):hover {
+    color: var(--c-gold) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--c-gold) !important;
+    border-color: var(--c-gold) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--c-gold) !important;
+    border-color: var(--c-gold) !important;
+    color: var(--c-black) !important;
+}
+
+/* REAP433 admin login */
+.login-card.reap433-login {
+    background:
+        radial-gradient(ellipse at top, rgba(191, 136, 52, 0.14), transparent 55%),
+        linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%) !important;
+    min-height: 100vh;
+}
+
+body.dark-only .login-card.reap433-login.login-dark {
+    background-color: #0f0f0f !important;
+}
+
+body.dark-only .reap433-login .login-main {
+    background-color: #1a1a1a !important;
+    border: 1px solid rgba(191, 136, 52, 0.18);
+}
+
+.reap433-login .login-main h4 {
+    color: var(--c-cream);
+    font-weight: 600;
+}
+
+.reap433-login .login-main p {
+    color: rgba(248, 244, 237, 0.65) !important;
+    margin-bottom: 1.5rem;
+}
+
+.reap433-login .login-main label {
+    color: var(--c-cream);
+}
+
+.reap433-login .login-main .form-control {
+    background-color: #0f0f0f !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: var(--c-cream) !important;
+}
+
+.reap433-login .login-main .form-control::placeholder {
+    color: rgba(248, 244, 237, 0.35);
+}
+
+.reap433-login .login-main .form-control:focus {
+    border-color: var(--c-gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(191, 136, 52, 0.2) !important;
+}
+
+.reap433-login .login-main .link,
+.reap433-login .login-main a.link {
+    color: var(--c-gold);
+    text-decoration: none;
+}
+
+.reap433-login .login-main .link:hover,
+.reap433-login .login-main a.link:hover {
+    color: var(--c-gold-light);
+}
+
+.reap433-login .form-check-label {
+    color: rgba(248, 244, 237, 0.65) !important;
+}
+
+.reap433-login .show-hide {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--c-gold);
+    font-size: 13px;
+    user-select: none;
+}
+
+.reap433-login .alert-success {
+    background-color: rgba(191, 136, 52, 0.15);
+    border-color: rgba(191, 136, 52, 0.35);
+    color: var(--c-cream);
+}
+
+.woo-variations-draft:empty {
+    display: none !important;
+}
+
+.woo-variations-scroll-box {
+    max-height: 420px;
+    overflow-y: auto;
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.dark-only .woo-variations-scroll-box {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.woo-variations-scroll-box .js-woo-attr-block:last-child {
+    margin-bottom: 0;
+}

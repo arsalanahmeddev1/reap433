@@ -75,7 +75,7 @@
             <div class="cartoon">
               <img
                 class="img-fluid"
-                src="../assets/images/dashboard/cartoon.svg"
+                src="{{ asset('assets/libs/images/dashboard/cartoon.svg') }}"
                 alt="vector women with leptop" />
             </div>
           </div>
@@ -91,10 +91,10 @@
                     <div class="bg-round">
                       <svg>
                         <use
-                          href="../assets/svg/icon-sprite.svg#c-revenue"></use>
+                          href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#c-revenue"></use>
                       </svg><svg class="half-circle svg-fill">
                         <use
-                          href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#halfcircle"></use>
                       </svg>
                     </div>
                   </div>
@@ -120,10 +120,10 @@
                       <div class="bg-round">
                         <svg>
                           <use
-                            href="../assets/svg/icon-sprite.svg#c-customer"></use>
+                            href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#c-customer"></use>
                         </svg><svg class="half-circle svg-fill">
                           <use
-                            href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#halfcircle"></use>
                         </svg>
                       </div>
                     </div>
@@ -155,10 +155,10 @@
                     <div class="bg-round">
                       <svg>
                         <use
-                          href="../assets/svg/icon-sprite.svg#c-profit"></use>
+                          href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#c-profit"></use>
                       </svg><svg class="half-circle svg-fill">
                         <use
-                          href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                          href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#halfcircle"></use>
                       </svg>
                     </div>
                   </div>
@@ -184,10 +184,10 @@
                       <div class="bg-round">
                         <svg class="fill-primary">
                           <use
-                            href="../assets/svg/icon-sprite.svg#c-invoice"></use>
+                            href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#c-invoice"></use>
                         </svg><svg class="half-circle svg-fill">
                           <use
-                            href="../assets/svg/icon-sprite.svg#halfcircle"></use>
+                            href="{{ asset('assets/libs/svg/icon-sprite.svg') }}#halfcircle"></use>
                         </svg>
                       </div>
                     </div>
@@ -291,7 +291,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard/user/2.jpg"
+                          src="{{ asset('assets/libs/images/dashboard/user/2.jpg') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Jane Cooper</a>
@@ -308,7 +308,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard/user/3.jpg"
+                          src="{{ asset('assets/libs/images/dashboard/user/3.jpg') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Wade Warren</a>
@@ -325,7 +325,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard/user/4.jpg"
+                          src="{{ asset('assets/libs/images/dashboard/user/4.jpg') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Guy Hawkins</a>
@@ -342,7 +342,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard/user/5.jpg"
+                          src="{{ asset('assets/libs/images/dashboard/user/5.jpg') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Jake Spy</a>
@@ -359,7 +359,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard-9/user/1.png"
+                          src="{{ asset('assets/libs/images/dashboard-9/user/1.png') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Devin Jake</a>
@@ -376,7 +376,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard-9/user/2.png"
+                          src="{{ asset('assets/libs/images/dashboard-9/user/2.png') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Jacob Jones</a>
@@ -393,7 +393,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard-9/user/5.png"
+                          src="{{ asset('assets/libs/images/dashboard-9/user/5.png') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Jams Bone</a>
@@ -410,7 +410,7 @@
                       <div class="d-flex">
                         <img
                           class="img-fluid img-40 rounded-circle me-2"
-                          src="../assets/images/dashboard-9/user/3.png"
+                          src="{{ asset('assets/libs/images/dashboard-9/user/3.png') }}"
                           alt="user" />
                         <div class="img-content-box">
                           <a class="f-w-500" href="products-list.html">Mili Pais</a>
@@ -603,19 +603,19 @@
                     <li>
                       <img
                         class="img-fluid"
-                        src="../assets/images/dashboard/bg-1.png"
+                        src="{{ asset('assets/libs/images/dashboard/bg-1.png') }}"
                         alt="background" />
                     </li>
                     <li>
                       <img
                         class="img-fluid"
-                        src="../assets/images/dashboard/bg-2.png"
+                        src="{{ asset('assets/libs/images/dashboard/bg-2.png') }}"
                         alt="background" />
                     </li>
                     <li>
                       <img
                         class="img-fluid"
-                        src="../assets/images/dashboard/bg-3.png"
+                        src="{{ asset('assets/libs/images/dashboard/bg-3.png') }}"
                         alt="background" />
                     </li>
                   </ul>
@@ -692,7 +692,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/16.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/16.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -721,7 +721,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/25.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/25.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -750,7 +750,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/26.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/26.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -779,7 +779,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/24.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/24.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -808,7 +808,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/6.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/6.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -837,7 +837,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/10.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/10.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -866,7 +866,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/11.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/11.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -895,7 +895,7 @@
                         <div class="currency-icon warning">
                           <img
                             class="img-fluid"
-                            src="../assets/images/dashboard-2/order/sub-product/14.png"
+                            src="{{ asset('assets/libs/images/dashboard-2/order/sub-product/14.png') }}"
                             alt="" />
                         </div>
                         <div>
@@ -928,7 +928,7 @@
         <div class="card buy-card">
           <img
             class="img-fluid"
-            src="../assets/images/dashboard/purchase1.png"
+            src="{{ asset('assets/libs/images/dashboard/purchase1.png') }}"
             alt="vector mens with laptop" />
           <div class="card-body">
             <h6 class="mb-3">
