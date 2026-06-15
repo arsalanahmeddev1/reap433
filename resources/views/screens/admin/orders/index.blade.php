@@ -32,7 +32,7 @@
 
 @section('content')
     @php
-        $orderStatusOptions = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
+        $orderStatusOptions = \App\Models\Order::STATUSES;
     @endphp
     <div class="container-fluid user-list-wrapper">
         <div class="row">
@@ -59,27 +59,25 @@
                                                     <a href="{{ route('orders.show', $order) }}">{{ $order->publicOrderNumber() }}</a>
                                                 </td>
                                                 <td>
-                                                    <p class="mb-0">{{ $order->user?->name ?? __('Guest') }}</p>
-                                                    @if ($order->user?->email)
-                                                        <small class="c-o-light">{{ $order->user->email }}</small>
-                                                    @endif
+                                                    <p class="mb-0">{{ $order->customer_name }}</p>
+                                                    <small class="c-o-light">{{ $order->customer_email }}</small>
                                                 </td>
                                                 <td>
-                                                    <p class="mb-0">${{ number_format((float) $order->total, 2) }}</p>
+                                                    <p class="mb-0">{{ $order->currency }} {{ number_format((float) $order->subtotal, 2) }}</p>
                                                 </td>
                                                 <td>
-                                                    @if ($order->order_status === 'completed')
-                                                        <span class="badge badge-light-success">{{ ucfirst($order->order_status) }}</span>
+                                                    @if ($order->status === 'completed')
+                                                        <span class="badge badge-light-success">{{ $order->statusLabel() }}</span>
                                                     @else
                                                         <select
                                                             class="form-select form-select-sm order-status-select order-status-select--themed"
                                                             aria-label="{{ __('Order status') }}"
                                                             data-order-id="{{ $order->id }}"
-                                                            data-current-status="{{ $order->order_status }}"
+                                                            data-current-status="{{ $order->status }}"
                                                         >
                                                             @foreach ($orderStatusOptions as $status)
-                                                                <option value="{{ $status }}" @selected($order->order_status === $status)>
-                                                                    {{ ucfirst($status) }}
+                                                                <option value="{{ $status }}" @selected($order->status === $status)>
+                                                                    {{ ucwords(str_replace('_', ' ', $status)) }}
                                                                 </option>
                                                             @endforeach
                                                         </select>
@@ -153,7 +151,7 @@
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                 },
                                 body: JSON.stringify({
-                                    order_status: newStatus
+                                    status: newStatus
                                 }),
                             })
                             .then(async function(res) {
@@ -162,7 +160,7 @@
                                 });
                                 if (!res.ok) {
                                     const msg = data.message ||
-                                        (data.errors && data.errors.order_status && data.errors.order_status[0]) ||
+                                        (data.errors && data.errors.status && data.errors.status[0]) ||
                                         @json(__('Something went wrong.'));
                                     throw new Error(msg);
                                 }

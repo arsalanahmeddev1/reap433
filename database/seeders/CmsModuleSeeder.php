@@ -46,6 +46,17 @@ class CmsModuleSeeder extends Seeder
                 'name' => 'Products',
                 'icon' => 'fa-solid fa-box-open',
                 'sort_order' => 3,
+                'status' => 'inactive',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'admin.printful.products.index'],
+            [
+                'name' => 'Products',
+                'icon' => 'fa-solid fa-box-open',
+                'sort_order' => 3,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -69,7 +80,7 @@ class CmsModuleSeeder extends Seeder
                 'name' => 'All Categories',
                 'icon' => 'fa-solid fa-tags',
                 'sort_order' => 1,
-                'status' => 'active',
+                'status' => 'inactive',
                 'parent_id' => $products->id,
             ]
         );
@@ -80,7 +91,7 @@ class CmsModuleSeeder extends Seeder
                 'name' => 'All Products',
                 'icon' => 'fa-solid fa-list-ul',
                 'sort_order' => 2,
-                'status' => 'active',
+                'status' => 'inactive',
                 'parent_id' => $products->id,
             ]
         );
@@ -124,6 +135,7 @@ class CmsModuleSeeder extends Seeder
             'products-module',
             'product-categories.index',
             'products.index',
+            'admin.printful.products.index',
             'orders.index',
             'blogs-module',
             'blog-categories.index',

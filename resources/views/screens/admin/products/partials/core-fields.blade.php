@@ -90,10 +90,10 @@
         </div>
     </div>
 </div>
-@if (! $ro && isset($wooInitialBlocks))
+@if (! $ro && isset($wooInitialPayload))
     <div class="col-12 js-variable-only" style="{{ $varPriceRangeInitiallyVisible ? '' : 'display: none;' }}">
         <hr class="border-secondary">
-        @include('screens.admin.products.partials.woo-attribute-blocks', ['wooInitialBlocks' => $wooInitialBlocks])
+        @include('screens.admin.products.partials.woo-attribute-blocks', ['wooInitialPayload' => $wooInitialPayload])
     </div>
 @endif
 @if ($ro && $isVariableProduct)

@@ -1,6 +1,3 @@
-@php
-    $cartCount = \App\Models\Cart::itemCount();
-@endphp
 <header class="nav-header" id="nav-header" role="banner">
     <nav class="nav-container" aria-label="Primary navigation">
       <a href="{{ route('home') }}" class="nav-logo" aria-label="REAP433 Home">
@@ -48,7 +45,7 @@
         </button>
         <a href="{{ route('cart.index') }}" class="nav-icon-btn cart-btn" aria-label="Shopping cart, {{ $cartCount }} items">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          <span class="cart-badge" data-cart-count @if ($cartCount <= 0) hidden @endif>{{ $cartCount }}</span>
+          <span class="cart-badge" data-cart-count @if ($cartCount < 1) hidden @endif>{{ $cartCount }}</span>
         </a>
         <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
           <span></span><span></span><span></span>
@@ -68,6 +65,7 @@
         <li><a href="#shop" class="mobile-nav-link">New Arrivals</a></li>
         <li><a href="#hub" class="mobile-nav-link">Civic Hub</a></li>
         <li><a href="#blog" class="mobile-nav-link">Blog</a></li>
+        <li><a href="{{ route('cart.index') }}" class="mobile-nav-link">Cart ({{ $cartCount }})</a></li>
         <li><a href="#about" class="mobile-nav-link">Our Story</a></li>
         <li><a href="#contact" class="mobile-nav-link">Contact</a></li>
       </ul>

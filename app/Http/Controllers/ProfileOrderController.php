@@ -24,11 +24,11 @@ class ProfileOrderController extends Controller
 
     public function show(Request $request, Order $order): View
     {
-        if ((int) $order->user_id !== (int) $request->user()->id) {
+        if (strcasecmp((string) $order->customer_email, (string) $request->user()->email) !== 0) {
             abort(403);
         }
 
-        $order->load(['items.product.images', 'addresses']);
+        $order->load('items');
 
         return view('profile.orders.show', [
             'user' => $request->user(),

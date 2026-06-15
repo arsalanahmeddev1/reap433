@@ -186,7 +186,7 @@
                                 <tbody>
                                     @forelse ($recentOrders as $order)
                                         @php
-                                            $statusBadge = match ($order->order_status) {
+                                            $statusBadge = match ($order->status) {
                                                 'completed', 'delivered' => 'badge-light-success',
                                                 'cancelled' => 'badge-light-danger',
                                                 default => 'badge-light-info',
@@ -196,9 +196,9 @@
                                             <td>
                                                 <a href="{{ route('orders.show', $order) }}">{{ $order->publicOrderNumber() }}</a>
                                             </td>
-                                            <td>{{ $order->user?->name ?? __('Guest') }}</td>
-                                            <td>${{ number_format((float) $order->total, 2) }}</td>
-                                            <td><span class="badge {{ $statusBadge }}">{{ ucfirst($order->order_status) }}</span></td>
+                                            <td>{{ $order->customer_name }}</td>
+                                            <td>{{ $order->currency }} {{ number_format((float) $order->subtotal, 2) }}</td>
+                                            <td><span class="badge {{ $statusBadge }}">{{ $order->statusLabel() }}</span></td>
                                             <td>{{ $order->created_at?->format('d M Y, h:i A') }}</td>
                                             <td>
                                                 <a class="square-white" href="{{ route('orders.show', $order) }}" title="{{ __('View') }}">

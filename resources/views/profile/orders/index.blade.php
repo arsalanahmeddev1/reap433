@@ -21,14 +21,14 @@
                                 <p class="profile-order-date">{{ $order->created_at?->format('M j, Y g:i A') }}</p>
                             </div>
                             <div class="profile-order-badges">
-                                <span class="profile-order-badge profile-order-badge--status profile-order-badge--{{ $order->order_status }}">
-                                    {{ ucfirst($order->order_status) }}
+                                <span class="profile-order-badge profile-order-badge--status profile-order-badge--{{ $order->status }}">
+                                    {{ $order->statusLabel() }}
                                 </span>
                             </div>
                         </div>
                         <div class="profile-order-card-meta">
                             <span>{{ trans_choice(':count item|:count items', $order->items_count, ['count' => $order->items_count]) }}</span>
-                            <strong>{{ '$' . number_format((float) $order->total, 2) }}</strong>
+                            <strong>{{ $order->currency }} {{ number_format((float) $order->subtotal, 2) }}</strong>
                         </div>
                         <a href="{{ route('profile.orders.show', $order) }}" class="profile-order-view-link">{{ __('View details') }}</a>
                     </article>
@@ -36,7 +36,7 @@
             </div>
         @else
             <p class="profile-address-empty">{{ __('You have not placed any orders yet.') }}</p>
-            <a href="{{ route('artifacts.index') }}" class="btn btn-gold">{{ __('Start shopping') }}</a>
+            <a href="{{ route('printful-products.index') }}" class="btn btn-gold">{{ __('Start shopping') }}</a>
         @endif
     </section>
 @endsection

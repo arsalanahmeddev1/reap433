@@ -42,7 +42,7 @@
                         <span>Back</span><i class="fa-solid fa-angle-right ps-2" aria-hidden="true"></i>
                     </div>
                 </li>
-                @foreach ($modules as $module)
+                @foreach ($modules->reject(fn ($module) => $module->route_name === 'products-module') as $module)
                     @php
                         $hasChildren = $module->children && $module->children->count() > 0;
                         $isChildRouteActive = static function (string $routeName): bool {

@@ -12,7 +12,6 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::query()
-            ->with('user')
             ->latest()
             ->get();
 
@@ -21,37 +20,30 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['user', 'items.product.images', 'addresses']);
+        $order->load('items');
 
         return view('screens.admin.orders.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order): JsonResponse
     {
-        if ($order->order_status === 'completed') {
+        if ($order->status === 'completed') {
             return response()->json([
                 'message' => __('Completed orders cannot be changed.'),
             ], 422);
         }
 
         $validated = $request->validate([
-            'order_status' => ['required', 'string', Rule::in([
-                'pending',
-                'processing',
-                'shipped',
-                'delivered',
-                'completed',
-                'cancelled',
-            ])],
+            'status' => ['required', 'string', Rule::in(Order::STATUSES)],
         ]);
 
         $order->update([
-            'order_status' => $validated['order_status'],
+            'status' => $validated['status'],
         ]);
 
         return response()->json([
             'message' => __('Order status updated successfully.'),
-            'status' => $order->order_status,
+            'status' => $order->status,
         ]);
     }
 }

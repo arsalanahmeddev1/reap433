@@ -21,7 +21,7 @@
                         'productTypes' => $productTypes,
                         'readonly' => false,
                         'lockProductType' => false,
-                        'wooInitialBlocks' => $wooInitialBlocks,
+                        'wooInitialPayload' => $wooInitialPayload,
                     ])
                     @include('screens.admin.products.partials.gallery', ['readonly' => false])
                 </div>

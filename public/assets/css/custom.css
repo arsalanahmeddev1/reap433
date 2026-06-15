@@ -559,17 +559,80 @@ body.dark-only .reap433-login .login-main {
     display: none !important;
 }
 
-.woo-variations-scroll-box {
+.woo-panel .card-header h6 {
+    font-size: 0.95rem;
+}
+
+.woo-attr-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.woo-tags-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.woo-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-height: 0;
+}
+
+.woo-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 0.82rem;
+}
+
+body.dark-only .woo-tag {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.woo-tag-remove {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    line-height: 1;
+    padding: 0;
+    font-size: 1rem;
+    opacity: 0.7;
+    cursor: pointer;
+}
+
+.woo-tag-remove:hover {
+    opacity: 1;
+}
+
+.woo-variations-table-wrap {
     max-height: 420px;
     overflow-y: auto;
-    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
 }
 
-body.dark-only .woo-variations-scroll-box {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-color: rgba(255, 255, 255, 0.12) !important;
+body.dark-only .woo-variations-table-wrap {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
-.woo-variations-scroll-box .js-woo-attr-block:last-child {
-    margin-bottom: 0;
+#woo-variations-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bs-body-bg, #1d1e26);
+}
+
+.woo-var-color,
+.woo-var-size {
+    white-space: nowrap;
 }

@@ -78,9 +78,9 @@ class ProductController extends Controller
             'variations.image',
         ]);
 
-        $wooInitialBlocks = $product->productType?->slug === 'variable'
-            ? $this->buildWooInitialBlocksFromProduct($product, $variationAttributes)
-            : [];
+        $wooInitialPayload = $product->productType?->slug === 'variable'
+            ? $this->buildWooInitialPayloadFromProduct($product)
+            : ['attributes' => [], 'variations' => []];
 
         return view('screens.admin.products.edit', compact(
             'product',
@@ -88,7 +88,7 @@ class ProductController extends Controller
             'productTypes',
             'variationAttributes',
             'variationDefinitions',
-            'wooInitialBlocks'
+            'wooInitialPayload'
         ));
     }
 
@@ -108,14 +108,14 @@ class ProductController extends Controller
             'name' => $a->name,
         ])->values();
 
-        $wooInitialBlocks = [];
+        $wooInitialPayload = ['attributes' => [], 'variations' => []];
 
         return view('screens.admin.products.create', compact(
             'categories',
             'productTypes',
             'variationAttributes',
             'variationDefinitions',
-            'wooInitialBlocks'
+            'wooInitialPayload'
         ));
     }
 
@@ -151,8 +151,7 @@ class ProductController extends Controller
             ], $messages);
         }
 
-        $variationAttributes = $this->fixedVariationAttributes();
-        [$normalizedVariationRows, $rowImageUploads] = $this->validatedVariableProductVariations($request, $type, $variationAttributes, null);
+        [$variationAttributes, $normalizedVariationRows, $rowImageUploads] = $this->validatedVariableProductVariations($request, $type, null);
 
         $slug = Product::slugFromName($base['name']);
 
@@ -225,8 +224,7 @@ class ProductController extends Controller
             ], $messages);
         }
 
-        $variationAttributes = $this->fixedVariationAttributes();
-        [$normalizedVariationRows, $rowImageUploads] = $this->validatedVariableProductVariations($request, $type, $variationAttributes, $product);
+        [$variationAttributes, $normalizedVariationRows, $rowImageUploads] = $this->validatedVariableProductVariations($request, $type, $product);
 
         $slug = Product::slugFromName($base['name'], $product->id);
 
@@ -401,21 +399,239 @@ class ProductController extends Controller
     }
 
     /**
-     * @return array{0: list<array{price: float, options: array<int, string>}>, 1: list<UploadedFile|null>}
+     * @return array{0: Collection<int, ProductAttribute>, 1: list<array{price: float, options: array<int, string>}>, 2: list<UploadedFile|null>}
      */
-    private function validatedVariableProductVariations(Request $request, ProductType $type, Collection $variationAttributes, ?Product $productForGalleryKeeps): array
+    private function validatedVariableProductVariations(Request $request, ProductType $type, ?Product $productForGalleryKeeps): array
     {
         if ($type->slug !== 'variable') {
-            return [[], []];
+            return [collect(), [], []];
+        }
+
+        if ($this->requestUsesVariationRows($request)) {
+            $variationAttributes = $this->resolveAttributesFromDefinitions($request);
+            [$normalized, $uploads] = $this->validatedDynamicVariationRows($request, $variationAttributes, $productForGalleryKeeps);
+
+            return [$variationAttributes, $normalized, $uploads];
         }
 
         if ($this->requestUsesWooAttributeBlocks($request)) {
-            return $this->validatedWooAttributeBlocks($request, $variationAttributes, $productForGalleryKeeps);
+            $variationAttributes = $this->fixedVariationAttributes();
+            [$normalized, $uploads] = $this->validatedWooAttributeBlocks($request, $variationAttributes, $productForGalleryKeeps);
+
+            return [$variationAttributes, $normalized, $uploads];
         }
 
         throw ValidationException::withMessages([
-            'attr_blocks' => __('Add at least one variation with at least one attribute row. Each row requires an image.'),
+            'attr_definitions' => __('Add attributes, generate variations, and set price and image for each row.'),
         ]);
+    }
+
+    private function requestUsesVariationRows(Request $request): bool
+    {
+        $rows = $request->input('variation_rows');
+
+        return is_array($rows) && count($rows) > 0;
+    }
+
+    /**
+     * @return Collection<int, ProductAttribute>
+     */
+    private function resolveAttributesFromDefinitions(Request $request): Collection
+    {
+        $definitions = $request->input('attr_definitions', []);
+        if (! is_array($definitions) || $definitions === []) {
+            throw ValidationException::withMessages([
+                'attr_definitions' => __('Add at least one attribute with values.'),
+            ]);
+        }
+
+        $uid = auth()->id();
+        $attrs = collect();
+        $seenNames = [];
+
+        foreach ($definitions as $di => $def) {
+            if (! is_array($def)) {
+                continue;
+            }
+            $name = trim((string) ($def['name'] ?? ''));
+            if ($name === '') {
+                throw ValidationException::withMessages([
+                    "attr_definitions.{$di}.name" => __('Attribute name is required.'),
+                ]);
+            }
+            $key = mb_strtolower($name);
+            if (isset($seenNames[$key])) {
+                throw ValidationException::withMessages([
+                    "attr_definitions.{$di}.name" => __('Duplicate attribute name.'),
+                ]);
+            }
+            $seenNames[$key] = true;
+
+            $values = $def['values'] ?? [];
+            if (! is_array($values)) {
+                $values = [];
+            }
+            $values = array_values(array_filter(array_map(fn ($v) => trim((string) $v), $values)));
+            if ($values === []) {
+                throw ValidationException::withMessages([
+                    "attr_definitions.{$di}.values" => __('Add at least one value for :name.', ['name' => $name]),
+                ]);
+            }
+
+            $existing = ProductAttribute::query()
+                ->whereRaw('LOWER(name) = ?', [$key])
+                ->orderBy('id')
+                ->first();
+
+            $attrs->push($existing ?? ProductAttribute::create([
+                'name' => $name,
+                'created_by' => $uid,
+            ]));
+        }
+
+        return $attrs->values();
+    }
+
+    /**
+     * @return array{0: list<array{price: float, options: array<int, string>}>, 1: list<UploadedFile|null>}
+     */
+    private function validatedDynamicVariationRows(Request $request, Collection $variationAttributes, ?Product $productForGalleryKeeps): array
+    {
+        $request->validate([
+            'variation_rows' => ['required', 'array', 'min:1'],
+            'variation_rows.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variation_rows.*.options' => ['required', 'array'],
+            'variation_rows.*.image' => $this->permissiveProductImageRules(),
+        ]);
+
+        $attributeIds = $variationAttributes->pluck('id')->map(fn ($id) => (int) $id)->values()->all();
+
+        $rows = $request->input('variation_rows', []);
+        $signatures = [];
+        $normalized = [];
+        $uploads = [];
+
+        foreach ($rows as $idx => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $opts = $row['options'] ?? [];
+            $flat = [];
+            foreach ($variationAttributes as $attr) {
+                $rawVal = $opts[$attr->name] ?? $opts[(string) $attr->id] ?? null;
+                if ($rawVal === null || trim((string) $rawVal) === '') {
+                    throw ValidationException::withMessages([
+                        "variation_rows.{$idx}.options.{$attr->name}" => __('Enter a value for :name on each row.', ['name' => $attr->name]),
+                    ]);
+                }
+                $flat[(int) $attr->id] = trim((string) $rawVal);
+            }
+
+            $priceRaw = $row['price'] ?? null;
+            if ($priceRaw === '' || $priceRaw === null) {
+                $price = 0.0;
+            } elseif (is_numeric($priceRaw)) {
+                $price = (float) $priceRaw;
+                if ($price < 0) {
+                    throw ValidationException::withMessages([
+                        "variation_rows.{$idx}.price" => __('Price must be at least zero.'),
+                    ]);
+                }
+            } else {
+                throw ValidationException::withMessages([
+                    "variation_rows.{$idx}.price" => __('Enter a valid price.'),
+                ]);
+            }
+
+            $file = $request->file("variation_rows.{$idx}.image");
+            $hasFile = $file instanceof UploadedFile && $file->isValid();
+            $hasExistingImage = $request->boolean("variation_rows.{$idx}.has_existing_image");
+
+            if ($price <= 0 && ! $hasFile && ! $hasExistingImage) {
+                continue;
+            }
+
+            if (! $hasFile && ! $hasExistingImage) {
+                throw ValidationException::withMessages([
+                    "variation_rows.{$idx}.image" => __('Please upload an image for this variation.'),
+                ]);
+            }
+
+            $sig = collect($attributeIds)->map(fn (int $id) => mb_strtolower($flat[$id]))->join('|');
+            if (isset($signatures[$sig])) {
+                throw ValidationException::withMessages([
+                    "variation_rows.{$idx}" => __('Duplicate row: the same combination of :attrs already exists.', ['attrs' => $variationAttributes->pluck('name')->join(', ')]),
+                ]);
+            }
+            $signatures[$sig] = true;
+
+            $normalized[] = [
+                'price' => $price,
+                'options' => $flat,
+            ];
+            $uploads[] = $hasFile ? $file : null;
+        }
+
+        if ($normalized === []) {
+            throw ValidationException::withMessages([
+                'variation_rows' => __('At least one variation with price or image is required.'),
+            ]);
+        }
+
+        return [$normalized, $uploads];
+    }
+
+    /**
+     * @return array{attributes: list<array{name: string, values: list<string>}>, variations: list<array{options: array<string, string>, price: mixed, image_url: string, has_existing_image: bool}>}
+     */
+    private function buildWooInitialPayloadFromProduct(Product $product): array
+    {
+        $product->loadMissing(['variations.values.productAttribute', 'variations.image']);
+
+        /** @var array<string, array<string, bool>> $attrValueMap */
+        $attrValueMap = [];
+        $variations = [];
+
+        foreach ($product->variations->sortBy('sort_order') as $variation) {
+            $options = [];
+            foreach ($variation->values as $value) {
+                $name = trim((string) ($value->productAttribute?->name ?? ''));
+                if ($name === '') {
+                    continue;
+                }
+                $val = trim((string) $value->value);
+                $options[$name] = $val;
+                if (! isset($attrValueMap[$name])) {
+                    $attrValueMap[$name] = [];
+                }
+                if ($val !== '') {
+                    $attrValueMap[$name][$val] = true;
+                }
+            }
+
+            $imageUrl = $variation->image?->publicUrl() ?? '';
+
+            $variations[] = [
+                'options' => $options,
+                'price' => $variation->price,
+                'image_url' => $imageUrl,
+                'has_existing_image' => $imageUrl !== '',
+            ];
+        }
+
+        $attributes = [];
+        foreach ($attrValueMap as $name => $values) {
+            $attributes[] = [
+                'name' => $name,
+                'values' => array_keys($values),
+            ];
+        }
+
+        return [
+            'attributes' => $attributes,
+            'variations' => $variations,
+        ];
     }
 
     private function requestUsesWooAttributeBlocks(Request $request): bool

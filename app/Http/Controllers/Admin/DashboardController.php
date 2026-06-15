@@ -23,7 +23,9 @@ class DashboardController extends Controller
                 'isAdmin' => false,
                 'user' => $user,
                 'stats' => [
-                    'myOrdersCount' => Order::query()->where('user_id', $user->id)->count(),
+                    'myOrdersCount' => Order::query()
+                        ->where('customer_email', $user->email)
+                        ->count(),
                 ],
             ]);
         }
@@ -31,17 +33,16 @@ class DashboardController extends Controller
         $stats = [
             'totalUsers' => User::query()->where('role', config('roles.user', 'user'))->count(),
             'totalOrders' => Order::query()->count(),
-            'pendingOrders' => Order::query()->where('order_status', 'pending')->count(),
+            'pendingOrders' => Order::query()->where('status', 'pending_payment')->count(),
             'totalProducts' => Product::query()->count(),
             'totalCategories' => ProductCategory::query()->count(),
             'totalBlogs' => Blog::query()->count(),
             'totalRevenue' => (float) Order::query()
-                ->where('order_status', '!=', 'cancelled')
-                ->sum('total'),
+                ->where('status', '!=', 'cancelled')
+                ->sum('subtotal'),
         ];
 
         $recentOrders = Order::query()
-            ->with('user')
             ->latest()
             ->take(6)
             ->get();

@@ -40,4 +40,9 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'printful' => [
+        'token' => env('PRINTFUL_API_TOKEN'),
+        'url' => env('PRINTFUL_API_URL', 'https://api.printful.com'),
+    ],
+
 ];

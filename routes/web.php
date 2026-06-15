@@ -8,15 +8,16 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\CartItemController;
 use App\Http\Controllers\UserAddressController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileOrderController;
+use App\Http\Controllers\PrintfulProductController;
 
 
 
@@ -28,20 +29,20 @@ Route::get('/artifacts', [StoreController::class, 'index'])->name('artifacts.ind
 Route::post('/artifacts/filter', [StoreController::class, 'filterArtifacts'])->name('artifacts.filter');
 Route::get('/artifacts/{product:slug}', [StoreController::class, 'show'])->name('artifacts.show');
 
+Route::get('/products', [PrintfulProductController::class, 'index'])->name('printful-products.index');
+Route::get('/products/{printfulProduct}', [PrintfulProductController::class, 'show'])->name('printful-products.show');
+
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{variant}', [CartController::class, 'add'])->name('cart.add');
+Route::patch('/cart/update/{variantId}', [CartController::class, 'update'])->name('cart.update');
+Route::delete('/cart/remove/{variantId}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.place-order');
-    Route::post('/checkout/payment-intent', [CheckoutController::class, 'createPaymentIntent'])->name('checkout.payment-intent');
-    Route::post('/checkout/complete', [CheckoutController::class, 'storeAfterPayment'])->name('checkout.complete');
-    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
-});
-Route::post('/cart/items', [CartItemController::class, 'store'])->name('cart.store');
-Route::patch('/cart/items/{cartItem}', [CartItemController::class, 'updateQty'])->name('cart.items.update');
-Route::delete('/cart/items/{cartItem}', [CartItemController::class, 'destroy'])->name('cart.items.destroy');
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/order/thank-you/{order:order_number}', [CheckoutController::class, 'thankYou'])->name('order.thank-you');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -90,6 +91,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/products/{product:slug}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product:slug}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/{product:slug}', [ProductController::class, 'show'])->name('products.show');
+
+    Route::post('/printful/sync-products', [PrintfulController::class, 'syncProducts'])->name('admin.printful.sync-products');
+    Route::get('/printful/products', [PrintfulController::class, 'index'])->name('admin.printful.products.index');
+    Route::get('/printful/products/{printfulProduct}', [PrintfulController::class, 'show'])->name('admin.printful.products.show');
 
     Route::get('/blog-categories', [BlogCategoryController::class, 'index'])->name('blog-categories.index');
     Route::post('/blog-categories', [BlogCategoryController::class, 'store'])->name('blog-categories.store');

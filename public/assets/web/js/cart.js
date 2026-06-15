@@ -6,7 +6,7 @@
   const updateCartBadge = (count) => {
     document.querySelectorAll('[data-cart-count]').forEach((el) => {
       el.textContent = String(count);
-      el.hidden = Number(count) <= 0;
+      el.hidden = false;
     });
     document.querySelectorAll('.cart-btn').forEach((btn) => {
       btn.setAttribute('aria-label', `Shopping cart, ${count} items`);

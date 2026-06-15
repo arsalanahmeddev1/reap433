@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OrderItem extends Model
+class PrintfulVariant extends Model
 {
     protected $fillable = [
-        'order_id',
         'printful_product_id',
         'printful_variant_id',
-        'product_name',
-        'variant_name',
+        'external_id',
+        'name',
         'sku',
-        'price',
-        'quantity',
-        'total',
+        'retail_price',
+        'currency',
+        'thumbnail_url',
         'raw_data',
     ];
 
@@ -29,15 +28,13 @@ class OrderItem extends Model
         return [
             'printful_product_id' => 'integer',
             'printful_variant_id' => 'integer',
-            'price' => 'decimal:2',
-            'quantity' => 'integer',
-            'total' => 'decimal:2',
+            'retail_price' => 'decimal:2',
             'raw_data' => 'array',
         ];
     }
 
-    public function order(): BelongsTo
+    public function product(): BelongsTo
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(PrintfulProduct::class, 'printful_product_id');
     }
 }

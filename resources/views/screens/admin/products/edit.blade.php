@@ -22,7 +22,7 @@
                         'productTypes' => $productTypes,
                         'readonly' => false,
                         'lockProductType' => true,
-                        'wooInitialBlocks' => $wooInitialBlocks,
+                        'wooInitialPayload' => $wooInitialPayload,
                     ])
                     @include('screens.admin.products.partials.gallery', [
                         'readonly' => false,
