@@ -77,8 +77,8 @@
                         </div>
                     </div>
                     @if ($products->hasPages())
-                        <div class="px-4 pb-4">
-                            {{ $products->links() }}
+                        <div class="px-4 pb-4 d-flex justify-content-center">
+                            {{ $products->links('pagination::bootstrap-5') }}
                         </div>
                     @endif
                 </div>

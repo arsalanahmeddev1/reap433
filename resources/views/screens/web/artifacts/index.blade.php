@@ -29,8 +29,8 @@
             </div>
 
             @if ($products->hasPages())
-                <div class="shop-cta-row" data-scroll-reveal>
-                    {{ $products->links() }}
+                <div class="shop-cta-row printful-products-pagination" data-scroll-reveal>
+                    {{ $products->links('vendor.pagination.storefront') }}
                 </div>
             @endif
         </div>

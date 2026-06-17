@@ -49,7 +49,7 @@
 
                 @if ($products->hasPages())
                     <div class="printful-products-pagination">
-                        {{ $products->links() }}
+                        {{ $products->links('vendor.pagination.storefront') }}
                     </div>
                 @endif
             @endif
@@ -181,36 +181,6 @@
         background: var(--c-black-mid);
         padding: 0.15rem 0.4rem;
         border-radius: var(--radius-sm);
-        color: var(--c-gold);
-    }
-
-    .printful-products-pagination {
-        margin-top: var(--space-2xl);
-        display: flex;
-        justify-content: center;
-    }
-
-    .printful-products-pagination nav {
-        display: flex;
-        gap: var(--space-sm);
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .printful-products-pagination .page-link,
-    .printful-products-pagination span {
-        color: var(--c-text-secondary);
-        padding: 0.4rem 0.75rem;
-        border-radius: var(--radius-sm);
-        text-decoration: none;
-    }
-
-    .printful-products-pagination .page-link:hover {
-        color: var(--c-gold);
-    }
-
-    .printful-products-pagination .active span {
-        background: var(--c-gold-muted);
         color: var(--c-gold);
     }
 </style>

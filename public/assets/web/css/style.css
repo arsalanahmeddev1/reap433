@@ -3761,3 +3761,57 @@
       text-align: left;
     }
   }
+
+  /* Storefront pagination (products, artifacts) */
+  .storefront-pagination__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .storefront-pagination__item a,
+  .storefront-pagination__item span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--c-black-border);
+    border-radius: var(--radius-sm);
+    color: var(--c-text-secondary);
+    text-decoration: none;
+    font-family: var(--font-heading);
+    font-size: 0.875rem;
+    line-height: 1;
+    background: var(--c-black-soft);
+    transition: color var(--t-fast), border-color var(--t-fast), background var(--t-fast);
+  }
+
+  .storefront-pagination__item a:hover {
+    color: var(--c-gold);
+    border-color: var(--c-gold);
+  }
+
+  .storefront-pagination__item--active span {
+    background: var(--c-gold-muted);
+    color: var(--c-gold);
+    border-color: var(--c-gold);
+  }
+
+  .storefront-pagination__item--disabled span,
+  .storefront-pagination__item--ellipsis span {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .printful-products-pagination {
+    margin-top: var(--space-2xl);
+    display: flex;
+    justify-content: center;
+  }
