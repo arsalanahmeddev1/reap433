@@ -3,12 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Services\OrderEmailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class OrderController extends Controller
 {
+    public function __construct(
+        private readonly OrderEmailService $orderEmails,
+    ) {}
+
     public function index()
     {
         $orders = Order::query()
@@ -37,9 +42,15 @@ class OrderController extends Controller
             'status' => ['required', 'string', Rule::in(Order::STATUSES)],
         ]);
 
+        $oldStatus = $order->status;
+
         $order->update([
             'status' => $validated['status'],
         ]);
+
+        if ($oldStatus !== $order->status) {
+            $this->orderEmails->sendOrderStatusChanged($order, $oldStatus);
+        }
 
         return response()->json([
             'message' => __('Order status updated successfully.'),

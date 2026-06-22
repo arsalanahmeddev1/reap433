@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\CartService;
+use App\Services\OrderEmailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,7 @@ class CheckoutController extends Controller
 {
     public function __construct(
         private readonly CartService $cart,
+        private readonly OrderEmailService $orderEmails,
     ) {}
 
     public function index(): View|RedirectResponse
@@ -57,6 +59,8 @@ class CheckoutController extends Controller
             'country_code' => ['required', 'string', 'size:2', 'alpha'],
             'zip' => ['required', 'string', 'max:20'],
         ]);
+
+        $validated['email'] = $request->user()->email;
 
         $cartItems = $this->cart->all();
 
@@ -110,7 +114,11 @@ class CheckoutController extends Controller
 
             $this->cart->clear();
 
-            return redirect()->route('order.thank-you', $order);
+            $this->orderEmails->sendOrderPlaced($order);
+
+            return redirect()
+                ->route('order.thank-you', $order)
+                ->with('placed_order_number', $order->order_number);
         } catch (Throwable $exception) {
             Log::error('Checkout order creation failed', [
                 'email' => $validated['email'] ?? null,
@@ -126,8 +134,17 @@ class CheckoutController extends Controller
         }
     }
 
-    public function thankYou(Order $order): View
+    public function thankYou(Request $request, Order $order): View
     {
+        $ownsOrder = strcasecmp((string) $order->customer_email, (string) $request->user()->email) === 0;
+        $justPlaced = session('placed_order_number') === $order->order_number;
+
+        if (! $ownsOrder && ! $justPlaced) {
+            abort(403);
+        }
+
+        session()->forget('placed_order_number');
+
         $order->load('items');
 
         return view('checkout.thank-you', [

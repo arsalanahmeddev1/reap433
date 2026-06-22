@@ -32,22 +32,30 @@
         </div>
 
         <h3 class="profile-order-section-title">{{ __('Items') }}</h3>
-        <ul class="checkout-items profile-order-items">
-            @foreach ($order->items as $item)
-                <li class="checkout-item">
-                    <div>
-                        <p class="checkout-item-name">{{ $item->product_name }}</p>
-                        @if ($item->variant_name)
-                            <p class="checkout-item-meta">{{ $item->variant_name }}</p>
-                        @endif
-                        <p class="checkout-item-meta">
-                            {{ $item->quantity }} × {{ $order->currency }} {{ number_format((float) $item->price, 2) }}
-                        </p>
-                    </div>
-                    <strong>{{ $order->currency }} {{ number_format((float) $item->total, 2) }}</strong>
-                </li>
-            @endforeach
-        </ul>
+        <div class="profile-order-items-table-wrap">
+            <table class="profile-order-items-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ __('Product') }}</th>
+                        <th scope="col">{{ __('Variant') }}</th>
+                        <th scope="col">{{ __('Qty') }}</th>
+                        <th scope="col">{{ __('Price') }}</th>
+                        <th scope="col" class="profile-order-items-table__total">{{ __('Total') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($order->items as $item)
+                        <tr>
+                            <td class="profile-order-items-table__product">{{ $item->product_name }}</td>
+                            <td>{{ $item->variant_name ?? '—' }}</td>
+                            <td>{{ $item->quantity }}</td>
+                            <td>{{ $order->currency }} {{ number_format((float) $item->price, 2) }}</td>
+                            <td class="profile-order-items-table__total">{{ $order->currency }} {{ number_format((float) $item->total, 2) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
         <div class="profile-order-totals">
             <div class="cart-summary-row">
@@ -61,3 +69,55 @@
         </div>
     </section>
 @endsection
+
+@push('styles')
+<style>
+    .profile-order-items-table-wrap {
+        margin-bottom: var(--space-lg);
+        overflow-x: auto;
+    }
+
+    .profile-order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .profile-order-items-table thead th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-family: var(--font-heading);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--c-gold);
+        border-bottom: 1px solid var(--c-black-border);
+        white-space: nowrap;
+    }
+
+    .profile-order-items-table tbody td {
+        padding: 0.85rem 1rem;
+        color: var(--c-text-secondary);
+        border-bottom: 1px solid var(--c-black-border);
+        vertical-align: top;
+    }
+
+    .profile-order-items-table__product {
+        color: var(--c-text-primary);
+        font-family: var(--font-heading);
+        min-width: 160px;
+    }
+
+    .profile-order-items-table__total {
+        text-align: right;
+        color: var(--c-gold);
+        font-family: var(--font-heading);
+        white-space: nowrap;
+    }
+
+    .profile-order-items-table thead th.profile-order-items-table__total {
+        text-align: right;
+    }
+</style>
+@endpush

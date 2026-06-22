@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
@@ -40,9 +41,11 @@ Route::patch('/cart/update/{variantId}', [CartController::class, 'update'])->nam
 Route::delete('/cart/remove/{variantId}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-Route::get('/order/thank-you/{order:order_number}', [CheckoutController::class, 'thankYou'])->name('order.thank-you');
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/order/thank-you/{order:order_number}', [CheckoutController::class, 'thankYou'])->name('order.thank-you');
+});
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -76,6 +79,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+
+    Route::get('/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');
+    Route::get('/email-templates/{emailTemplate}/edit', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
+    Route::put('/email-templates/{emailTemplate}', [EmailTemplateController::class, 'update'])->name('email-templates.update');
 
     Route::get('/categories', [ProductCategoryController::class, 'index'])->name('product-categories.index');
     Route::post('/categories', [ProductCategoryController::class, 'store'])->name('product-categories.store');

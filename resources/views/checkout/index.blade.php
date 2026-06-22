@@ -28,6 +28,16 @@
 
             <div class="cart-layout checkout-index-layout" data-scroll-reveal>
                 <div class="checkout-index-main">
+                    @guest
+                        <div class="checkout-panel checkout-login-panel">
+                            <h2 class="checkout-panel-title">Sign in required</h2>
+                            <p class="checkout-login-message">Please log in or create an account to place your order.</p>
+                            <div class="checkout-login-actions">
+                                <a href="{{ route('login') }}" class="btn btn-gold">Log in</a>
+                                <a href="{{ route('register') }}" class="btn btn-outline-sm">Create account</a>
+                            </div>
+                        </div>
+                    @else
                     <form action="{{ route('checkout.store') }}" method="POST" class="checkout-index-form" novalidate>
                         @csrf
 
@@ -40,7 +50,7 @@
                                         type="text"
                                         id="full_name"
                                         name="full_name"
-                                        value="{{ old('full_name', auth()->user()?->name) }}"
+                                        value="{{ old('full_name', auth()->user()->name) }}"
                                         required
                                     >
                                     @error('full_name')
@@ -54,7 +64,8 @@
                                         type="email"
                                         id="email"
                                         name="email"
-                                        value="{{ old('email', auth()->user()?->email) }}"
+                                        value="{{ old('email', auth()->user()->email) }}"
+                                        readonly
                                         required
                                     >
                                     @error('email')
@@ -168,6 +179,7 @@
 
                         <button type="submit" class="btn btn-gold checkout-index-submit">Place Order</button>
                     </form>
+                    @endguest
                 </div>
 
                 <aside class="cart-summary checkout-index-summary">
@@ -240,6 +252,22 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-lg);
+    }
+
+    .checkout-login-panel {
+        text-align: center;
+    }
+
+    .checkout-login-message {
+        color: var(--c-text-secondary);
+        margin-bottom: var(--space-lg);
+    }
+
+    .checkout-login-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-md);
+        justify-content: center;
     }
 
     .checkout-panel {

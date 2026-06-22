@@ -21,6 +21,7 @@ class CmsModulePermissionsSeeder extends Seeder
                 'users.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'admin.printful.products.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 0, 'is_delete' => 0],
                 'orders.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
+                'email-templates.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 1, 'is_delete' => 0],
                 'blogs-module' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'blog-categories.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'blogs.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],

@@ -75,6 +75,17 @@ class CmsModuleSeeder extends Seeder
         );
 
         CmsModule::updateOrCreate(
+            ['route_name' => 'email-templates.index'],
+            [
+                'name' => 'Email templates',
+                'icon' => 'fa-solid fa-envelope',
+                'sort_order' => 5,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
             ['route_name' => 'product-categories.index'],
             [
                 'name' => 'All Categories',
@@ -101,7 +112,7 @@ class CmsModuleSeeder extends Seeder
             [
                 'name' => 'Blogs',
                 'icon' => 'fa-solid fa-book-open',
-                'sort_order' => 5,
+                'sort_order' => 6,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -137,6 +148,7 @@ class CmsModuleSeeder extends Seeder
             'products.index',
             'admin.printful.products.index',
             'orders.index',
+            'email-templates.index',
             'blogs-module',
             'blog-categories.index',
             'blogs.index',

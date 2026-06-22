@@ -191,41 +191,64 @@
 
         <!-- Product Filters -->
         @php
-            $productCategories = \App\Models\ProductCategory::query()
-                ->where('parent_id', 0)
-                ->where('status', 'active')
-                ->where('slug', '!=', 'all-products')
-                ->orderBy('name')
-                ->get();
-
-            $shopProducts = \App\Models\Product::query()
-                ->with(['category', 'images', 'productType'])
-                ->where('status', 'active')
+            $shopProducts = \App\Models\PrintfulProduct::query()
+                ->withCount('variants')
+                ->with('variants')
                 ->latest()
                 ->limit(6)
                 ->get();
         @endphp
         <div class="product-filters" role="group" aria-label="Filter products">
           <button class="filter-btn active" data-filter="all" aria-pressed="true">All Pieces</button>
-          @foreach ($productCategories as $category)
-            <button class="filter-btn" data-filter="{{ $category->slug }}" aria-pressed="false">{{ $category->name }}</button>
-          @endforeach
         </div>
 
         <!-- Product Grid -->
         <div class="product-grid" role="list" aria-label="Products">
           @forelse ($shopProducts as $product)
-            @include('screens.web.artifacts.partials.product-card', [
-                'product' => $product,
-                'delay' => ($loop->index % 4) * 80,
-            ])
+            @php
+                $imageUrl = $product->thumbnail_url ?: 'https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=600&q=80&auto=format&fit=crop';
+                $minPrice = $product->variants
+                    ->whereNotNull('retail_price')
+                    ->min('retail_price');
+                $currency = strtoupper($product->variants->first()?->currency ?? 'USD');
+            @endphp
+            <article class="product-card product-card--variable" role="listitem" data-category="all" data-scroll-reveal data-delay="{{ ($loop->index % 4) * 80 }}">
+                <div class="product-image-wrap">
+                    <img
+                        src="{{ $imageUrl }}"
+                        alt="REAP433 {{ $product->name }}"
+                        class="product-image"
+                        loading="lazy"
+                    />
+                    <div class="product-overlay" aria-hidden="true">
+                        <a href="{{ route('printful-products.show', $product) }}" class="product-quick-view" aria-label="Quick view {{ $product->name }}">Quick View</a>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-meta">
+                        <span class="product-category">{{ $product->variants_count }} {{ Str::plural('variant', $product->variants_count) }}</span>
+                    </div>
+                    <h3 class="product-name">{{ $product->name }}</h3>
+                    <p class="product-desc">&nbsp;</p>
+                    <div class="product-footer">
+                        <span class="product-price">
+                            @if ($minPrice !== null)
+                                From {{ $currency }} {{ number_format((float) $minPrice, 2) }}
+                            @else
+                                —
+                            @endif
+                        </span>
+                        <a href="{{ route('printful-products.show', $product) }}" class="btn btn-gold-sm" aria-label="Select options for {{ $product->name }}">Select Options</a>
+                    </div>
+                </div>
+            </article>
           @empty
             <p class="product-grid-empty">No products available yet.</p>
           @endforelse
         </div>
 
         <div class="shop-cta-row" data-scroll-reveal>
-          <a href="{{ route('artifacts.index') }}" class="btn btn-gold">
+          <a href="{{ route('printful-products.index') }}" class="btn btn-gold">
             View Full Collection
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
           </a>
