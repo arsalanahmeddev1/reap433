@@ -38,7 +38,7 @@
                             </div>
                         </div>
                     @else
-                    <form action="{{ route('checkout.store') }}" method="POST" class="checkout-index-form" novalidate>
+                    <form action="{{ route('checkout.store') }}" method="POST" class="checkout-index-form" id="checkout-form" novalidate>
                         @csrf
 
                         <div class="checkout-panel">
@@ -133,12 +133,16 @@
                                 </div>
 
                                 <div class="checkout-field">
-                                    <label for="state_code">State / Province</label>
+                                    <label for="state_code">State</label>
                                     <input
                                         type="text"
                                         id="state_code"
                                         name="state_code"
                                         value="{{ old('state_code') }}"
+                                        maxlength="2"
+                                        placeholder="CA"
+                                        pattern="[A-Za-z]{2}"
+                                        title="Use a 2-letter US state code, e.g. CA or NY"
                                         required
                                     >
                                     @error('state_code')
@@ -147,15 +151,14 @@
                                 </div>
 
                                 <div class="checkout-field">
-                                    <label for="country_code">Country code</label>
+                                    <label for="country_code">Country</label>
                                     <input
                                         type="text"
-                                        id="country_code"
-                                        name="country_code"
-                                        value="{{ old('country_code', 'US') }}"
-                                        maxlength="2"
-                                        required
+                                        id="country_code_display"
+                                        value="United States"
+                                        readonly
                                     >
+                                    <input type="hidden" name="country_code" value="US">
                                     @error('country_code')
                                         <span class="checkout-field-error">{{ $message }}</span>
                                     @enderror
@@ -177,7 +180,26 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-gold checkout-index-submit">Place Order</button>
+                        <div class="checkout-panel">
+                            <h2 class="checkout-panel-title">Payment</h2>
+                            @if ($stripeEnabled)
+                                <label class="checkout-card-label" for="card-element">Card details</label>
+                                <div id="card-element" class="checkout-card-element"></div>
+                                <p id="card-errors" class="checkout-field-error" role="alert"></p>
+                            @else
+                                <p class="checkout-stripe-missing">Card payment is not configured yet. Your order will be saved with payment status pending.</p>
+                            @endif
+                        </div>
+
+                        <p id="checkout-form-error" class="checkout-field-error checkout-form-error" role="alert" hidden></p>
+
+                        <button type="submit" class="btn btn-gold checkout-index-submit checkout-pay-btn">
+                            @if ($stripeEnabled)
+                                Pay {{ '$' . number_format((float) $subtotal, 2) }}
+                            @else
+                                Place Order
+                            @endif
+                        </button>
                     </form>
                     @endguest
                 </div>
@@ -322,6 +344,11 @@
         box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.15);
     }
 
+    .checkout-field input[readonly] {
+        cursor: default;
+        color: var(--c-text-secondary);
+    }
+
     .checkout-field-error {
         display: block;
         margin-top: 0.35rem;
@@ -332,6 +359,30 @@
     .checkout-index-submit {
         width: 100%;
         max-width: 320px;
+    }
+
+    .checkout-card-label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-size: 0.8125rem;
+        color: var(--c-text-secondary);
+    }
+
+    .checkout-card-element {
+        padding: 0.75rem;
+        border: 1px solid var(--c-black-border);
+        border-radius: var(--radius-sm);
+        background: var(--c-black-mid);
+    }
+
+    .checkout-stripe-missing {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--c-text-secondary);
+    }
+
+    .checkout-form-error {
+        margin: 0;
     }
 
     .checkout-summary-items {
@@ -392,4 +443,18 @@
         }
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    window.__checkout = {
+        paymentIntentUrl: @json(route('checkout.payment-intent')),
+        stripeKey: @json($stripeEnabled ? config('services.stripe.key') : null),
+        stripeEnabled: @json($stripeEnabled),
+    };
+</script>
+@if ($stripeEnabled)
+    <script src="https://js.stripe.com/v3/"></script>
+@endif
+<script src="{{ asset('assets/web/js/checkout-index.js') }}"></script>
 @endpush

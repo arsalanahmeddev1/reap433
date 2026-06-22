@@ -10,6 +10,7 @@ class Order extends Model
 {
     public const STATUSES = [
         'pending_payment',
+        'printful_draft',
         'processing',
         'shipped',
         'delivered',
@@ -32,6 +33,8 @@ class Order extends Model
         'currency',
         'status',
         'payment_status',
+        'payment_method',
+        'stripe_payment_intent_id',
         'printful_order_id',
         'printful_status',
         'raw_data',

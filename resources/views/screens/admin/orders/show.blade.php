@@ -20,6 +20,38 @@
                         </div>
                     </div>
                     <div class="card-body">
+                        @if (session('success'))
+                            <div class="alert alert-success" role="status">{{ session('success') }}</div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
+                        @endif
+
+                        @php
+                            $printfulStatus = strtolower((string) ($order->printful_status ?? ''));
+                            $printfulRaw = is_array($order->raw_data['printful'] ?? null) ? $order->raw_data['printful'] : [];
+                            $printfulLastSync = $printfulRaw['last_status_sync_at']
+                                ?? $printfulRaw['confirmed_at']
+                                ?? $printfulRaw['submitted_at']
+                                ?? null;
+                            $printfulSafeError = null;
+
+                            if (! empty($printfulRaw['confirm_error']['error']) && is_string($printfulRaw['confirm_error']['error'])) {
+                                $printfulSafeError = $printfulRaw['confirm_error']['error'];
+                            } elseif (! empty($printfulRaw['status_sync_error']['error']) && is_string($printfulRaw['status_sync_error']['error'])) {
+                                $printfulSafeError = $printfulRaw['status_sync_error']['error'];
+                            } elseif ($printfulStatus === 'failed') {
+                                $printfulSafeError = __('Printful reported a failed order status. Refresh the status or retry confirmation if applicable.');
+                            }
+
+                            $canCreateDraft = strcasecmp((string) $order->payment_status, 'paid') === 0
+                                && $order->printful_order_id === null;
+                            $canConfirmPrintful = $order->printful_order_id !== null
+                                && in_array($printfulStatus, ['draft', 'failed'], true);
+                            $canRefreshPrintfulStatus = $order->printful_order_id !== null;
+                        @endphp
+
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <div class="card">
@@ -64,6 +96,93 @@
                                             {{ $order->city }}, {{ $order->state_code }} {{ $order->zip }}<br>
                                             {{ strtoupper($order->country_code) }}
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Printful Fulfillment</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3 mb-4">
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="small c-o-light">Local order number</div>
+                                                <div class="fw-semibold">{{ $order->publicOrderNumber() }}</div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="small c-o-light">Payment status</div>
+                                                <div class="fw-semibold">{{ ucfirst($order->payment_status) }}</div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="small c-o-light">Printful order ID</div>
+                                                <div class="fw-semibold">{{ $order->printful_order_id ?? '—' }}</div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="small c-o-light">Printful status</div>
+                                                <div class="fw-semibold">
+                                                    @if ($order->printful_status)
+                                                        <span class="badge {{ $printfulStatus === 'failed' ? 'badge-light-danger' : ($printfulStatus === 'draft' ? 'badge-light-warning' : 'badge-light-info') }}">
+                                                            {{ ucwords(str_replace('_', ' ', $order->printful_status)) }}
+                                                        </span>
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-lg-4">
+                                                <div class="small c-o-light">Last Printful sync</div>
+                                                <div class="fw-semibold">
+                                                    @if ($printfulLastSync)
+                                                        {{ \Illuminate\Support\Carbon::parse($printfulLastSync)->format('d M Y, h:i A') }}
+                                                    @else
+                                                        —
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if ($printfulSafeError)
+                                            <div class="alert alert-danger py-2 mb-3" role="alert">
+                                                <strong>{{ __('Printful error:') }}</strong> {{ $printfulSafeError }}
+                                            </div>
+                                        @endif
+
+                                        <div class="d-flex flex-wrap gap-2">
+                                            @if ($canCreateDraft)
+                                                <form action="{{ route('orders.printful.create-draft', $order) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-primary btn-sm">
+                                                        <i class="fa-solid fa-file-circle-plus pe-1"></i>
+                                                        Create Printful Draft
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                            @if ($canConfirmPrintful)
+                                                <form action="{{ route('orders.printful.confirm', $order) }}" method="POST" class="d-inline printful-confirm-form">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-warning btn-sm">
+                                                        <i class="fa-solid fa-truck-fast pe-1"></i>
+                                                        Confirm Printful Order
+                                                    </button>
+                                                </form>
+                                            @endif
+
+                                        @if ($canRefreshPrintfulStatus)
+                                            <a href="{{ route('orders.printful.status', $order) }}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-rotate pe-1"></i>
+                                                Refresh Printful Status
+                                            </a>
+                                        @endif
+                                        </div>
+
+                                        @unless (config('services.printful.auto_confirm'))
+                                            <p class="mb-0 mt-3 c-o-light small">
+                                                Automatic Printful confirmation is disabled. Draft orders must be confirmed manually.
+                                            </p>
+                                        @endunless
                                     </div>
                                 </div>
                             </div>
@@ -114,3 +233,23 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        (function () {
+            document.querySelectorAll('.printful-confirm-form').forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const confirmed = window.confirm(
+                        'Confirming this order may charge your Printful billing method and start fulfillment. Continue?'
+                    );
+
+                    if (confirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        })();
+    </script>
+@endpush

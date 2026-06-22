@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\OrderPrintfulController;
 use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
@@ -43,6 +44,7 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/payment-intent', [CheckoutController::class, 'paymentIntent'])->name('checkout.payment-intent');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/order/thank-you/{order:order_number}', [CheckoutController::class, 'thankYou'])->name('order.thank-you');
 });
@@ -79,6 +81,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::post('/orders/{order}/printful/create-draft', [OrderPrintfulController::class, 'createDraft'])->name('orders.printful.create-draft');
+    Route::post('/orders/{order}/printful/confirm', [OrderPrintfulController::class, 'confirm'])->name('orders.printful.confirm');
+    Route::get('/orders/{order}/printful/status', [OrderPrintfulController::class, 'status'])->name('orders.printful.status');
 
     Route::get('/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');
     Route::get('/email-templates/{emailTemplate}/edit', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
