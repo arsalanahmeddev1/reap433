@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BiblicalTriviaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -35,6 +36,8 @@ Route::get('/products', [PrintfulProductController::class, 'index'])->name('prin
 Route::get('/products/{printfulProduct}', [PrintfulProductController::class, 'show'])->name('printful-products.show');
 
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/biblical-trivia', [BiblicalTriviaController::class, 'index'])->name('biblical-trivia.index');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{variant}', [CartController::class, 'add'])->name('cart.add');
