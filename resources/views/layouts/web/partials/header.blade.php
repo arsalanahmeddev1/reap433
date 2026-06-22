@@ -19,7 +19,7 @@
       <!-- Desktop Nav -->
       <ul class="nav-links" role="list">
         <li><a href="#shop" class="nav-link shop-nav">Collection</a></li>
-        <li><a href="#shop" class="nav-link shop-nav">New Arrivals</a></li>
+        <li><a href="{{ route('biblical-trivia.index') }}" class="nav-link shop-nav">Cards Game</a></li>
         <li><a href="#hub" class="nav-link impact-nav" style="display:none">Civic Hub</a></li>
         <li><a href="#blog" class="nav-link impact-nav" style="display:none">Blog</a></li>
         <li><a href="#about" class="nav-link">Our Story</a></li>
