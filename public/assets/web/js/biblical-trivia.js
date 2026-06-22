@@ -1,11 +1,11 @@
 /**
- * Biblical Trivia Card Game — client logic
- * Requires: biblical-trivia-decks.js, #biblical-trivia-root
+ * Reap433 Bible Trivia — client logic (from Claude artifact)
+ * Requires: biblical-trivia-decks.js, #reap433-decks
  */
 (function () {
     'use strict';
 
-    var root = document.getElementById('biblical-trivia-root');
+    var root = document.getElementById('reap433-decks');
     if (!root) {
         return;
     }
@@ -21,8 +21,8 @@
         pos: 0,
         score: 0,
         answered: 0,
-        selected: null,
         revealed: false,
+        selected: null,
     };
 
     function escapeHtml(str) {
@@ -39,25 +39,16 @@
     }
 
     function shuffle(arr) {
-        var copy = arr.slice();
+        var a = arr.slice();
 
-        for (var i = copy.length - 1; i > 0; i--) {
+        for (var i = a.length - 1; i > 0; i--) {
             var j = Math.floor(Math.random() * (i + 1));
-            var temp = copy[i];
-            copy[i] = copy[j];
-            copy[j] = temp;
+            var tmp = a[i];
+            a[i] = a[j];
+            a[j] = tmp;
         }
 
-        return copy;
-    }
-
-    function resetPlayState() {
-        state.pos = 0;
-        state.score = 0;
-        state.answered = 0;
-        state.selected = null;
-        state.revealed = false;
-        state.order = [];
+        return a;
     }
 
     function getDeck(key) {
@@ -71,26 +62,35 @@
     function openDeck(key) {
         var deck = getDeck(key);
 
-        state.screen = 'play';
-        state.deckKey = key;
-        resetPlayState();
-
         if (!deck || !Array.isArray(deck.cards) || deck.cards.length === 0) {
+            state.screen = 'play';
+            state.deckKey = key;
+            state.order = [];
+            state.pos = 0;
+            state.score = 0;
+            state.answered = 0;
+            state.revealed = false;
+            state.selected = null;
             render();
             return;
         }
 
-        state.order = shuffle(deck.cards.map(function (_, index) {
-            return index;
+        state.screen = 'play';
+        state.deckKey = key;
+        state.order = shuffle(deck.cards.map(function (_, i) {
+            return i;
         }));
-
+        state.pos = 0;
+        state.score = 0;
+        state.answered = 0;
+        state.revealed = false;
+        state.selected = null;
         render();
     }
 
     function goMenu() {
         state.screen = 'menu';
         state.deckKey = null;
-        resetPlayState();
         render();
     }
 
@@ -106,72 +106,56 @@
     function renderMenu() {
         var html = '';
 
-        html += '<div class="bt-header">'
-            + '<div class="bt-eyebrow">Reap433 &middot; Foundations</div>'
-            + '<h1 class="bt-title" id="biblical-trivia-heading">Biblical Trivia Card Game</h1>'
-            + '<p class="bt-sub">Six trivia decks covering the core building blocks of the faith &mdash; '
+        html += '<div class="header">'
+            + '<div class="eyebrow">Reap433 &middot; Foundations</div>'
+            + '<h1 class="title" id="biblical-trivia-heading">Choose a Deck</h1>'
+            + '<p class="sub">Seven trivia decks covering Faith, Baptism, Tithing, Salvation, Holy Spirit, Spiritual Gifts, and Reap What You Sow &mdash; '
             + 'each pulling questions and verses straight from Scripture.</p>'
             + '</div>';
 
-        html += '<div class="bt-deck-grid" role="list">';
+        html += '<div class="deck-grid" role="list">';
 
         DECK_ORDER.forEach(function (key) {
-            var deck = getDeck(key);
-            if (!deck) {
+            var d = getDeck(key);
+            if (!d) {
                 return;
             }
 
-            var cardCount = Array.isArray(deck.cards) ? deck.cards.length : 0;
+            var cardCount = Array.isArray(d.cards) ? d.cards.length : 0;
 
-            html += '<button type="button" class="bt-deck-tile" data-deck="' + escapeHtml(key) + '" '
-                + 'role="listitem" aria-label="' + escapeHtml(deck.title + ', ' + cardCount + ' cards') + '">'
-                + '<div class="bt-deck-bar" style="background:' + escapeHtml(deck.color) + ';"></div>'
-                + '<div class="bt-deck-body">'
-                + '<p class="bt-deck-name">' + escapeHtml(deck.title) + '</p>'
-                + '<p class="bt-deck-verse">' + escapeHtml(deck.verse) + ' &mdash; ' + escapeHtml(deck.ref) + '</p>'
-                + '<div class="bt-deck-meta">' + cardCount + ' cards &middot; ' + escapeHtml(deck.desc) + '</div>'
+            html += '<button type="button" class="deck-tile" data-deck="' + escapeHtml(key) + '" '
+                + 'role="listitem" aria-label="' + escapeHtml(d.title + ', ' + cardCount + ' cards') + '">'
+                + '<div class="deck-bar" style="background:' + escapeHtml(d.color) + ';"></div>'
+                + '<div class="deck-body">'
+                + '<p class="deck-name">' + escapeHtml(d.title) + '</p>'
+                + '<p class="deck-verse">' + escapeHtml(d.verse) + ' &mdash; ' + escapeHtml(d.ref) + '</p>'
+                + '<div class="deck-meta">' + cardCount + ' cards &middot; ' + escapeHtml(d.desc) + '</div>'
                 + '</div></button>';
         });
 
         html += '</div>';
 
         root.innerHTML = html;
-        attachMenuHandlers();
-    }
 
-    function renderEmptyDeck(deck) {
-        return '<div class="bt-empty-deck" role="alert">'
-            + '<p class="bt-empty-title">This deck has no cards yet.</p>'
-            + '<p class="bt-empty-text">Please choose another deck to continue playing.</p>'
-            + '<div class="bt-final-actions">'
-            + '<button type="button" class="bt-btn-solid" data-action="menu">Choose another deck</button>'
-            + '</div></div>';
+        root.querySelectorAll('.deck-tile').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                openDeck(this.getAttribute('data-deck'));
+            });
+        });
     }
 
     function renderPlay() {
         var deck = getDeck(state.deckKey);
         var html = '';
 
-        html += '<button type="button" class="bt-back-link" aria-label="Return to all decks">&larr; All decks</button>';
+        html += '<button type="button" class="back-link" aria-label="Return to all decks">&larr; All decks</button>';
 
-        if (!deck) {
-            html += '<div class="bt-empty-deck" role="alert">'
-                + '<p class="bt-empty-title">Deck not found.</p>'
-                + '<button type="button" class="bt-btn-solid" data-action="menu">Back to all decks</button>'
-                + '</div>';
-            root.innerHTML = html;
-            attachPlayHandlers();
-            return;
-        }
-
-        html += '<div class="bt-header">'
-            + '<div class="bt-eyebrow">Reap433 &middot; ' + escapeHtml(deck.title) + '</div>'
-            + '<h2 class="bt-title">' + escapeHtml(deck.title) + '</h2>'
-            + '<p class="bt-sub">' + escapeHtml(deck.verse) + ' &mdash; ' + escapeHtml(deck.ref) + '</p>'
-            + '</div>';
-
-        if (!Array.isArray(deck.cards) || deck.cards.length === 0) {
-            html += renderEmptyDeck(deck);
+        if (!deck || !Array.isArray(deck.cards) || deck.cards.length === 0) {
+            html += '<div class="final" role="alert">'
+                + '<p class="final-msg">This deck has no cards yet. Please choose another deck.</p>'
+                + '<div class="final-actions">'
+                + '<button type="button" class="btn-solid" data-action="menu">Choose another deck</button>'
+                + '</div></div>';
             root.innerHTML = html;
             attachPlayHandlers();
             return;
@@ -179,85 +163,83 @@
 
         var finished = state.pos >= state.order.length;
 
-        html += '<div class="bt-stats" aria-live="polite">'
+        html += '<div class="header">'
+            + '<div class="eyebrow">Reap433 &middot; ' + escapeHtml(deck.title) + '</div>'
+            + '<h2 class="title">' + escapeHtml(deck.title) + '</h2>'
+            + '<p class="sub">' + escapeHtml(deck.verse) + ' &mdash; ' + escapeHtml(deck.ref) + '</p>'
+            + '</div>';
+
+        html += '<div class="stats" aria-live="polite">'
             + '<span>Card <strong>' + Math.min(state.pos + 1, state.order.length) + '</strong> / ' + state.order.length + '</span>'
-            + '<span class="bt-stats-sep" aria-hidden="true">&middot;</span>'
+            + '<span>&middot;</span>'
             + '<span>Score <strong>' + state.score + '</strong> / ' + state.answered + '</span>'
             + '</div>';
 
         var progressPct = ((state.pos + (finished ? 1 : 0)) / state.order.length) * 100;
-        html += '<div class="bt-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(progressPct) + '" aria-label="Deck progress">'
-            + '<div class="bt-progress-fill" style="width:' + progressPct + '%; background:' + escapeHtml(deck.color) + ';"></div>'
+        html += '<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(progressPct) + '">'
+            + '<div class="progress-fill" style="width:' + progressPct + '%; background:' + escapeHtml(deck.color) + ';"></div>'
             + '</div>';
 
         if (!finished) {
-            var cardIndex = state.order[state.pos];
-            var card = deck.cards[cardIndex];
+            var card = deck.cards[state.order[state.pos]];
 
             if (!card) {
-                html += '<div class="bt-empty-deck" role="alert">'
-                    + '<p class="bt-empty-title">Unable to load this card.</p>'
-                    + '<button type="button" class="bt-btn-solid" data-action="menu">Back to all decks</button>'
+                html += '<div class="final" role="alert">'
+                    + '<p class="final-msg">Unable to load this card.</p>'
+                    + '<button type="button" class="btn-solid" data-action="menu">Back to all decks</button>'
                     + '</div>';
                 root.innerHTML = html;
                 attachPlayHandlers();
                 return;
             }
 
-            html += '<div class="bt-card">';
-
-            html += '<div class="bt-band" style="background:' + escapeHtml(deck.color) + ';">'
-                + '<span class="bt-band-label">' + escapeHtml(deck.title) + '</span>'
-                + '<span class="bt-band-desc">Card ' + (state.pos + 1) + ' of ' + state.order.length + '</span>'
+            html += '<div class="card">';
+            html += '<div class="band" style="background:' + escapeHtml(deck.color) + ';">'
+                + '<span class="band-label">' + escapeHtml(deck.title) + '</span>'
+                + '<span class="band-desc">Card ' + (state.pos + 1) + ' of ' + state.order.length + '</span>'
                 + '</div>';
-
-            html += '<div class="bt-body">';
-            html += '<p class="bt-question" id="bt-current-question">' + escapeHtml(card.q) + '</p>';
-            html += '<div class="bt-options" role="group" aria-labelledby="bt-current-question">';
+            html += '<div class="body">';
+            html += '<p class="question" id="bt-current-question">' + escapeHtml(card.q) + '</p>';
+            html += '<div class="options" role="group" aria-labelledby="bt-current-question">';
 
             card.options.forEach(function (opt, i) {
-                var cls = 'bt-opt';
+                var cls = 'opt';
                 var mark = '';
-                var letter = String.fromCharCode(65 + i);
-                var ariaLabel = 'Option ' + letter + ': ' + opt;
 
                 if (state.revealed) {
-                    cls += ' bt-locked';
+                    cls += ' locked';
                     if (i === card.answer) {
-                        cls += ' bt-correct';
-                        mark = '<span class="bt-mark" aria-hidden="true">&#10003;</span>';
-                        ariaLabel += ', correct answer';
+                        cls += ' correct';
+                        mark = '<span class="mark" aria-hidden="true">&#10003;</span>';
                     } else if (i === state.selected) {
-                        cls += ' bt-incorrect';
-                        mark = '<span class="bt-mark" aria-hidden="true">&#10007;</span>';
-                        ariaLabel += ', your answer, incorrect';
+                        cls += ' incorrect';
+                        mark = '<span class="mark" aria-hidden="true">&#10007;</span>';
                     } else {
-                        cls += ' bt-dim';
+                        cls += ' dim';
                     }
                 }
 
                 html += '<button type="button" class="' + cls + '" data-idx="' + i + '" '
                     + (state.revealed ? 'disabled aria-disabled="true"' : '')
-                    + ' aria-label="' + escapeHtml(ariaLabel) + '">'
-                    + '<span class="bt-opt-letter" aria-hidden="true">' + letter + '</span>'
+                    + ' aria-label="Option ' + String.fromCharCode(65 + i) + ': ' + escapeHtml(opt) + '">'
+                    + '<span class="opt-letter" aria-hidden="true">' + String.fromCharCode(65 + i) + '</span>'
                     + escapeHtml(opt) + mark
                     + '</button>';
             });
 
             html += '</div>';
 
-            html += '<div class="bt-note' + (state.revealed ? ' bt-show' : '') + '" '
+            html += '<div class="note' + (state.revealed ? ' show' : '') + '" '
                 + (state.revealed ? '' : 'hidden')
                 + ' role="note">'
-                + '<div class="bt-note-ref" style="color:' + escapeHtml(deck.color) + ';">' + escapeHtml(card.ref) + '</div>'
+                + '<div class="note-ref" style="color:' + escapeHtml(deck.color) + ';">' + escapeHtml(card.ref) + '</div>'
                 + escapeHtml(card.note)
                 + '</div>';
 
-            var isLast = state.pos + 1 >= state.order.length;
-            html += '<button type="button" class="bt-next-btn' + (state.revealed ? ' bt-active' : '') + '" '
+            html += '<button type="button" class="next-btn' + (state.revealed ? ' active' : '') + '" '
                 + (state.revealed ? '' : 'disabled aria-disabled="true"')
-                + ' aria-label="' + (isLast ? 'Finish deck' : 'Go to next card') + '">'
-                + (isLast ? 'Finish' : 'Next card &rarr;')
+                + ' aria-label="' + (state.pos + 1 >= state.order.length ? 'Finish deck' : 'Go to next card') + '">'
+                + (state.pos + 1 >= state.order.length ? 'Finish' : 'Next card &rarr;')
                 + '</button>';
 
             html += '</div></div>';
@@ -269,13 +251,13 @@
                     ? 'Good soil. Most of it took root.'
                     : 'Some seed fell on rocky ground &mdash; worth another pass.';
 
-            html += '<div class="bt-final">'
-                + '<div class="bt-final-eyebrow">Deck Complete</div>'
-                + '<p class="bt-final-score" aria-live="polite">' + state.score + ' / ' + state.order.length + '</p>'
-                + '<p class="bt-final-msg">' + msg + '</p>'
-                + '<div class="bt-final-actions">'
-                + '<button type="button" class="bt-btn-solid" data-action="replay">Play again</button>'
-                + '<button type="button" class="bt-btn-outline" data-action="menu">Choose another deck</button>'
+            html += '<div class="final">'
+                + '<div class="final-eyebrow">Deck Complete</div>'
+                + '<p class="final-score" aria-live="polite">' + state.score + ' / ' + state.order.length + '</p>'
+                + '<p class="final-msg">' + msg + '</p>'
+                + '<div class="final-actions">'
+                + '<button type="button" class="btn-solid" data-action="replay">Play again</button>'
+                + '<button type="button" class="btn-outline" data-action="menu">Choose another deck</button>'
                 + '</div></div>';
         }
 
@@ -283,31 +265,21 @@
         attachPlayHandlers();
     }
 
-    function attachMenuHandlers() {
-        root.querySelectorAll('.bt-deck-tile').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                openDeck(this.getAttribute('data-deck'));
-            });
-        });
-    }
-
     function attachPlayHandlers() {
-        var back = root.querySelector('.bt-back-link');
+        var back = root.querySelector('.back-link');
         if (back) {
             back.addEventListener('click', goMenu);
         }
 
         var deck = getDeck(state.deckKey);
 
-        root.querySelectorAll('.bt-opt').forEach(function (btn) {
+        root.querySelectorAll('.opt').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 if (state.revealed || !deck) {
                     return;
                 }
 
-                var cardIndex = state.order[state.pos];
-                var card = deck.cards[cardIndex];
-
+                var card = deck.cards[state.order[state.pos]];
                 if (!card) {
                     return;
                 }
@@ -335,7 +307,7 @@
             });
         });
 
-        var nextBtn = root.querySelector('.bt-next-btn');
+        var nextBtn = root.querySelector('.next-btn');
         if (nextBtn) {
             nextBtn.addEventListener('click', function () {
                 if (!state.revealed) {

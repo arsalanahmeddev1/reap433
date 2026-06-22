@@ -10,12 +10,10 @@
 <main id="main" class="biblical-trivia-page">
     <section class="biblical-trivia-section" aria-labelledby="biblical-trivia-heading">
         <div class="container biblical-trivia-container">
-            <div id="biblical-trivia-app" class="biblical-trivia-app" role="application" aria-label="Biblical Trivia Card Game">
-                <div id="biblical-trivia-root" class="biblical-trivia-root" aria-live="polite"></div>
-                <noscript>
-                    <p class="biblical-trivia-noscript">JavaScript is required to play the Biblical Trivia Card Game.</p>
-                </noscript>
-            </div>
+            <div id="reap433-decks" role="application" aria-label="Reap433 Bible Trivia Card Game"></div>
+            <noscript>
+                <p style="text-align:center;padding:2rem;color:#6b5d4f;">JavaScript is required to play the Bible Trivia Card Game.</p>
+            </noscript>
         </div>
     </section>
 </main>
