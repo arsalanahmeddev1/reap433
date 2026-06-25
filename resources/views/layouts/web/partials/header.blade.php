@@ -40,8 +40,15 @@
           <a href="{{ route('login') }}" class="nav-auth-link">Log in</a>
           <a href="{{ route('register') }}" class="btn btn-gold-sm nav-signup-btn">Sign up</a>
         @endauth
-        <button class="nav-icon-btn" aria-label="Search">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <button
+          type="button"
+          class="nav-icon-btn nav-search-toggle"
+          id="nav-search-toggle"
+          aria-label="Open search"
+          aria-expanded="false"
+          aria-controls="nav-search-panel"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
         <a href="{{ route('cart.index') }}" class="nav-icon-btn cart-btn" aria-label="Shopping cart, {{ $cartCount }} items">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -54,14 +61,37 @@
     </nav>
   </header>
 
+  {{-- Storefront search panel — GET /search queries database via SearchController --}}
+  <div class="nav-search-panel" id="nav-search-panel" hidden>
+    <div class="container nav-search-inner">
+      <form class="nav-search-field" action="{{ route('search.index') }}" method="GET" role="search">
+        <span class="nav-search-field-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </span>
+        <label for="nav-search-input" class="visually-hidden">Search</label>
+        <input
+          type="search"
+          id="nav-search-input"
+          name="q"
+          class="nav-search-input"
+          placeholder="Search collection…"
+          value="{{ request()->routeIs('search.index') ? request('q') : '' }}"
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn-gold-sm nav-search-submit" aria-label="Search">
+          <span class="nav-search-submit-label">Search</span>
+          <svg class="nav-search-submit-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
   <!-- Mobile Menu Overlay -->
   <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Mobile navigation" aria-modal="true" hidden>
-    <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
     <nav aria-label="Mobile navigation">
       <ul class="mobile-nav-links" role="list">
         <li><a href="#shop" class="mobile-nav-link">Collection</a></li>
+        <li><a href="{{ route('biblical-trivia.index') }}" class="mobile-nav-link">Cards Game</a></li>
         <li><a href="#shop" class="mobile-nav-link">New Arrivals</a></li>
         <li><a href="#hub" class="mobile-nav-link">Civic Hub</a></li>
         <li><a href="#blog" class="mobile-nav-link">Blog</a></li>

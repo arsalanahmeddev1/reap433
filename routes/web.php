@@ -21,12 +21,16 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileOrderController;
 use App\Http\Controllers\PrintfulProductController;
+use App\Http\Controllers\SearchController;
 
 
 
 
 // web routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Storefront search — artifacts, Printful products, and journal (database-backed)
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
 Route::get('/artifacts', [StoreController::class, 'index'])->name('artifacts.index');
 Route::post('/artifacts/filter', [StoreController::class, 'filterArtifacts'])->name('artifacts.filter');
