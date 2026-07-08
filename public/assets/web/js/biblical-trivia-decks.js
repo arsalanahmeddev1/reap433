@@ -7,13 +7,13 @@
 
     global.BiblicalTriviaDecks = {
         DECK_ORDER:         [
-                "reapsow",
                 "faith",
                 "baptism",
                 "tithing",
                 "salvation",
                 "holyspirit",
-                "gifts"
+                "gifts",
+                "reapsow"
         ],
         DECKS: {
     "faith": {

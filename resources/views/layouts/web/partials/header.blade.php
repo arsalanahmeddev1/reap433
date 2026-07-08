@@ -20,8 +20,8 @@
       <ul class="nav-links" role="list">
         <li><a href="#shop" class="nav-link shop-nav">Collection</a></li>
         <li><a href="{{ route('biblical-trivia.index') }}" class="nav-link shop-nav">Cards Game</a></li>
-        <li><a href="#hub" class="nav-link impact-nav" style="display:none">Civic Hub</a></li>
-        <li><a href="#blog" class="nav-link impact-nav" style="display:none">Blog</a></li>
+        <li style="display: none;"><a href="#hub" class="nav-link impact-nav">Civic Hub</a></li>
+        <li style="display: none;"><a href="#blog" class="nav-link impact-nav">Blog</a></li>
         <li><a href="#about" class="nav-link">Our Story</a></li>
         <li><a href="#contact" class="nav-link">Contact</a></li>
       </ul>

@@ -1,6 +1,10 @@
 @extends('layouts.web.master')
 
-@section('title', 'Biblical Trivia Card Game')
+@section('title', 'Reap433 — Bible Trivia Decks')
+
+@push('meta')
+    <meta name="description" content="Reap433 Bible Trivia — Seven decks covering Faith, Baptism, Tithing, Salvation, Holy Spirit, Spiritual Gifts, and Reap What You Sow." />
+@endpush
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/web/css/biblical-trivia.css') }}">
@@ -8,14 +12,10 @@
 
 @section('content')
 <main id="main" class="biblical-trivia-page">
-    <section class="biblical-trivia-section" aria-labelledby="biblical-trivia-heading">
-        <div class="container biblical-trivia-container">
-            <div id="reap433-decks" role="application" aria-label="Reap433 Bible Trivia Card Game"></div>
-            <noscript>
-                <p style="text-align:center;padding:2rem;color:#6b5d4f;">JavaScript is required to play the Bible Trivia Card Game.</p>
-            </noscript>
-        </div>
-    </section>
+    <div id="reap433-decks" role="application" aria-label="Reap433 Bible Trivia Decks"></div>
+    <noscript>
+        <p style="text-align:center;padding:2rem;color:#6b5d4f;">JavaScript is required to play the Bible Trivia Card Game.</p>
+    </noscript>
 </main>
 @endsection
 
