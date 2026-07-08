@@ -9,7 +9,7 @@
         <div class="hero-gradient-mesh" aria-hidden="true"></div>
         <div class="hero-noise" aria-hidden="true"></div>
         <img
-          src="{{asset('assets/images/hero.jpg')}}"
+          src="{{asset('assets/images/hero.png')}}"
           alt="Confident man wearing REAP433 premium hoodie, Grand Prairie Texas"
           class="hero-image"
           loading="eager"
