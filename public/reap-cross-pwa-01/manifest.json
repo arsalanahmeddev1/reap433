@@ -1,0 +1,17 @@
+{
+  "name": "The Cross — Reap Threads Trivia",
+  "short_name": "The Cross",
+  "description": "A Reap Threads trivia deck on the crucifixion — answer, then turn the card for the Word behind it.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11192E",
+  "theme_color": "#11192E",
+  "categories": ["education", "books", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

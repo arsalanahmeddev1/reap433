@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>The Cross · Reap Threads Trivia</title>
+<meta name="description" content="A Reap Threads trivia deck on the crucifixion — answer, then turn the card for the Word behind it." />
+<meta name="theme-color" content="#11192E" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="The Cross" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --navy:#11192E; --navyDeep:#0B1120; --panel:#1A2540;
+    --gold:#9C7A34; --goldBright:#C9A961; --cream:#F4F0E6; --creamSoft:#EDE7D8;
+    --correct:#4E8A6B; --correctB:#7CBE9C; --wrong:#B0503A; --wrongB:#D07A63;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin:0; padding:0; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background: radial-gradient(120% 80% at 50% -10%, #1A2540 0%, var(--navy) 45%, var(--navyDeep) 100%);
+    background-attachment: fixed;
+    font-family:'Source Sans 3', system-ui, -apple-system, sans-serif;
+    color: var(--creamSoft);
+    display:flex; align-items:center; justify-content:center;
+    padding: max(24px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+  }
+  #app { width:100%; max-width:480px; }
+  .serif { font-family:'Playfair Display', Georgia, 'Times New Roman', serif; }
+  .eyebrow { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--goldBright); font-weight:700; }
+  .rule { width:44px; height:2px; background:var(--gold); border:0; border-radius:2px; }
+  button { font-family:inherit; cursor:pointer; border:0; transition:transform .15s ease, box-shadow .15s ease, background .2s ease, border-color .18s ease, color .18s ease; }
+  button:active { transform: translateY(1px); }
+  .primary { background:linear-gradient(180deg, var(--goldBright), var(--gold)); color:var(--navyDeep); font-weight:700; letter-spacing:.04em; }
+  .primary:hover { box-shadow:0 6px 22px rgba(156,122,52,.4); }
+  .ghost { background:transparent; color:var(--goldBright); font-weight:600; border:1px solid rgba(201,169,97,.4); }
+  .answer { text-align:left; width:100%; padding:15px 17px; border-radius:13px; font-size:16px; font-weight:600; line-height:1.35;
+    border:1.5px solid rgba(201,169,97,.28); background:var(--panel); color:var(--creamSoft); }
+  .answer:not([disabled]):hover { border-color:var(--goldBright); background:#20305A; }
+  .answer .lbl { color:var(--goldBright); font-weight:700; margin-right:10px; }
+  button:focus-visible, .answer:focus-visible { outline:2px solid var(--goldBright); outline-offset:3px; }
+  .chip { font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--goldBright);
+    border:1px solid rgba(201,169,97,.35); border-radius:999px; padding:5px 11px; font-weight:700; }
+  .reveal { animation: rvl .42s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes rvl { from { opacity:0; transform:translateY(14px) scale(.98); } to { opacity:1; transform:none; } }
+  .center { text-align:center; }
+  .col { display:flex; flex-direction:column; gap:11px; }
+  @media (prefers-reduced-motion: reduce) { .reveal { animation:none; } button { transition:none; } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  "use strict";
+
+  var DECK = {
+    title: "The Cross",
+    subtitle: "A Reap Threads trivia deck on the crucifixion",
+    cards: [
+      { cat:"Historical Context", q:"Which empire is most associated with perfecting crucifixion as a public means of execution?",
+        choices:["Rome","Greece","Egypt","Babylon"], answer:0, ref:"John 19:6",
+        note:"Rome refined crucifixion as a deterrent — slow, public, shameful — reserved for slaves, rebels, and non-citizens." },
+      { cat:"Historical Context", q:"Roman citizens were normally exempt from crucifixion because it was considered too what?",
+        choices:["Expensive","Degrading","Quick","Merciful"], answer:1, ref:"Acts 22:25",
+        note:"The shame was the point. That the sinless Son bore the death reserved for the lowest is the scandal of the cross." },
+      { cat:"Historical Context", q:"What did the Romans call the placard fixed to the cross naming the victim's crime?",
+        choices:["Patibulum","Titulus","Tessera","Corona"], answer:1, ref:"John 19:19",
+        note:"Pilate's titulus read 'Jesus of Nazareth, King of the Jews' — an intended mockery that spoke more truly than he knew." },
+      { cat:"Historical Context", q:"After the revolt of Spartacus (71 BC), roughly how many were crucified along the Appian Way?",
+        choices:["About 600","About 6,000","About 60","About 60,000"], answer:1, ref:"—",
+        note:"Mass crucifixion was Rome's language of fear. Into a world numb to the cross, the gospel makes one cross everything." },
+      { cat:"Passion Narratives", q:"Which Roman governor handed Jesus over to be crucified?",
+        choices:["Herod Antipas","Pontius Pilate","Felix","Festus"], answer:1, ref:"Matthew 27:26",
+        note:"Pilate found no guilt yet yielded to the crowd — a portrait of authority that knows the truth and bends anyway." },
+      { cat:"Passion Narratives", q:"Who was compelled to carry Jesus' crossbeam on the road to Golgotha?",
+        choices:["Simon Peter","Simon of Cyrene","Joseph of Arimathea","Nicodemus"], answer:1, ref:"Mark 15:21",
+        note:"A bystander from Cyrene is pulled into the story — the first, unwilling picture of taking up a cross to follow." },
+      { cat:"Passion Narratives", q:"Jesus' cry 'My God, my God, why have you forsaken me?' quotes which psalm?",
+        choices:["Psalm 23","Psalm 22","Psalm 51","Psalm 88"], answer:1, ref:"Matthew 27:46",
+        note:"Psalm 22 opens in forsakenness and ends in vindication — Jesus prays the whole arc, not only its first line." },
+      { cat:"Passion Narratives", q:"What happened to the temple curtain at the moment of Jesus' death?",
+        choices:["It caught fire","It was torn top to bottom","It was rolled away","Nothing is recorded"], answer:1, ref:"Matthew 27:51",
+        note:"Torn from the top down — by God's hand, not ours. The way into his presence is thrown open by the cross." },
+      { cat:"Theology of the Cross", q:"In Galatians, Christ 'became a curse for us,' fulfilling which text about hanging on a tree?",
+        choices:["Deuteronomy 21:23","Leviticus 16:22","Numbers 21:9","Exodus 12:13"], answer:0, ref:"Galatians 3:13",
+        note:"Rome meant the cross as its ultimate curse. Scripture shows him taking that curse so the blessing could reach us." },
+      { cat:"Theology of the Cross", q:"Which prophet foretold a servant 'pierced for our transgressions,' 'despised and rejected'?",
+        choices:["Jeremiah","Isaiah","Ezekiel","Daniel"], answer:1, ref:"Isaiah 53:5",
+        note:"Centuries before Golgotha, Isaiah 53 sketches the suffering servant — substitution written into the prophets." },
+      { cat:"Theology of the Cross", q:"Paul says the message of the cross is folly to the perishing, but to us it is what?",
+        choices:["A stumbling block","The power of God","A hidden mystery","A hard saying"], answer:1, ref:"1 Corinthians 1:18",
+        note:"What looked like Rome's victory and God's defeat is, in truth, the power of God at work to save." },
+      { cat:"Theology of the Cross", q:"Hebrews argues Christ's single sacrifice does what to the old sacrificial system?",
+        choices:["Suspends it","Fulfills and ends it","Restarts it yearly","Leaves it unchanged"], answer:1, ref:"Hebrews 10:10",
+        note:"One offering, once for all. The blood the system always required is finally, fully given — and the altar closes." }
+    ]
+  };
+  var CAT_ORDER = ["Historical Context","Passion Narratives","Theology of the Cross"];
+
+  var app = document.getElementById("app");
+  var total = DECK.cards.length;
+  var state = { screen:"start", i:0, picked:null, score:0 };
+
+  // Best score persistence — guarded so it works on a real host and no-ops in sandboxes.
+  function getBest() { try { var v = localStorage.getItem("reap_cross_best"); return v===null?null:parseInt(v,10); } catch(e){ return null; } }
+  function setBest(v) { try { localStorage.setItem("reap_cross_best", String(v)); } catch(e){} }
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function catCounts(){ var m={}; DECK.cards.forEach(function(c){ m[c.cat]=(m[c.cat]||0)+1; }); return m; }
+
+  function resultMessage(s,t){
+    var p=s/t;
+    if(p===1) return "Every card. You know this cross well.";
+    if(p>=.75) return "Strong. The story and its weight are in you.";
+    if(p>=.5) return "Good ground covered — worth another pass.";
+    return "A good place to begin. Run it again.";
+  }
+
+  function begin(){ state.screen="quiz"; state.i=0; state.picked=null; state.score=0; render(); }
+  function choose(idx){
+    if(state.picked!==null) return;
+    state.picked=idx;
+    if(idx===DECK.cards[state.i].answer) state.score++;
+    render();
+  }
+  function next(){
+    if(state.i+1<total){ state.i++; state.picked=null; render(); }
+    else {
+      var b=getBest(); if(b===null||state.score>b) setBest(state.score);
+      state.screen="results"; render();
+    }
+  }
+
+  function renderStart(){
+    var counts=catCounts(), best=getBest();
+    var chips=CAT_ORDER.map(function(c){ return '<span class="chip">'+esc(c)+' · '+counts[c]+'</span>'; }).join("");
+    app.innerHTML =
+      '<div class="center">'+
+        '<div class="eyebrow" style="margin-bottom:18px">Reap&nbsp;Threads&nbsp;·&nbsp;Trivia</div>'+
+        '<h1 class="serif" style="font-size:46px;line-height:1.05;margin:0 0 14px;color:var(--cream);font-weight:700">'+esc(DECK.title)+'</h1>'+
+        '<hr class="rule" style="margin:0 auto 18px" />'+
+        '<p style="font-size:16px;color:rgba(237,231,216,.75);margin:0 0 26px;line-height:1.5">'+esc(DECK.subtitle)+'. '+total+' cards — answer, then turn the card for the Word behind it.</p>'+
+        '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:30px">'+chips+'</div>'+
+        '<button id="begin" class="primary" style="padding:15px 40px;border-radius:999px;font-size:17px">Begin the deck</button>'+
+        (best!==null ? '<p style="margin-top:20px;font-size:14px;color:var(--goldBright)">Best so far · '+best+'/'+total+'</p>' : '')+
+        '<p style="margin-top:28px;font-size:12.5px;color:rgba(237,231,216,.4);line-height:1.5">Tip: on your phone, use “Add to Home Screen” to install it like an app.</p>'+
+      '</div>';
+    document.getElementById("begin").addEventListener("click", begin);
+  }
+
+  function answerClasses(idx, card, picked){
+    // returns inline style string based on answered state
+    if(picked===null) return "";
+    if(idx===card.answer) return "border:1.5px solid var(--correctB);background:rgba(78,138,107,.22);color:var(--cream)";
+    if(idx===picked) return "border:1.5px solid var(--wrongB);background:rgba(176,80,58,.20);color:var(--cream)";
+    return "border:1.5px solid rgba(201,169,97,.12);background:rgba(26,37,64,.5);color:rgba(237,231,216,.45)";
+  }
+
+  function renderQuiz(){
+    var card=DECK.cards[state.i], picked=state.picked, answered=picked!==null;
+    var correct=answered && picked===card.answer;
+    var pct=((state.i+(answered?1:0))/total)*100;
+    var letters="ABCD";
+    var answers=card.choices.map(function(ch,idx){
+      var st=answerClasses(idx,card,picked);
+      return '<button class="answer" data-idx="'+idx+'"'+(answered?' disabled':'')+(st?' style="'+st+'"':'')+'>'+
+             '<span class="lbl">'+letters[idx]+'</span>'+esc(ch)+'</button>';
+    }).join("");
+
+    var teaching="";
+    if(answered){
+      teaching =
+        '<div class="reveal" style="margin-top:22px;background:var(--cream);border-radius:15px;padding:20px 22px;box-shadow:0 14px 40px rgba(0,0,0,.45)">'+
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'+
+            '<span class="serif" style="font-size:14px;font-weight:700;letter-spacing:.02em;color:'+(correct?'var(--correct)':'var(--wrong)')+'">'+(correct?'Correct':'Not quite')+'</span>'+
+            (card.ref!=="—" ? '<span class="serif" style="font-size:14px;font-weight:700;color:var(--gold);border-left:1px solid rgba(156,122,52,.4);padding-left:10px">'+esc(card.ref)+'</span>' : '')+
+          '</div>'+
+          '<p style="margin:0;font-size:15.5px;line-height:1.55;color:#2A2618">'+esc(card.note)+'</p>'+
+          '<button id="next" class="primary" style="margin-top:16px;padding:11px 26px;border-radius:999px;font-size:15px">'+(state.i+1<total?'Next card':'See results')+'</button>'+
+        '</div>';
+    }
+
+    app.innerHTML =
+      '<div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+          '<span class="eyebrow">'+esc(card.cat)+'</span>'+
+          '<span style="font-size:13px;color:rgba(237,231,216,.6);font-weight:600">'+(state.i+1)+' / '+total+'</span>'+
+        '</div>'+
+        '<div style="height:4px;background:rgba(201,169,97,.15);border-radius:4px;margin-bottom:22px">'+
+          '<div style="height:4px;width:'+pct+'%;background:var(--gold);border-radius:4px;transition:width .3s ease"></div>'+
+        '</div>'+
+        '<h2 class="serif" style="font-size:25px;line-height:1.25;color:var(--cream);margin:0 0 22px;font-weight:600">'+esc(card.q)+'</h2>'+
+        '<div class="col">'+answers+'</div>'+
+        teaching+
+      '</div>';
+
+    if(!answered){
+      Array.prototype.forEach.call(app.querySelectorAll(".answer"), function(btn){
+        btn.addEventListener("click", function(){ choose(parseInt(btn.getAttribute("data-idx"),10)); });
+      });
+    } else {
+      document.getElementById("next").addEventListener("click", next);
+    }
+  }
+
+  function renderResults(){
+    app.innerHTML =
+      '<div class="center">'+
+        '<div class="eyebrow" style="margin-bottom:20px">The Cross · Complete</div>'+
+        '<div style="width:150px;height:150px;margin:0 auto 20px;border-radius:50%;border:2px solid var(--gold);display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle, rgba(156,122,52,.14), transparent 70%)">'+
+          '<span class="serif" style="font-size:52px;font-weight:700;color:var(--cream);line-height:1">'+state.score+'</span>'+
+          '<span style="font-size:14px;color:var(--goldBright);margin-top:4px">of '+total+'</span>'+
+        '</div>'+
+        '<p class="serif" style="font-size:22px;color:var(--cream);margin:0 0 30px;font-weight:500">'+esc(resultMessage(state.score,total))+'</p>'+
+        '<div style="display:flex;gap:12px;justify-content:center">'+
+          '<button id="again" class="primary" style="padding:13px 30px;border-radius:999px;font-size:16px">Play again</button>'+
+          '<button id="home" class="ghost" style="padding:13px 26px;border-radius:999px;font-size:16px">Home</button>'+
+        '</div>'+
+      '</div>';
+    document.getElementById("again").addEventListener("click", begin);
+    document.getElementById("home").addEventListener("click", function(){ state.screen="start"; render(); });
+  }
+
+  function render(){
+    if(state.screen==="start") renderStart();
+    else if(state.screen==="quiz") renderQuiz();
+    else renderResults();
+  }
+
+  render();
+
+  // Register the service worker for offline use (silently ignored where unsupported).
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function(){ /* offline install unavailable here */ });
+    });
+  }
+})();
+</script>
+</body>
+</html>
