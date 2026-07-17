@@ -191,15 +191,23 @@
 
         <!-- Product Filters -->
         @php
+            $shopCategories = \App\Models\ProductCategory::query()
+                ->where('status', 'active')
+                ->whereHas('printfulProducts')
+                ->orderBy('name')
+                ->get();
+
             $shopProducts = \App\Models\PrintfulProduct::query()
                 ->withCount('variants')
-                ->with('variants')
+                ->with(['variants', 'category'])
                 ->latest()
-                ->limit(6)
                 ->get();
         @endphp
         <div class="product-filters" role="group" aria-label="Filter products">
           <button class="filter-btn active" data-filter="all" aria-pressed="true">All Pieces</button>
+          @foreach ($shopCategories as $category)
+            <button class="filter-btn" data-filter="{{ $category->slug }}" aria-pressed="false">{{ $category->name }}</button>
+          @endforeach
         </div>
 
         <!-- Product Grid -->
@@ -211,8 +219,9 @@
                     ->whereNotNull('retail_price')
                     ->min('retail_price');
                 $currency = strtoupper($product->variants->first()?->currency ?? 'USD');
+                $categorySlug = $product->category?->slug ?? '';
             @endphp
-            <article class="product-card product-card--variable" role="listitem" data-category="all" data-scroll-reveal data-delay="{{ ($loop->index % 4) * 80 }}">
+            <article class="product-card product-card--variable" role="listitem" data-category="{{ $categorySlug }}" data-scroll-reveal data-delay="{{ ($loop->index % 4) * 80 }}">
                 <div class="product-image-wrap">
                     <img
                         src="{{ $imageUrl }}"
@@ -226,7 +235,7 @@
                 </div>
                 <div class="product-info">
                     <div class="product-meta">
-                        <span class="product-category">{{ $product->variants_count }} {{ Str::plural('variant', $product->variants_count) }}</span>
+                        <span class="product-category">{{ $product->category?->name ?? ($product->category_name ?: ($product->variants_count . ' ' . Str::plural('variant', $product->variants_count))) }}</span>
                     </div>
                     <h3 class="product-name">{{ $product->name }}</h3>
                     <p class="product-desc">&nbsp;</p>

@@ -17,6 +17,11 @@ class ProductCategory extends Model
         return $this->hasMany(Product::class, 'category_id');
     }
 
+    public function printfulProducts()
+    {
+        return $this->hasMany(PrintfulProduct::class, 'category_id');
+    }
+
     public static function slugFromName(string $name, ?int $ignoreId = null): string
     {
         return UniqueSlug::generate(self::class, 'slug', $name, $ignoreId);

@@ -2,6 +2,12 @@
 @extends('layouts.admin.master')
 @section('content')
 <div class="container-fluid user-list-wrapper">
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
     <div class="row">
         <div class="col-12">
             <div class="mb-3">
@@ -35,6 +41,26 @@
                             </p>
                             <p class="c-o-light mb-1">
                                 <strong>External ID:</strong> {{ $product->external_id ?? '—' }}
+                            </p>
+                            <p class="c-o-light mb-1">
+                                <strong>Category:</strong>
+                                @if ($product->category)
+                                    <span class="d-inline-flex align-items-center gap-2 ms-1">
+                                        @if ($product->category->imageUrl())
+                                            <img
+                                                src="{{ $product->category->imageUrl() }}"
+                                                alt="{{ $product->category->name }}"
+                                                width="28"
+                                                height="28"
+                                                class="rounded"
+                                                style="object-fit: cover;"
+                                            >
+                                        @endif
+                                        {{ $product->category->name }}
+                                    </span>
+                                @else
+                                    {{ $product->category_name ?? '-' }}
+                                @endif
                             </p>
                             <p class="c-o-light mb-0">
                                 <strong>Variants:</strong> {{ $product->variants->count() }}

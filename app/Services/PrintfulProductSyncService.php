@@ -4,12 +4,19 @@ namespace App\Services;
 
 use App\Models\PrintfulProduct;
 use App\Models\PrintfulVariant;
+use App\Models\ProductCategory;
 
 class PrintfulProductSyncService
 {
     private const BATCH_SIZE = 100;
 
     private ?string $lastFetchError = null;
+
+    /** @var array<int, string|null> */
+    private array $categoryCache = [];
+
+    /** @var array<int, array<string, mixed>|null> */
+    private array $catalogProductCache = [];
 
     public function __construct(
         private readonly PrintfulService $printful,
@@ -186,16 +193,207 @@ class PrintfulProductSyncService
         $printfulProductId = $this->extractPrintfulProductId($syncProduct)
             ?? $this->extractPrintfulProductId($summary);
 
+        $categoryName = $this->resolveCategoryName($detailData);
+        $category = $this->findOrCreateCategory($categoryName);
+
         return PrintfulProduct::updateOrCreate(
             ['printful_product_id' => $printfulProductId],
             [
                 'external_id' => $this->stringOrNull($syncProduct['external_id'] ?? $summary['external_id'] ?? null),
                 'name' => $this->stringOrNull($syncProduct['name'] ?? $summary['name'] ?? null) ?? 'Untitled product',
+                'category_name' => $categoryName,
+                'category_id' => $category?->id,
                 'thumbnail_url' => $this->stringOrNull($syncProduct['thumbnail_url'] ?? $summary['thumbnail_url'] ?? null),
                 'is_synced' => $this->resolveIsSynced($summary, $syncProduct),
                 'raw_data' => $detailData,
             ]
         );
+    }
+
+    /**
+     * Find an existing product category by name (case-insensitive) or create it.
+     */
+    private function findOrCreateCategory(?string $categoryName): ?ProductCategory
+    {
+        if ($categoryName === null) {
+            return null;
+        }
+
+        $existing = ProductCategory::query()
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower($categoryName)])
+            ->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        return ProductCategory::create([
+            'name' => $categoryName,
+            'slug' => ProductCategory::slugFromName($categoryName),
+            'parent_id' => 0,
+            'status' => 'active',
+            'description' => null,
+            'image' => null,
+        ]);
+    }
+
+    /**
+     * Resolve a human-readable category from Printful Catalog / Categories APIs.
+     *
+     * Store product payloads include catalog product_id and main_category_id on variants,
+     * but not the category title. We look those up (with in-request caching) so re-sync
+     * also backfills categories on existing products.
+     *
+     * @param  array<string, mixed>  $detailData
+     */
+    private function resolveCategoryName(array $detailData): ?string
+    {
+        $catalogProductId = $this->extractCatalogProductId($detailData);
+        $categoryId = $this->extractMainCategoryId($detailData);
+
+        if ($catalogProductId !== null) {
+            $catalog = $this->fetchCatalogProduct($catalogProductId);
+
+            if ($categoryId === null && $catalog !== null) {
+                $categoryId = $this->numericId($catalog['main_category_id'] ?? null);
+            }
+
+            if ($categoryId !== null) {
+                $title = $this->fetchCategoryTitle($categoryId);
+
+                if ($title !== null) {
+                    return $title;
+                }
+            }
+
+            if ($catalog !== null) {
+                $typeName = $this->stringOrNull($catalog['type_name'] ?? $catalog['type'] ?? null);
+
+                if ($typeName !== null) {
+                    return $typeName;
+                }
+            }
+        }
+
+        if ($categoryId !== null) {
+            return $this->fetchCategoryTitle($categoryId);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $detailData
+     */
+    private function extractCatalogProductId(array $detailData): ?int
+    {
+        $variants = $detailData['sync_variants'] ?? [];
+
+        if (! is_array($variants)) {
+            return null;
+        }
+
+        foreach ($variants as $variant) {
+            if (! is_array($variant)) {
+                continue;
+            }
+
+            $nested = $variant['product'] ?? null;
+
+            if (is_array($nested)) {
+                $id = $this->numericId($nested['product_id'] ?? null);
+
+                if ($id !== null) {
+                    return $id;
+                }
+            }
+
+            $id = $this->numericId($variant['product_id'] ?? null);
+
+            if ($id !== null) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $detailData
+     */
+    private function extractMainCategoryId(array $detailData): ?int
+    {
+        $variants = $detailData['sync_variants'] ?? [];
+
+        if (! is_array($variants)) {
+            return null;
+        }
+
+        foreach ($variants as $variant) {
+            if (! is_array($variant)) {
+                continue;
+            }
+
+            $id = $this->numericId($variant['main_category_id'] ?? null);
+
+            if ($id !== null) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function fetchCatalogProduct(int $catalogProductId): ?array
+    {
+        if (array_key_exists($catalogProductId, $this->catalogProductCache)) {
+            return $this->catalogProductCache[$catalogProductId];
+        }
+
+        $response = $this->printful->getCatalogProduct($catalogProductId);
+
+        if (! $response['success'] || ! is_array($response['data'])) {
+            $this->catalogProductCache[$catalogProductId] = null;
+
+            return null;
+        }
+
+        $data = $response['data'];
+        $product = is_array($data['product'] ?? null) ? $data['product'] : $data;
+        $this->catalogProductCache[$catalogProductId] = is_array($product) ? $product : null;
+
+        return $this->catalogProductCache[$catalogProductId];
+    }
+
+    private function fetchCategoryTitle(int $categoryId): ?string
+    {
+        if (array_key_exists($categoryId, $this->categoryCache)) {
+            return $this->categoryCache[$categoryId];
+        }
+
+        $response = $this->printful->getCatalogCategory($categoryId);
+
+        if (! $response['success'] || ! is_array($response['data'])) {
+            $this->categoryCache[$categoryId] = null;
+
+            return null;
+        }
+
+        $data = $response['data'];
+        $category = is_array($data['category'] ?? null) ? $data['category'] : $data;
+
+        $title = $this->stringOrNull($category['title'] ?? $category['name'] ?? null);
+        $this->categoryCache[$categoryId] = $title;
+
+        return $title;
+    }
+
+    private function numericId(mixed $value): ?int
+    {
+        return is_numeric($value) ? (int) $value : null;
     }
 
     /**

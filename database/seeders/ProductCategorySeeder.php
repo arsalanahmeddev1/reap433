@@ -1,30 +1,54 @@
 <?php
 
 namespace Database\Seeders;
+
 use App\Models\ProductCategory;
 use Illuminate\Database\Seeder;
 
 class ProductCategorySeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Seed example storefront / Printful product categories.
+     * Images are uploaded later via Admin → Categories (stored in storage/app/public/categories/).
      */
-    public function run(): void {
-        
+    public function run(): void
+    {
         $rows = [
-            ['name' => 'Tops', 'slug' => 'tops', 'description' => 'Tops are the upper part of the body that covers the chest and shoulders. They are typically made of a light material and are designed to be worn over other clothing.', 'image' => 'tops.jpg'],
-            ['name' => 'Headwear', 'slug' => 'headwear', 'description' => 'Headwear is the clothing that covers the head. It is typically made of a light material and is designed to be worn over other clothing.', 'image' => 'headwear.jpg'],
-            ['name' => 'Footwear', 'slug' => 'footwear', 'description' => 'Footwear is the clothing that covers the feet. It is typically made of a light material and is designed to be worn over other clothing.', 'image' => 'footwear.jpg'],
-            ['name' => 'Limited Edition', 'slug' => 'limited-edition', 'description' => 'Limited Edition is a collection of products that are limited in quantity. They are typically made of a light material and are designed to be worn over other clothing.', 'image' => 'limited-edition.jpg'],
+            [
+                'name' => 'Hats',
+                'slug' => 'hats',
+                'description' => 'Hats, caps, and headwear from Printful.',
+            ],
+            [
+                'name' => 'Hoodies',
+                'slug' => 'hoodies',
+                'description' => 'Hoodies and sweatshirts from Printful.',
+            ],
+            [
+                'name' => 'Shirts',
+                'slug' => 'shirts',
+                'description' => 'Polos, tees, and shirts from Printful.',
+            ],
+            [
+                'name' => 'Drinkware',
+                'slug' => 'drinkware',
+                'description' => 'Mugs and drinkware from Printful.',
+            ],
+            [
+                'name' => 'Home & Living',
+                'slug' => 'home-living',
+                'description' => 'Candles and home products from Printful.',
+            ],
         ];
 
         foreach ($rows as $row) {
             ProductCategory::updateOrCreate(
                 ['slug' => $row['slug']],
-                ['name' => $row['name'], 
-                'description' => $row['description'],
-                'image' => $row['image'],
-                'status' => 'active',
+                [
+                    'name' => $row['name'],
+                    'description' => $row['description'],
+                    'parent_id' => 0,
+                    'status' => 'active',
                 ]
             );
         }

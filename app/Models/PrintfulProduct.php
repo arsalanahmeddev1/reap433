@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PrintfulProduct extends Model
@@ -11,6 +12,8 @@ class PrintfulProduct extends Model
         'printful_product_id',
         'external_id',
         'name',
+        'category_name',
+        'category_id',
         'thumbnail_url',
         'is_synced',
         'raw_data',
@@ -27,6 +30,11 @@ class PrintfulProduct extends Model
             'is_synced' => 'boolean',
             'raw_data' => 'array',
         ];
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id');
     }
 
     public function variants(): HasMany

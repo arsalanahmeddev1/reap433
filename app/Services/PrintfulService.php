@@ -30,6 +30,26 @@ class PrintfulService
     }
 
     /**
+     * Retrieve a catalog product by Printful catalog product ID.
+     *
+     * @return array{success: bool, data: array<string, mixed>|null, message: string|null, status: int|null}
+     */
+    public function getCatalogProduct(int|string $catalogProductId): array
+    {
+        return $this->get('/products/'.rawurlencode((string) $catalogProductId));
+    }
+
+    /**
+     * Retrieve a catalog category by Printful category ID.
+     *
+     * @return array{success: bool, data: array<string, mixed>|null, message: string|null, status: int|null}
+     */
+    public function getCatalogCategory(int|string $categoryId): array
+    {
+        return $this->get('/categories/'.rawurlencode((string) $categoryId));
+    }
+
+    /**
      * Create a Printful order in draft status (not submitted for fulfillment).
      *
      * @param  array<string, mixed>  $payload

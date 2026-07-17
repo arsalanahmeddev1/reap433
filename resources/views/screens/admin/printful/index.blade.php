@@ -29,6 +29,7 @@
                                     <tr>
                                         <th><span class="c-o-light f-w-600">Thumbnail</span></th>
                                         <th><span class="c-o-light f-w-600">Name</span></th>
+                                        <th><span class="c-o-light f-w-600">Category</span></th>
                                         <th><span class="c-o-light f-w-600">Variants</span></th>
                                         <th><span class="c-o-light f-w-600">Synced</span></th>
                                         <th><span class="c-o-light f-w-600">Actions</span></th>
@@ -52,6 +53,17 @@
                                                 @endif
                                             </td>
                                             <td>{{ $product->name }}</td>
+                                            <td>
+                                                @if ($product->category)
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span>{{ $product->category->name }}</span>
+                                                    </div>
+                                                @elseif ($product->category_name)
+                                                    {{ $product->category_name }}
+                                                @else
+                                                    -
+                                                @endif
+                                            </td>
                                             <td>{{ $product->variants_count }}</td>
                                             <td>
                                                 <span class="badge {{ $product->is_synced ? 'badge-light-success' : 'badge-light-warning' }}">
@@ -66,7 +78,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center">
+                                            <td colspan="6" class="text-center">
                                                 <h3 class="pt-5">{{ __('No Printful products synced yet.') }}</h3>
                                                 <p class="c-o-light pb-4">Click "Sync Printful Products" to import from Printful.</p>
                                             </td>
@@ -94,7 +106,7 @@
                 order: [[1, 'asc']],
                 columnDefs: [{
                     orderable: false,
-                    targets: [0, 4],
+                    targets: [0, 5],
                 }],
                 paging: false,
                 info: false,

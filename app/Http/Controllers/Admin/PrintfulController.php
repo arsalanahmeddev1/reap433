@@ -13,6 +13,7 @@ class PrintfulController extends Controller
     public function index(): View
     {
         $products = PrintfulProduct::query()
+            ->with('category')
             ->withCount('variants')
             ->latest()
             ->paginate(12);
@@ -22,7 +23,7 @@ class PrintfulController extends Controller
 
     public function show(PrintfulProduct $printfulProduct): View
     {
-        $printfulProduct->load('variants');
+        $printfulProduct->load(['variants', 'category']);
 
         return view('screens.admin.printful.show', [
             'product' => $printfulProduct,

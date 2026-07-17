@@ -34,7 +34,7 @@ class ProductCategoryController extends Controller
 
         $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('product-categories', 'public');
+            $imagePath = $request->file('image')->store('categories', 'public');
         }
 
         $category = ProductCategory::create([
@@ -88,7 +88,7 @@ class ProductCategoryController extends Controller
             if ($category->image) {
                 Storage::disk('public')->delete($category->image);
             }
-            $imagePath = $request->file('image')->store('product-categories', 'public');
+            $imagePath = $request->file('image')->store('categories', 'public');
         }
 
         $category->update([
@@ -115,7 +115,7 @@ class ProductCategoryController extends Controller
 
     public function destroy(Request $request, ProductCategory $category): JsonResponse|Response
     {
-        if ($category->products()->exists()) {
+        if ($category->products()->exists() || $category->printfulProducts()->exists()) {
             $message = __('Cannot delete this category while it still has products. Reassign or remove those products first.');
 
             if ($request->expectsJson() || $request->ajax()) {
