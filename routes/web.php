@@ -3,6 +3,7 @@
 use App\Http\Controllers\BiblicalTriviaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProductCustomizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
@@ -41,14 +42,31 @@ Route::get('/artifacts/{product:slug}', [StoreController::class, 'show'])->name(
 Route::get('/products', [PrintfulProductController::class, 'index'])->name('printful-products.index');
 Route::get('/products/{printfulProduct}', [PrintfulProductController::class, 'show'])->name('printful-products.show');
 
+Route::middleware('auth')->group(function () {
+    Route::get('/products/{printfulProduct}/customize', [ProductCustomizationController::class, 'show'])
+        ->name('printful-products.customize');
+    Route::get('/products/{printfulProduct}/customize/options', [ProductCustomizationController::class, 'options'])
+        ->name('printful-products.customize.options');
+    Route::post('/products/{printfulProduct}/customize', [ProductCustomizationController::class, 'store'])
+        ->name('printful-products.customize.store');
+    Route::post('/customizations/{customization}/finalize', [ProductCustomizationController::class, 'finalize'])
+        ->name('printful-products.customize.finalize');
+    Route::post('/customizations/{customization}/add-to-cart', [ProductCustomizationController::class, 'addToCart'])
+        ->name('printful-products.customize.add-to-cart');
+});
+
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/biblical-trivia', [BiblicalTriviaController::class, 'index'])->name('biblical-trivia.index');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{variant}', [CartController::class, 'add'])->name('cart.add');
-Route::patch('/cart/update/{variantId}', [CartController::class, 'update'])->name('cart.update');
-Route::delete('/cart/remove/{variantId}', [CartController::class, 'remove'])->name('cart.remove');
+Route::patch('/cart/update/{variantId}', [CartController::class, 'update'])
+    ->where('variantId', '.*')
+    ->name('cart.update');
+Route::delete('/cart/remove/{variantId}', [CartController::class, 'remove'])
+    ->where('variantId', '.*')
+    ->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
 Route::middleware('auth')->group(function () {

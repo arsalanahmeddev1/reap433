@@ -220,6 +220,84 @@
                     ->min('retail_price');
                 $currency = strtoupper($product->variants->first()?->currency ?? 'USD');
                 $categorySlug = $product->category?->slug ?? '';
+
+                $colorNameToHex = [
+                    'berry' => '#8e3a59',
+                    'black' => '#1a1a1a',
+                    'black camo' => '#2c2c2c',
+                    'black/ grey' => '#2a2a2a',
+                    'black/ red' => '#1a1a1a',
+                    'black/natural' => '#1a1a1a',
+                    'carbon grey' => '#5a5a5a',
+                    'charcoal grey' => '#4a4a4a',
+                    'charcoal heather' => '#5c5c5c',
+                    'cool heather' => '#9aa0a6',
+                    'dusty rose' => '#c9a0a0',
+                    'forest green' => '#2d4a3e',
+                    'grey' => '#8a8a8a',
+                    'harbor blue' => '#4a6d8c',
+                    'heather blue lagoon' => '#6a9aaa',
+                    'heather deep teal' => '#3d6b6e',
+                    'heather grey' => '#b0b0b0',
+                    'heather grey / black' => '#9a9a9a',
+                    'heather mauve' => '#a67f8a',
+                    'heather navy' => '#3d4a5c',
+                    'heather red' => '#a85a5a',
+                    'heather stone' => '#a8a29e',
+                    'heather true royal' => '#4a5f9a',
+                    'khaki' => '#c3b091',
+                    'latte' => '#c4a484',
+                    'leaf' => '#5a7a4a',
+                    'light violet' => '#c4b0d4',
+                    'maroon' => '#6b2d3c',
+                    'matte' => '#2b2b2b',
+                    'mauve' => '#9a6b7a',
+                    'military green' => '#4a5d23',
+                    'natural' => '#e8dfd0',
+                    'navy' => '#1b2a4a',
+                    'navy blazer' => '#1e2f4d',
+                    'peach' => '#e8b4a0',
+                    'pigment alpine green' => '#4a6b55',
+                    'pigment black' => '#1a1a1a',
+                    'pigment light blue' => '#8bb5d4',
+                    'pink' => '#e8a0b0',
+                    'red' => '#c0392b',
+                    'royal blue' => '#2b4c9b',
+                    'sandshell' => '#e6d5b8',
+                    'solid black blend' => '#1a1a1a',
+                    'solid white blend' => '#f5f5f5',
+                    'stone' => '#b5aea3',
+                    'storm' => '#6e7278',
+                    'turquoise' => '#40e0d0',
+                    'vintage gold' => '#c9a227',
+                    'white' => '#f5f5f5',
+                    'white front, silver back' => '#e8e8e8',
+                    'white sage and lavender' => '#d4cfc8',
+                    'wood' => '#8b6914',
+                    'yellow' => '#f1c40f',
+                ];
+
+                $colorSwatches = [];
+                foreach ($product->variants as $variant) {
+                    $raw = is_array($variant->raw_data) ? $variant->raw_data : [];
+                    $colorName = trim((string) ($raw['color'] ?? ''));
+                    if ($colorName === '' && is_string($variant->name)) {
+                        $parts = array_values(array_filter(array_map('trim', explode('/', $variant->name))));
+                        $colorName = $parts[1] ?? 'Default';
+                    }
+                    if ($colorName === '') {
+                        $colorName = 'Default';
+                    }
+                    if (isset($colorSwatches[$colorName])) {
+                        continue;
+                    }
+                    $hexKey = strtolower($colorName);
+                    $colorSwatches[$colorName] = [
+                        'name' => $colorName,
+                        'hex' => $colorNameToHex[$hexKey] ?? null,
+                        'thumbnail' => $variant->thumbnail_url ?: $product->thumbnail_url,
+                    ];
+                }
             @endphp
             <article class="product-card product-card--variable" role="listitem" data-category="{{ $categorySlug }}" data-scroll-reveal data-delay="{{ ($loop->index % 4) * 80 }}">
                 <div class="product-image-wrap">
@@ -238,6 +316,28 @@
                         <span class="product-category">{{ $product->category?->name ?? ($product->category_name ?: ($product->variants_count . ' ' . Str::plural('variant', $product->variants_count))) }}</span>
                     </div>
                     <h3 class="product-name">{{ $product->name }}</h3>
+                    @if (count($colorSwatches) > 0)
+                        <div class="product-color-swatches" role="list" aria-label="Available colors">
+                            @foreach ($colorSwatches as $swatch)
+                                @php
+                                    $swatchStyle = $swatch['hex']
+                                        ? 'background-color: '.$swatch['hex'].';'
+                                        : ($swatch['thumbnail'] ? 'background-image: url('.e($swatch['thumbnail']).'); background-size: cover; background-position: center;' : 'background-color: #888;');
+                                    $isLight = in_array(strtolower($swatch['name']), ['white', 'solid white blend', 'natural', 'sandshell', 'yellow', 'peach', 'latte', 'khaki'], true);
+                                @endphp
+                                <button
+                                    type="button"
+                                    class="product-color-swatch{{ $loop->first ? ' is-active' : '' }}{{ $isLight ? ' is-light' : '' }}"
+                                    style="{{ $swatchStyle }}"
+                                    title="{{ $swatch['name'] }}"
+                                    aria-label="{{ $swatch['name'] }}"
+                                    role="listitem"
+                                    data-image="{{ $swatch['thumbnail'] ?: $imageUrl }}"
+                                    onclick="(function(btn){var card=btn.closest('.product-card');if(!card)return;var img=card.querySelector('.product-image');if(img&&btn.dataset.image){img.src=btn.dataset.image;}card.querySelectorAll('.product-color-swatch').forEach(function(s){s.classList.remove('is-active');});btn.classList.add('is-active');})(this)"
+                                ></button>
+                            @endforeach
+                        </div>
+                    @endif
                     <p class="product-desc">&nbsp;</p>
                     <div class="product-footer">
                         <span class="product-price">
@@ -255,6 +355,39 @@
             <p class="product-grid-empty">No products available yet.</p>
           @endforelse
         </div>
+
+        <style>
+          .product-color-swatches {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 0 0 10px;
+            min-height: 18px;
+          }
+          .product-color-swatch {
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 3px;
+            cursor: pointer;
+            flex: 0 0 auto;
+            box-sizing: border-box;
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+          }
+          .product-color-swatch.is-light {
+            border-color: rgba(255, 255, 255, 0.45);
+          }
+          .product-color-swatch.is-active,
+          .product-color-swatch:hover {
+            box-shadow: 0 0 0 2px var(--c-gold, #c9a227);
+            transform: translateY(-1px);
+          }
+          .product-card--variable .product-desc {
+            min-height: 0;
+            margin-bottom: 8px;
+          }
+        </style>
 
         <div class="shop-cta-row" data-scroll-reveal>
           <a href="{{ route('printful-products.index') }}" class="btn btn-gold">

@@ -29,9 +29,11 @@
                 <div class="cart-layout cart-index-layout" data-scroll-reveal>
                     <div class="cart-items-panel">
                         <div class="cart-items-list">
-                            @foreach ($items as $item)
+                            @foreach ($items as $cartKey => $item)
                                 @php
-                                    $imageUrl = $item['variant_thumbnail_url']
+                                    $cartKey = $item['cart_key'] ?? (string) $cartKey;
+                                    $imageUrl = $item['preview_image']
+                                        ?? $item['variant_thumbnail_url']
                                         ?? $item['product_thumbnail_url']
                                         ?? asset('assets/images/placeholders/img-not-available.png');
                                     $lineTotal = (float) $item['price'] * (int) $item['quantity'];
@@ -45,8 +47,13 @@
                                     <div class="cart-item-body cart-index-item__body">
                                         <div class="cart-index-item__info">
                                             <h2 class="cart-item-name">{{ $item['product_name'] }}</h2>
-                                            @if ($item['variant_name'])
+                                            @if (! empty($item['is_customized']))
+                                                <p class="cart-index-item__variant">Customized{{ ! empty($item['color']) ? ' · '.$item['color'] : '' }}{{ ! empty($item['size']) ? ' / '.$item['size'] : '' }}</p>
+                                            @elseif ($item['variant_name'])
                                                 <p class="cart-index-item__variant">{{ $item['variant_name'] }}</p>
+                                            @endif
+                                            @if (! empty($item['custom_text_summary']))
+                                                <p class="cart-index-item__sku">Text: {{ $item['custom_text_summary'] }}</p>
                                             @endif
                                             <p class="cart-index-item__sku">
                                                 <span>SKU</span> {{ $item['sku'] ?? '—' }}
@@ -57,14 +64,14 @@
                                         </div>
 
                                         <div class="cart-index-item__actions">
-                                            <form action="{{ route('cart.update', $item['variant_id']) }}" method="POST" class="cart-index-item__update-form">
+                                            <form action="{{ route('cart.update', $cartKey) }}" method="POST" class="cart-index-item__update-form">
                                                 @csrf
                                                 @method('PATCH')
-                                                <label for="qty-{{ $item['variant_id'] }}" class="cart-index-item__qty-label">Quantity</label>
+                                                <label for="qty-{{ md5($cartKey) }}" class="cart-index-item__qty-label">Quantity</label>
                                                 <div class="cart-index-item__qty-row">
                                                     <input
                                                         type="number"
-                                                        id="qty-{{ $item['variant_id'] }}"
+                                                        id="qty-{{ md5($cartKey) }}"
                                                         name="quantity"
                                                         class="cart-index-item__qty-input"
                                                         value="{{ $item['quantity'] }}"
@@ -81,7 +88,7 @@
                                                 <strong>{{ $currency }} {{ number_format($lineTotal, 2) }}</strong>
                                             </div>
 
-                                            <form action="{{ route('cart.remove', $item['variant_id']) }}" method="POST" class="cart-index-item__remove-form">
+                                            <form action="{{ route('cart.remove', $cartKey) }}" method="POST" class="cart-index-item__remove-form">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-outline-sm cart-index-item__remove-btn">Remove</button>

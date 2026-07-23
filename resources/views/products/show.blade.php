@@ -26,6 +26,19 @@
                     <p class="printful-product-detail__meta">
                         {{ $product->variants->count() }} {{ Str::plural('variant', $product->variants->count()) }}
                     </p>
+                    @auth
+                        <p class="mt-3">
+                            <a href="{{ route('printful-products.customize', $product) }}" class="btn btn-gold">
+                                Customize Product
+                            </a>
+                        </p>
+                    @else
+                        <p class="mt-3">
+                            <a href="{{ route('login') }}" class="btn btn-gold">
+                                Log in to Customize Product
+                            </a>
+                        </p>
+                    @endauth
                 </div>
             </div>
 

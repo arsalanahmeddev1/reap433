@@ -44,6 +44,7 @@ return [
         'token' => env('PRINTFUL_API_TOKEN'),
         'url' => env('PRINTFUL_API_URL', 'https://api.printful.com'),
         'auto_confirm' => filter_var(env('PRINTFUL_AUTO_CONFIRM', false), FILTER_VALIDATE_BOOLEAN),
+        'customization_fee' => (float) env('PRINTFUL_CUSTOMIZATION_FEE', 0),
     ],
 
 ];

@@ -37,7 +37,7 @@ class CartController extends Controller
             ->with('success', __('Product added to cart.'));
     }
 
-    public function update(Request $request, int $variantId): RedirectResponse
+    public function update(Request $request, string $variantId): RedirectResponse
     {
         $validated = $request->validate([
             'quantity' => ['required', 'integer', 'min:1', 'max:99'],
@@ -54,7 +54,7 @@ class CartController extends Controller
             ->with('success', __('Cart updated.'));
     }
 
-    public function remove(int $variantId): RedirectResponse
+    public function remove(string $variantId): RedirectResponse
     {
         if (! $this->cart->has($variantId)) {
             return redirect()

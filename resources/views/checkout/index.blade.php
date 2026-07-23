@@ -212,17 +212,20 @@
                     <ul class="checkout-summary-items">
                         @foreach ($items as $item)
                             @php
-                                $imageUrl = $item['variant_thumbnail_url']
+                                $imageUrl = $item['preview_image']
+                                    ?? $item['variant_thumbnail_url']
                                     ?? $item['product_thumbnail_url']
                                     ?? asset('assets/images/placeholders/img-not-available.png');
                                 $lineTotal = (float) $item['price'] * (int) $item['quantity'];
                                 $currency = strtoupper($item['currency'] ?? 'USD');
                             @endphp
                             <li class="checkout-summary-item">
-                                <img src="{{ $imageUrl }}" alt="" class="checkout-summary-item__thumb" loading="lazy">
+                                <img src="{{ $imageUrl }}" alt="{{ $item['product_name'] }}" class="checkout-summary-item__thumb" loading="lazy">
                                 <div class="checkout-summary-item__details">
                                     <strong>{{ $item['product_name'] }}</strong>
-                                    @if ($item['variant_name'])
+                                    @if (! empty($item['is_customized']))
+                                        <span>Customized{{ ! empty($item['color']) ? ' · '.$item['color'] : '' }}{{ ! empty($item['size']) ? ' / '.$item['size'] : '' }}</span>
+                                    @elseif ($item['variant_name'])
                                         <span>{{ $item['variant_name'] }}</span>
                                     @endif
                                     <span>Qty {{ $item['quantity'] }} × {{ $currency }} {{ number_format((float) $item['price'], 2) }}</span>

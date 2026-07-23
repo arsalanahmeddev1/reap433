@@ -419,12 +419,29 @@ class PrintfulFulfillmentService
 
         $items = $order->items->map(function (OrderItem $item) {
             $syncVariantId = $this->resolveSyncVariantId($item);
+            $raw = is_array($item->raw_data) ? $item->raw_data : [];
 
-            return [
+            $line = [
                 'sync_variant_id' => $syncVariantId,
                 'quantity' => (int) $item->quantity,
                 'retail_price' => $this->formatMoney($item->price),
             ];
+
+            // Customized products: attach print file for the selected placement.
+            if (! empty($raw['is_customized']) && ! empty($raw['print_file_url'])) {
+                $placement = is_string($raw['placement'] ?? null) && $raw['placement'] !== '' && $raw['placement'] !== 'default'
+                    ? (string) $raw['placement']
+                    : 'default';
+
+                $line['files'] = [
+                    [
+                        'type' => $placement === 'default' ? 'default' : $placement,
+                        'url' => (string) $raw['print_file_url'],
+                    ],
+                ];
+            }
+
+            return $line;
         })->values()->all();
 
         return [

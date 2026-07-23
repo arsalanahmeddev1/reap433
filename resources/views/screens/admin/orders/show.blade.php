@@ -208,6 +208,7 @@
                                     <table class="table mb-0">
                                         <thead>
                                             <tr>
+                                                <th><span class="c-o-light f-w-600">Image</span></th>
                                                 <th><span class="c-o-light f-w-600">Product</span></th>
                                                 <th><span class="c-o-light f-w-600">Variant</span></th>
                                                 <th><span class="c-o-light f-w-600">SKU</span></th>
@@ -218,7 +219,28 @@
                                         </thead>
                                         <tbody>
                                             @foreach ($order->items as $item)
+                                                @php
+                                                    $itemRaw = is_array($item->raw_data) ? $item->raw_data : [];
+                                                    $thumbnailUrl = $itemRaw['preview_image']
+                                                        ?? $itemRaw['variant_thumbnail_url']
+                                                        ?? $itemRaw['product_thumbnail_url']
+                                                        ?? null;
+                                                @endphp
                                                 <tr>
+                                                    <td>
+                                                        @if ($thumbnailUrl)
+                                                            <img
+                                                                src="{{ $thumbnailUrl }}"
+                                                                alt="{{ $item->product_name }}"
+                                                                width="40"
+                                                                height="40"
+                                                                class="rounded"
+                                                                style="object-fit: cover;"
+                                                            >
+                                                        @else
+                                                            <span class="c-o-light">—</span>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $item->product_name }}</td>
                                                     <td>{{ $item->variant_name ?? '—' }}</td>
                                                     <td>{{ $item->sku ?? '—' }}</td>
