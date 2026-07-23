@@ -6,8 +6,10 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StoreController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AbandonedCartController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\OrderPrintfulController;
 use App\Http\Controllers\Admin\PrintfulController;
@@ -51,6 +53,8 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/coupon', [CheckoutController::class, 'applyCoupon'])->name('checkout.coupon.apply');
+    Route::delete('/checkout/coupon', [CheckoutController::class, 'removeCoupon'])->name('checkout.coupon.remove');
     Route::post('/checkout/payment-intent', [CheckoutController::class, 'paymentIntent'])->name('checkout.payment-intent');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/order/thank-you/{order:order_number}', [CheckoutController::class, 'thankYou'])->name('order.thank-you');
@@ -92,6 +96,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/orders/{order}/printful/confirm', [OrderPrintfulController::class, 'confirm'])->name('orders.printful.confirm');
     Route::get('/orders/{order}/printful/status', [OrderPrintfulController::class, 'status'])->name('orders.printful.status');
 
+    Route::get('/abandoned-carts', [AbandonedCartController::class, 'index'])->name('abandoned-carts.index');
+    Route::get('/abandoned-carts/{user}', [AbandonedCartController::class, 'show'])->name('abandoned-carts.show');
+    Route::post('/abandoned-carts/{user}/send-offer', [AbandonedCartController::class, 'sendOffer'])->name('abandoned-carts.send-offer');
+
     Route::get('/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');
     Route::get('/email-templates/{emailTemplate}/edit', [EmailTemplateController::class, 'edit'])->name('email-templates.edit');
     Route::put('/email-templates/{emailTemplate}', [EmailTemplateController::class, 'update'])->name('email-templates.update');
@@ -100,6 +108,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/categories', [ProductCategoryController::class, 'store'])->name('product-categories.store');
     Route::put('/categories/{category}', [ProductCategoryController::class, 'update'])->name('product-categories.update');
     Route::delete('/categories/{category}', [ProductCategoryController::class, 'destroy'])->name('product-categories.destroy');
+
+    Route::get('/coupons', [CouponController::class, 'index'])->name('coupons.index');
+    Route::post('/coupons', [CouponController::class, 'store'])->name('coupons.store');
+    Route::put('/coupons/{coupon}', [CouponController::class, 'update'])->name('coupons.update');
+    Route::delete('/coupons/{coupon}', [CouponController::class, 'destroy'])->name('coupons.destroy');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,9 @@ class Order extends Model
         'country_code',
         'zip',
         'subtotal',
+        'coupon_id',
+        'coupon_code',
+        'discount_amount',
         'currency',
         'status',
         'payment_status',
@@ -48,6 +52,7 @@ class Order extends Model
     {
         return [
             'subtotal' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
             'printful_order_id' => 'integer',
             'raw_data' => 'array',
         ];
@@ -56,6 +61,11 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     public function publicOrderNumber(): string

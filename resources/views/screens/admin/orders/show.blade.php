@@ -62,7 +62,18 @@
                                         <div class="mb-2"><strong>Order Number:</strong> {{ $order->publicOrderNumber() }}</div>
                                         <div class="mb-2"><strong>Order Date:</strong> {{ $order->created_at->format('d M Y, h:i A') }}</div>
                                         <div class="mb-2"><strong>Payment Status:</strong> {{ ucfirst($order->payment_status) }}</div>
-                                        <div class="mb-0"><strong>Total Items:</strong> {{ $order->items->sum('quantity') }}</div>
+                                        <div class="mb-2"><strong>Total Items:</strong> {{ $order->items->sum('quantity') }}</div>
+                                        @if ($order->coupon_code || (float) $order->discount_amount > 0)
+                                            <hr class="my-3">
+                                            <div class="mb-2"><strong>Coupon Code:</strong> <code class="text-reset">{{ $order->coupon_code ?? '—' }}</code></div>
+                                            @if ($order->coupon?->title)
+                                                <div class="mb-2"><strong>Coupon Title:</strong> {{ $order->coupon->title }}</div>
+                                            @endif
+                                            @if ($order->coupon?->discount_in_percent)
+                                                <div class="mb-2"><strong>Discount Rate:</strong> {{ $order->coupon->discount_in_percent }}%</div>
+                                            @endif
+                                            <div class="mb-0"><strong>Discount Amount:</strong> {{ $order->currency }} {{ number_format((float) $order->discount_amount, 2) }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -220,8 +231,22 @@
                                     </table>
                                 </div>
                                 <div class="p-3 border-top">
+                                    @php
+                                        $cartSubtotal = (float) data_get($order->raw_data, 'cart_subtotal', $order->items->sum('total'));
+                                        $discountAmount = (float) $order->discount_amount;
+                                    @endphp
+                                    @if ($order->coupon_code || $discountAmount > 0)
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Cart Subtotal</span>
+                                            <span>{{ $order->currency }} {{ number_format($cartSubtotal, 2) }}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 text-success">
+                                            <span>Discount{{ $order->coupon_code ? ' ('.$order->coupon_code.')' : '' }}</span>
+                                            <span>−{{ $order->currency }} {{ number_format($discountAmount, 2) }}</span>
+                                        </div>
+                                    @endif
                                     <div class="d-flex justify-content-between fw-bold">
-                                        <span>Subtotal</span>
+                                        <span>Total Paid</span>
                                         <span>{{ $order->currency }} {{ number_format((float) $order->subtotal, 2) }}</span>
                                     </div>
                                 </div>

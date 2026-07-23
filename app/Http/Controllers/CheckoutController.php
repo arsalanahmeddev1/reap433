@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\CartService;
+use App\Services\CheckoutCouponService;
 use App\Services\OrderEmailService;
 use App\Services\StripePaymentService;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,7 @@ class CheckoutController extends Controller
 {
     public function __construct(
         private readonly CartService $cart,
+        private readonly CheckoutCouponService $coupons,
         private readonly OrderEmailService $orderEmails,
         private readonly StripePaymentService $stripe,
     ) {}
@@ -26,16 +28,51 @@ class CheckoutController extends Controller
     public function index(): View|RedirectResponse
     {
         if ($this->cart->count() === 0) {
+            $this->coupons->remove();
+
             return redirect()
                 ->route('cart.index')
                 ->with('error', __('Your cart is empty.'));
         }
 
+        $summary = $this->coupons->summary();
+
         return view('checkout.index', [
             'items' => $this->cart->all(),
-            'subtotal' => $this->cart->subtotal(),
+            'subtotal' => $summary['cart_subtotal'],
+            'discountAmount' => $summary['discount_amount'],
+            'total' => $summary['total'],
+            'appliedCoupon' => $summary['coupon'],
             'stripeEnabled' => $this->stripe->isConfigured(),
         ]);
+    }
+
+    public function applyCoupon(Request $request): RedirectResponse
+    {
+        if ($this->cart->count() === 0) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', __('Your cart is empty.'));
+        }
+
+        $validated = $request->validate([
+            'coupon_code' => ['required', 'string', 'max:100'],
+        ]);
+
+        $result = $this->coupons->apply($validated['coupon_code']);
+
+        return redirect()
+            ->route('checkout.index')
+            ->with($result['success'] ? 'success' : 'error', $result['message']);
+    }
+
+    public function removeCoupon(): RedirectResponse
+    {
+        $this->coupons->remove();
+
+        return redirect()
+            ->route('checkout.index')
+            ->with('success', __('Coupon removed.'));
     }
 
     public function paymentIntent(Request $request): JsonResponse
@@ -50,7 +87,15 @@ class CheckoutController extends Controller
 
         $cartItems = $this->cart->all();
         $currency = $this->resolveCartCurrency($cartItems);
-        $amountCents = $this->amountToCents($this->cart->subtotalFor($cartItems));
+        $summary = $this->coupons->summary($this->cart->subtotalFor($cartItems));
+        $amountCents = $this->amountToCents($summary['total']);
+
+        if ($amountCents < 1) {
+            return response()->json([
+                'message' => __('No payment is required for this order.'),
+                'free' => true,
+            ], 422);
+        }
 
         $result = $this->stripe->createPaymentIntent($amountCents, $currency, [
             'user_id' => (string) $request->user()->id,
@@ -87,6 +132,11 @@ class CheckoutController extends Controller
             ]);
         }
 
+        $cartItems = $this->cart->all();
+        $summary = $this->coupons->summary($this->cart->subtotalFor($cartItems));
+        $payableTotal = $summary['total'];
+        $requiresPayment = $this->stripe->isConfigured() && $this->amountToCents($payableTotal) >= 1;
+
         $rules = [
             'full_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -99,7 +149,7 @@ class CheckoutController extends Controller
             'zip' => ['required', 'string', 'max:20'],
         ];
 
-        if ($this->stripe->isConfigured()) {
+        if ($requiresPayment) {
             $rules['payment_intent_id'] = ['required', 'string', 'max:255'];
         }
 
@@ -107,23 +157,20 @@ class CheckoutController extends Controller
 
         $validated['email'] = $request->user()->email;
 
-        $cartItems = $this->cart->all();
-
         if ($cartItems === []) {
             return redirect()
                 ->route('cart.index')
                 ->with('error', __('Your cart is empty.'));
         }
 
-        $subtotal = $this->cart->subtotalFor($cartItems);
         $currency = $this->resolveCartCurrency($cartItems);
         $paymentIntentId = $validated['payment_intent_id'] ?? null;
         $isPaid = false;
 
-        if ($this->stripe->isConfigured()) {
+        if ($requiresPayment) {
             $verification = $this->stripe->verifyPaymentIntent(
                 $paymentIntentId,
-                $this->amountToCents($subtotal),
+                $this->amountToCents($payableTotal),
                 $currency,
             );
 
@@ -135,10 +182,12 @@ class CheckoutController extends Controller
             }
 
             $isPaid = true;
+        } elseif ($this->amountToCents($payableTotal) < 1) {
+            $isPaid = true;
         }
 
         try {
-            $order = DB::transaction(function () use ($validated, $cartItems, $subtotal, $currency, $isPaid, $paymentIntentId) {
+            $order = DB::transaction(function () use ($validated, $cartItems, $summary, $currency, $isPaid, $paymentIntentId) {
                 $order = Order::create([
                     'order_number' => Order::generateOrderNumber(),
                     'customer_name' => $validated['full_name'],
@@ -150,12 +199,22 @@ class CheckoutController extends Controller
                     'state_code' => $validated['state_code'],
                     'country_code' => $validated['country_code'],
                     'zip' => $validated['zip'],
-                    'subtotal' => $subtotal,
+                    'subtotal' => $summary['total'],
+                    'coupon_id' => $summary['coupon']?->id,
+                    'coupon_code' => $summary['coupon']?->coupon_code,
+                    'discount_amount' => $summary['discount_amount'],
                     'currency' => $currency,
                     'status' => $isPaid ? 'processing' : 'pending_payment',
                     'payment_status' => $isPaid ? 'paid' : 'unpaid',
-                    'payment_method' => $isPaid ? 'stripe' : null,
-                    'stripe_payment_intent_id' => $isPaid ? $paymentIntentId : null,
+                    'payment_method' => $isPaid
+                        ? ($this->amountToCents($summary['total']) < 1 ? 'coupon' : 'stripe')
+                        : null,
+                    'stripe_payment_intent_id' => $isPaid && $paymentIntentId ? $paymentIntentId : null,
+                    'raw_data' => [
+                        'cart_subtotal' => $summary['cart_subtotal'],
+                        'discount_amount' => $summary['discount_amount'],
+                        'coupon_code' => $summary['coupon']?->coupon_code,
+                    ],
                 ]);
 
                 foreach ($cartItems as $item) {
@@ -180,6 +239,7 @@ class CheckoutController extends Controller
             });
 
             $this->cart->clear();
+            $this->coupons->remove();
 
             $this->orderEmails->sendOrderPlaced($order);
 

@@ -10,6 +10,8 @@ class EmailTemplate extends Model
 
     public const SLUG_ORDER_STATUS_CHANGED = 'order_status_changed';
 
+    public const SLUG_ABANDONED_CART = 'abandoned_cart';
+
     protected $fillable = [
         'slug',
         'name',
@@ -50,6 +52,21 @@ class EmailTemplate extends Model
                 '{{old_status}}',
                 '{{new_status}}',
             ]),
+            self::SLUG_ABANDONED_CART => [
+                '{{customer_name}}',
+                '{{customer_email}}',
+                '{{cart_items_count}}',
+                '{{cart_amount}}',
+                '{{currency}}',
+                '{{cart_items}}',
+                '{{cart_url}}',
+                '{{checkout_url}}',
+                '{{site_name}}',
+                '{{offer_message}}',
+                '{{coupon_code}}',
+                '{{discount_in_percent}}',
+                '{{coupon_title}}',
+            ],
             default => $common,
         };
     }

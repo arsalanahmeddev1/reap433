@@ -182,10 +182,12 @@
 
                         <div class="checkout-panel">
                             <h2 class="checkout-panel-title">Payment</h2>
-                            @if ($stripeEnabled)
+                            @if ($stripeEnabled && $total > 0)
                                 <label class="checkout-card-label" for="card-element">Card details</label>
                                 <div id="card-element" class="checkout-card-element"></div>
                                 <p id="card-errors" class="checkout-field-error" role="alert"></p>
+                            @elseif ($stripeEnabled && $total <= 0)
+                                <p class="checkout-stripe-missing">Your coupon covers this order. No payment is required.</p>
                             @else
                                 <p class="checkout-stripe-missing">Card payment is not configured yet. Your order will be saved with payment status pending.</p>
                             @endif
@@ -194,8 +196,8 @@
                         <p id="checkout-form-error" class="checkout-field-error checkout-form-error" role="alert" hidden></p>
 
                         <button type="submit" class="btn btn-gold checkout-index-submit checkout-pay-btn">
-                            @if ($stripeEnabled)
-                                Pay {{ '$' . number_format((float) $subtotal, 2) }}
+                            @if ($stripeEnabled && $total > 0)
+                                Pay {{ '$' . number_format((float) $total, 2) }}
                             @else
                                 Place Order
                             @endif
@@ -232,9 +234,55 @@
                         @endforeach
                     </ul>
 
-                    <div class="cart-summary-row cart-summary-total">
+                    <div class="checkout-coupon-box">
+                        @if ($appliedCoupon)
+                            <div class="checkout-coupon-applied">
+                                <div>
+                                    <strong>{{ $appliedCoupon->coupon_code }}</strong>
+                                    <span>−{{ $appliedCoupon->discount_in_percent }}%</span>
+                                </div>
+                                <form action="{{ route('checkout.coupon.remove') }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-sm checkout-coupon-remove">Remove</button>
+                                </form>
+                            </div>
+                        @else
+                            <form action="{{ route('checkout.coupon.apply') }}" method="POST" class="checkout-coupon-form">
+                                @csrf
+                                <label for="coupon_code" class="visually-hidden">Coupon code</label>
+                                <input
+                                    type="text"
+                                    id="coupon_code"
+                                    name="coupon_code"
+                                    value="{{ old('coupon_code') }}"
+                                    placeholder="Coupon code"
+                                    maxlength="100"
+                                    required
+                                >
+                                <button type="submit" class="btn btn-gold-sm">Apply</button>
+                            </form>
+                            @error('coupon_code')
+                                <span class="checkout-field-error">{{ $message }}</span>
+                            @enderror
+                        @endif
+                    </div>
+
+                    <div class="cart-summary-row">
                         <span>Subtotal</span>
                         <strong>{{ '$' . number_format((float) $subtotal, 2) }}</strong>
+                    </div>
+
+                    @if ($discountAmount > 0)
+                        <div class="cart-summary-row checkout-discount-row">
+                            <span>Discount{{ $appliedCoupon ? ' ('.$appliedCoupon->coupon_code.')' : '' }}</span>
+                            <strong>−{{ '$' . number_format((float) $discountAmount, 2) }}</strong>
+                        </div>
+                    @endif
+
+                    <div class="cart-summary-row cart-summary-total">
+                        <span>Total</span>
+                        <strong>{{ '$' . number_format((float) $total, 2) }}</strong>
                     </div>
 
                     <a href="{{ route('cart.index') }}" class="btn btn-outline-sm checkout-index-back">Back to Cart</a>
@@ -433,6 +481,58 @@
         margin-top: var(--space-md);
     }
 
+    .checkout-coupon-box {
+        margin-bottom: var(--space-md);
+    }
+
+    .checkout-coupon-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .checkout-coupon-form input {
+        flex: 1;
+        min-width: 0;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid var(--c-black-border);
+        border-radius: var(--radius-sm);
+        background: var(--c-black-mid);
+        color: var(--c-text-primary);
+        font-family: var(--font-body);
+        text-transform: uppercase;
+    }
+
+    .checkout-coupon-form input:focus {
+        outline: none;
+        border-color: var(--c-gold);
+    }
+
+    .checkout-coupon-applied {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid rgba(201, 162, 39, 0.35);
+        border-radius: var(--radius-sm);
+        background: rgba(201, 162, 39, 0.08);
+        font-size: 0.875rem;
+    }
+
+    .checkout-coupon-applied strong {
+        color: var(--c-gold);
+        margin-right: 0.35rem;
+    }
+
+    .checkout-coupon-remove {
+        white-space: nowrap;
+    }
+
+    .checkout-discount-row strong {
+        color: #4ade80;
+    }
+
     @media (max-width: 768px) {
         .checkout-field-grid {
             grid-template-columns: 1fr;
@@ -450,10 +550,11 @@
     window.__checkout = {
         paymentIntentUrl: @json(route('checkout.payment-intent')),
         stripeKey: @json($stripeEnabled ? config('services.stripe.key') : null),
-        stripeEnabled: @json($stripeEnabled),
+        stripeEnabled: @json($stripeEnabled && (float) $total > 0),
+        payableTotal: @json((float) $total),
     };
 </script>
-@if ($stripeEnabled)
+@if ($stripeEnabled && $total > 0)
     <script src="https://js.stripe.com/v3/"></script>
 @endif
 <script src="{{ asset('assets/web/js/checkout-index.js') }}"></script>

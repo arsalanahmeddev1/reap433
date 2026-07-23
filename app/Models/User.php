@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'customer_email', 'email');
     }
+
+    public function printfulCartItems(): HasMany
+    {
+        return $this->hasMany(PrintfulCartItem::class);
+    }
 }

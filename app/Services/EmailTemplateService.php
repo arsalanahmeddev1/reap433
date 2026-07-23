@@ -20,6 +20,29 @@ class EmailTemplateService
             ->first();
 
         if (! $template) {
+            Log::warning('Email template missing or inactive', ['slug' => $slug]);
+
+            return false;
+        }
+
+        $mailer = (string) config('mail.default');
+
+        if (in_array($mailer, ['log', 'array'], true)) {
+            Log::warning('Email not delivered: MAIL_MAILER is not a real transport', [
+                'mailer' => $mailer,
+                'slug' => $slug,
+                'to' => $to,
+            ]);
+
+            return false;
+        }
+
+        if ($mailer === 'smtp' && blank(config('mail.mailers.smtp.username'))) {
+            Log::warning('Email not delivered: SMTP username/password are empty in .env', [
+                'slug' => $slug,
+                'to' => $to,
+            ]);
+
             return false;
         }
 

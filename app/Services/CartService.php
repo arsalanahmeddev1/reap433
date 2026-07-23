@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\PrintfulCartItem;
 use App\Models\PrintfulVariant;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class CartService
@@ -44,6 +46,7 @@ class CartService
         }
 
         Session::put(self::SESSION_KEY, $cart);
+        $this->persistAuthenticatedCart();
     }
 
     public function update(int $variantId, int $quantity): bool
@@ -57,6 +60,7 @@ class CartService
         $cart[$variantId]['quantity'] = max(1, $quantity);
 
         Session::put(self::SESSION_KEY, $cart);
+        $this->persistAuthenticatedCart();
 
         return true;
     }
@@ -73,11 +77,13 @@ class CartService
         unset($cart[$variantId]);
 
         Session::put(self::SESSION_KEY, $cart);
+        $this->persistAuthenticatedCart();
     }
 
     public function clear(): void
     {
         Session::forget(self::SESSION_KEY);
+        $this->persistAuthenticatedCart();
     }
 
     public function count(): int
@@ -108,6 +114,40 @@ class CartService
         }
 
         return round($total, 2);
+    }
+
+    /**
+     * Mirror the session cart into the database for the logged-in user
+     * so admins can review abandoned / pending carts.
+     */
+    public function persistAuthenticatedCart(): void
+    {
+        if (! Auth::check()) {
+            return;
+        }
+
+        $userId = (int) Auth::id();
+        $items = $this->all();
+
+        PrintfulCartItem::query()->where('user_id', $userId)->delete();
+
+        foreach ($items as $item) {
+            PrintfulCartItem::query()->create([
+                'user_id' => $userId,
+                'variant_id' => (int) $item['variant_id'],
+                'printful_variant_id' => $item['printful_variant_id'] ?? null,
+                'printful_product_id' => $item['product_id'] ?? null,
+                'product_name' => $item['product_name'] ?? 'Untitled product',
+                'variant_name' => $item['variant_name'] ?? null,
+                'sku' => $item['sku'] ?? null,
+                'price' => (float) ($item['price'] ?? 0),
+                'currency' => $item['currency'] ?? 'USD',
+                'quantity' => max(1, (int) ($item['quantity'] ?? 1)),
+                'thumbnail_url' => $item['variant_thumbnail_url']
+                    ?? $item['product_thumbnail_url']
+                    ?? null,
+            ]);
+        }
     }
 
     /**

@@ -75,11 +75,33 @@ class CmsModuleSeeder extends Seeder
         );
 
         CmsModule::updateOrCreate(
+            ['route_name' => 'abandoned-carts.index'],
+            [
+                'name' => 'Abandoned Carts',
+                'icon' => 'fa-solid fa-cart-shopping',
+                'sort_order' => 4,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
             ['route_name' => 'email-templates.index'],
             [
                 'name' => 'Email templates',
                 'icon' => 'fa-solid fa-envelope',
                 'sort_order' => 5,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'coupons.index'],
+            [
+                'name' => 'Coupon Management',
+                'icon' => 'fa-solid fa-ticket',
+                'sort_order' => 6,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -112,7 +134,7 @@ class CmsModuleSeeder extends Seeder
             [
                 'name' => 'Blogs',
                 'icon' => 'fa-solid fa-book-open',
-                'sort_order' => 6,
+                'sort_order' => 7,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -148,7 +170,9 @@ class CmsModuleSeeder extends Seeder
             'products.index',
             'admin.printful.products.index',
             'orders.index',
+            'abandoned-carts.index',
             'email-templates.index',
+            'coupons.index',
             'blogs-module',
             'blog-categories.index',
             'blogs.index',
