@@ -19,6 +19,9 @@ class CmsModulePermissionsSeeder extends Seeder
             'admin' => [
                 'admin.dashboard' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'users.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
+                'whole-seller-management' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 0, 'is_delete' => 0],
+                'whole-sellers.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 1, 'is_delete' => 0],
+                'whole-seller-settings.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 1, 'is_delete' => 0],
                 'admin.printful.products.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 0, 'is_delete' => 0],
                 'orders.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'abandoned-carts.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 0, 'is_delete' => 0],

@@ -40,6 +40,39 @@ class CmsModuleSeeder extends Seeder
             ]
         );
 
+        $wholeSellerManagement = CmsModule::updateOrCreate(
+            ['route_name' => 'whole-seller-management'],
+            [
+                'name' => 'Whole Seller Management',
+                'icon' => 'fa-solid fa-handshake',
+                'sort_order' => 3,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'whole-sellers.index'],
+            [
+                'name' => 'Whole Sellers',
+                'icon' => 'fa-solid fa-store',
+                'sort_order' => 1,
+                'status' => 'active',
+                'parent_id' => $wholeSellerManagement->id,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'whole-seller-settings.index'],
+            [
+                'name' => 'Whole Seller Setting',
+                'icon' => 'fa-solid fa-sliders',
+                'sort_order' => 2,
+                'status' => 'active',
+                'parent_id' => $wholeSellerManagement->id,
+            ]
+        );
+
         $products = CmsModule::updateOrCreate(
             ['route_name' => 'products-module'],
             [
@@ -165,6 +198,9 @@ class CmsModuleSeeder extends Seeder
         $allowed = [
             'admin.dashboard',
             'users.index',
+            'whole-seller-management',
+            'whole-sellers.index',
+            'whole-seller-settings.index',
             'products-module',
             'product-categories.index',
             'products.index',
