@@ -155,6 +155,7 @@
         setStatus(
             `Selected: ${selectedVariant.color || ''} / ${selectedVariant.size || ''} — ${priceLabel}${fee ? ` (+${fee.toFixed(2)} fee)` : ''}`
         );
+    }
 
     const COLOR_HEX = {
         berry: '#8e3a59',
