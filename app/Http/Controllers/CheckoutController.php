@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\WholeSellerSetting;
 use App\Services\CartService;
 use App\Services\CheckoutCouponService;
 use App\Services\OrderEmailService;
@@ -35,15 +36,24 @@ class CheckoutController extends Controller
                 ->with('error', __('Your cart is empty.'));
         }
 
+        if ($message = WholeSellerSetting::cartQuantityValidationMessage($this->cart->all())) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', $message);
+        }
+
         $summary = $this->coupons->summary();
+        $items = $this->cart->all();
 
         return view('checkout.index', [
-            'items' => $this->cart->all(),
+            'items' => $items,
             'subtotal' => $summary['cart_subtotal'],
             'discountAmount' => $summary['discount_amount'],
             'total' => $summary['total'],
             'appliedCoupon' => $summary['coupon'],
             'stripeEnabled' => $this->stripe->isConfigured(),
+            'wholesaleSummary' => $this->cart->wholesaleDiscountSummary($items),
+            'isWholesalerCheckout' => WholeSellerSetting::appliesToCurrentUser(),
         ]);
     }
 
@@ -81,6 +91,10 @@ class CheckoutController extends Controller
             return response()->json(['message' => __('Your cart is empty.')], 422);
         }
 
+        if ($message = WholeSellerSetting::cartQuantityValidationMessage($this->cart->all())) {
+            return response()->json(['message' => $message], 422);
+        }
+
         if (! $this->stripe->isConfigured()) {
             return response()->json(['message' => __('Card payment is not configured.')], 422);
         }
@@ -116,6 +130,12 @@ class CheckoutController extends Controller
             return redirect()
                 ->route('cart.index')
                 ->with('error', __('Your cart is empty.'));
+        }
+
+        if ($message = WholeSellerSetting::cartQuantityValidationMessage($this->cart->all())) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', $message);
         }
 
         if ($request->filled('country_code')) {

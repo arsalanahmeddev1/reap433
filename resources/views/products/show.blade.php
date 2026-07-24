@@ -74,8 +74,28 @@
                                             <dt>Price</dt>
                                             <dd>
                                                 @if ($variant->retail_price !== null)
-                                                    {{ strtoupper($variant->currency ?? 'USD') }}
-                                                    {{ number_format((float) $variant->retail_price, 2) }}
+                                                    @php
+                                                        $retailPrice = (float) $variant->retail_price;
+                                                        $displayPrice = wholesaler_product_price($retailPrice);
+                                                        $wholesalerDiscount = wholesaler_discount_percent();
+                                                        $showComparePrice = $wholesalerDiscount > 0
+                                                            && $displayPrice !== null
+                                                            && $displayPrice < $retailPrice;
+                                                    @endphp
+                                                    @if ($showComparePrice)
+                                                        <span class="printful-variant-price-compare">
+                                                            {{ strtoupper($variant->currency ?? 'USD') }}
+                                                            {{ number_format($retailPrice, 2) }}
+                                                        </span>
+                                                        <span class="printful-variant-price-sale">
+                                                            {{ strtoupper($variant->currency ?? 'USD') }}
+                                                            {{ number_format((float) $displayPrice, 2) }}
+                                                        </span>
+                                                        <span class="printful-variant-price-off">{{ $wholesalerDiscount }}% off</span>
+                                                    @else
+                                                        {{ strtoupper($variant->currency ?? 'USD') }}
+                                                        {{ number_format((float) $displayPrice, 2) }}
+                                                    @endif
                                                 @else
                                                     —
                                                 @endif
@@ -92,8 +112,8 @@
                                             type="number"
                                             id="quantity-{{ $variant->id }}"
                                             name="quantity"
-                                            value="1"
-                                            min="1"
+                                            value="{{ wholesaler_min_order_quantity() }}"
+                                            min="{{ wholesaler_min_order_quantity() }}"
                                             max="99"
                                             class="printful-variant-row__qty-input"
                                             required
@@ -286,6 +306,26 @@
         outline: none;
         border-color: var(--c-gold);
         box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.15);
+    }
+
+    .printful-variant-price-compare {
+        display: inline-block;
+        margin-right: 0.45rem;
+        color: var(--c-text-muted);
+        text-decoration: line-through;
+    }
+
+    .printful-variant-price-sale {
+        display: inline-block;
+        font-weight: 700;
+        color: var(--c-text-primary);
+    }
+
+    .printful-variant-price-off {
+        display: inline-block;
+        margin-left: 0.4rem;
+        font-size: 0.8em;
+        color: var(--c-gold);
     }
 
     .printful-variant-row__add-btn {

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\PrintfulProduct;
 use App\Models\PrintfulVariant;
+use App\Models\WholeSellerSetting;
 
 class PrintfulVariantOptions
 {
@@ -35,7 +36,10 @@ class PrintfulVariantOptions
                 'color' => $meta['color'],
                 'size' => $meta['size'],
                 'sku' => $variant->sku,
-                'price' => $variant->retail_price !== null ? (float) $variant->retail_price : 0.0,
+                'original_price' => $variant->retail_price !== null ? (float) $variant->retail_price : 0.0,
+                'price' => WholeSellerSetting::applyProductDiscount(
+                    $variant->retail_price !== null ? (float) $variant->retail_price : 0.0
+                ),
                 'currency' => $variant->currency ?? 'USD',
                 'thumbnail_url' => $variant->thumbnail_url ?: $meta['image'],
                 'availability_status' => $meta['availability_status'],

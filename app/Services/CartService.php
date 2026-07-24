@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\PrintfulCartItem;
 use App\Models\PrintfulVariant;
 use App\Models\ProductCustomization;
+use App\Models\WholeSellerSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -26,7 +27,9 @@ class CartService
             $normalized[(string) $key] = $item;
         }
 
-        return $this->refreshCustomizedImages($normalized);
+        return $this->refreshWholesalerPricing(
+            $this->refreshCustomizedImages($normalized)
+        );
     }
 
     /**
@@ -60,6 +63,56 @@ class CartService
             $cart[$key]['preview_image'] = $preview;
             $cart[$key]['variant_thumbnail_url'] = $preview;
             $cart[$key]['print_file_url'] = $customization->printFileUrl() ?: $customization->uploadUrl();
+        }
+
+        return $cart;
+    }
+
+    /**
+     * Keep wholesale original/sale prices in sync with admin settings.
+     *
+     * @param  array<string, array<string, mixed>>  $cart
+     * @return array<string, array<string, mixed>>
+     */
+    private function refreshWholesalerPricing(array $cart): array
+    {
+        if ($cart === []) {
+            return $cart;
+        }
+
+        $variantIds = collect($cart)
+            ->pluck('variant_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($variantIds === []) {
+            return $cart;
+        }
+
+        $variants = PrintfulVariant::query()
+            ->whereIn('id', $variantIds)
+            ->get()
+            ->keyBy('id');
+
+        $isWholesaler = WholeSellerSetting::appliesToCurrentUser();
+        $discountPercent = $isWholesaler ? WholeSellerSetting::productDiscountPercent() : 0;
+
+        foreach ($cart as $key => $item) {
+            $variantId = (int) ($item['variant_id'] ?? 0);
+            $variant = $variants->get($variantId);
+            if (! $variant) {
+                continue;
+            }
+
+            $retail = $variant->retail_price !== null ? (float) $variant->retail_price : 0.0;
+            $fee = ! empty($item['is_customized']) ? (float) ($item['customization_fee'] ?? 0) : 0.0;
+            $sale = WholeSellerSetting::applyProductDiscount($retail);
+
+            $cart[$key]['original_price'] = round($retail + $fee, 2);
+            $cart[$key]['price'] = round($sale + $fee, 2);
+            $cart[$key]['wholesale_discount_percent'] = $discountPercent;
         }
 
         return $cart;
@@ -163,6 +216,39 @@ class CartService
         return round($total, 2);
     }
 
+    /**
+     * Wholesale compare-at / discount totals for cart or checkout summary.
+     *
+     * @param  array<string, array<string, mixed>>|null  $items
+     * @return array{original_subtotal: float, discount_amount: float, discount_percent: int, subtotal: float}
+     */
+    public function wholesaleDiscountSummary(?array $items = null): array
+    {
+        $items ??= $this->all();
+        $originalSubtotal = 0.0;
+        $subtotal = 0.0;
+        $discountPercent = 0;
+
+        foreach ($items as $item) {
+            $qty = max(1, (int) ($item['quantity'] ?? 1));
+            $price = (float) ($item['price'] ?? 0);
+            $original = (float) ($item['original_price'] ?? $price);
+            $originalSubtotal += $original * $qty;
+            $subtotal += $price * $qty;
+            $discountPercent = max($discountPercent, (int) ($item['wholesale_discount_percent'] ?? 0));
+        }
+
+        $originalSubtotal = round($originalSubtotal, 2);
+        $subtotal = round($subtotal, 2);
+
+        return [
+            'original_subtotal' => $originalSubtotal,
+            'discount_amount' => round(max(0, $originalSubtotal - $subtotal), 2),
+            'discount_percent' => $discountPercent,
+            'subtotal' => $subtotal,
+        ];
+    }
+
     public function persistAuthenticatedCart(): void
     {
         if (! Auth::check()) {
@@ -210,6 +296,10 @@ class CartService
     private function formatItem(PrintfulVariant $variant, int $quantity): array
     {
         $product = $variant->product;
+        $retailPrice = $variant->retail_price !== null ? (float) $variant->retail_price : 0.0;
+        $discountPercent = WholeSellerSetting::appliesToCurrentUser()
+            ? WholeSellerSetting::productDiscountPercent()
+            : 0;
 
         return [
             'cart_key' => $this->standardKey($variant->id),
@@ -225,7 +315,9 @@ class CartService
                 : null,
             'variant_name' => $variant->name,
             'sku' => $variant->sku,
-            'price' => $variant->retail_price !== null ? (float) $variant->retail_price : 0.0,
+            'original_price' => round($retailPrice, 2),
+            'price' => WholeSellerSetting::applyProductDiscount($retailPrice),
+            'wholesale_discount_percent' => $discountPercent,
             'currency' => $variant->currency,
             'quantity' => max(1, $quantity),
             'variant_thumbnail_url' => $variant->thumbnail_url,
@@ -254,6 +346,7 @@ class CartService
             'is_customized' => true,
             'customization_id' => $customization->id,
             'customization_uuid' => $customization->uuid,
+            'original_price' => round(((float) $base['original_price']) + $fee, 2),
             'price' => round(((float) $base['price']) + $fee, 2),
             'customization_fee' => $fee,
             'preview_image' => $customization->previewUrl() ?: $base['variant_thumbnail_url'],

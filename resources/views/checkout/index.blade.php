@@ -218,6 +218,11 @@
                                     ?? asset('assets/images/placeholders/img-not-available.png');
                                 $lineTotal = (float) $item['price'] * (int) $item['quantity'];
                                 $currency = strtoupper($item['currency'] ?? 'USD');
+                                $originalPrice = (float) ($item['original_price'] ?? $item['price']);
+                                $unitPrice = (float) $item['price'];
+                                $showUnitDiscount = ! empty($isWholesalerCheckout)
+                                    && $originalPrice > $unitPrice
+                                    && (int) ($item['wholesale_discount_percent'] ?? 0) > 0;
                             @endphp
                             <li class="checkout-summary-item">
                                 <img src="{{ $imageUrl }}" alt="{{ $item['product_name'] }}" class="checkout-summary-item__thumb" loading="lazy">
@@ -228,7 +233,16 @@
                                     @elseif ($item['variant_name'])
                                         <span>{{ $item['variant_name'] }}</span>
                                     @endif
-                                    <span>Qty {{ $item['quantity'] }} × {{ $currency }} {{ number_format((float) $item['price'], 2) }}</span>
+                                    @if ($showUnitDiscount)
+                                        <span>
+                                            Qty {{ $item['quantity'] }} ×
+                                            <span class="checkout-price-compare">{{ $currency }} {{ number_format($originalPrice, 2) }}</span>
+                                            {{ $currency }} {{ number_format($unitPrice, 2) }}
+                                            <span class="checkout-price-off">{{ (int) $item['wholesale_discount_percent'] }}% off</span>
+                                        </span>
+                                    @else
+                                        <span>Qty {{ $item['quantity'] }} × {{ $currency }} {{ number_format($unitPrice, 2) }}</span>
+                                    @endif
                                 </div>
                                 <strong class="checkout-summary-item__total">
                                     {{ $currency }} {{ number_format($lineTotal, 2) }}
@@ -272,9 +286,35 @@
                     </div>
 
                     <div class="cart-summary-row">
-                        <span>Subtotal</span>
-                        <strong>{{ '$' . number_format((float) $subtotal, 2) }}</strong>
+                        @php
+                            $wholesaleSummary = $wholesaleSummary ?? [
+                                'original_subtotal' => (float) $subtotal,
+                                'discount_amount' => 0,
+                                'discount_percent' => 0,
+                                'subtotal' => (float) $subtotal,
+                            ];
+                            $showWholesaleDiscount = ! empty($isWholesalerCheckout)
+                                && ($wholesaleSummary['discount_amount'] ?? 0) > 0;
+                        @endphp
+                        @if ($showWholesaleDiscount)
+                            <span>{{ __('Retail subtotal') }}</span>
+                            <strong class="checkout-price-compare">{{ '$' . number_format((float) $wholesaleSummary['original_subtotal'], 2) }}</strong>
+                        @else
+                            <span>Subtotal</span>
+                            <strong>{{ '$' . number_format((float) $subtotal, 2) }}</strong>
+                        @endif
                     </div>
+
+                    @if ($showWholesaleDiscount)
+                        <div class="cart-summary-row checkout-discount-row">
+                            <span>{{ __('Wholesale discount') }} ({{ (int) $wholesaleSummary['discount_percent'] }}%)</span>
+                            <strong>−{{ '$' . number_format((float) $wholesaleSummary['discount_amount'], 2) }}</strong>
+                        </div>
+                        <div class="cart-summary-row">
+                            <span>{{ __('Subtotal after discount') }}</span>
+                            <strong>{{ '$' . number_format((float) $wholesaleSummary['subtotal'], 2) }}</strong>
+                        </div>
+                    @endif
 
                     @if ($discountAmount > 0)
                         <div class="cart-summary-row checkout-discount-row">
@@ -534,6 +574,18 @@
 
     .checkout-discount-row strong {
         color: #4ade80;
+    }
+
+    .checkout-price-compare {
+        text-decoration: line-through;
+        color: var(--c-text-muted);
+        margin-right: 0.25rem;
+    }
+
+    .checkout-price-off {
+        color: var(--c-gold);
+        font-size: 0.85em;
+        margin-left: 0.25rem;
     }
 
     @media (max-width: 768px) {

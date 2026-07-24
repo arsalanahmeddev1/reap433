@@ -215,11 +215,17 @@
           @forelse ($shopProducts as $product)
             @php
                 $imageUrl = $product->thumbnail_url ?: 'https://images.unsplash.com/photo-1575428652377-a2d80e2277fc?w=600&q=80&auto=format&fit=crop';
-                $minPrice = $product->variants
+                $retailMinPrice = $product->variants
                     ->whereNotNull('retail_price')
                     ->min('retail_price');
+                $minPrice = wholesaler_product_price($retailMinPrice);
                 $currency = strtoupper($product->variants->first()?->currency ?? 'USD');
                 $categorySlug = $product->category?->slug ?? '';
+                $wholesalerDiscount = wholesaler_discount_percent();
+                $showComparePrice = $wholesalerDiscount > 0
+                    && $retailMinPrice !== null
+                    && $minPrice !== null
+                    && (float) $minPrice < (float) $retailMinPrice;
 
                 $colorNameToHex = [
                     'berry' => '#8e3a59',
@@ -342,7 +348,13 @@
                     <div class="product-footer">
                         <span class="product-price">
                             @if ($minPrice !== null)
-                                From {{ $currency }} {{ number_format((float) $minPrice, 2) }}
+                                @if ($showComparePrice)
+                                    <span class="product-price-compare">From {{ $currency }} {{ number_format((float) $retailMinPrice, 2) }}</span>
+                                    <span class="product-price-sale">{{ $currency }} {{ number_format((float) $minPrice, 2) }}</span>
+                                    <small class="product-price-discount">{{ $wholesalerDiscount }}% off</small>
+                                @else
+                                    From {{ $currency }} {{ number_format((float) $minPrice, 2) }}
+                                @endif
                             @else
                                 —
                             @endif
@@ -386,6 +398,25 @@
           .product-card--variable .product-desc {
             min-height: 0;
             margin-bottom: 8px;
+          }
+          .product-price-compare {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--c-text-muted, #8a8580);
+            text-decoration: line-through;
+            line-height: 1.2;
+          }
+          .product-price-sale {
+            display: block;
+            line-height: 1.2;
+          }
+          .product-price-discount {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--c-gold, #c9a227);
+            margin-top: 2px;
           }
         </style>
 

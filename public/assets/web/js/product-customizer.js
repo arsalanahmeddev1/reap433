@@ -139,10 +139,22 @@
             productImage.src = selectedVariant.thumbnail_url;
         }
         addCartBtn.disabled = !selectedVariant;
-        setStatus(selectedVariant
-            ? `Selected: ${selectedVariant.color || ''} / ${selectedVariant.size || ''} — ${selectedVariant.currency || 'USD'} ${Number(selectedVariant.price || 0).toFixed(2)}${fee ? ` (+${fee.toFixed(2)} fee)` : ''}`
-            : 'Select an available color and size.');
-    }
+        if (!selectedVariant) {
+            setStatus('Select an available color and size.');
+            return;
+        }
+
+        const currency = selectedVariant.currency || 'USD';
+        const salePrice = Number(selectedVariant.price || 0).toFixed(2);
+        const originalPrice = Number(selectedVariant.original_price || selectedVariant.price || 0).toFixed(2);
+        const hasDiscount = Number(originalPrice) > Number(salePrice);
+        const priceLabel = hasDiscount
+            ? `${currency} ${originalPrice} → ${salePrice}`
+            : `${currency} ${salePrice}`;
+
+        setStatus(
+            `Selected: ${selectedVariant.color || ''} / ${selectedVariant.size || ''} — ${priceLabel}${fee ? ` (+${fee.toFixed(2)} fee)` : ''}`
+        );
 
     const COLOR_HEX = {
         berry: '#8e3a59',

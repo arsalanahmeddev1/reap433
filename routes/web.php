@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\WholeSellerController;
+use App\Http\Controllers\Admin\WholeSellerSettingController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\UserAddressController;
@@ -106,6 +108,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::get('/users/{user}', [UserController::class, 'show'])->name('users.show');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
+    Route::get('/whole-sellers', [WholeSellerController::class, 'index'])->name('whole-sellers.index');
+    Route::get('/whole-sellers/{user}', [WholeSellerController::class, 'show'])->name('whole-sellers.show');
+    Route::post('/whole-sellers/{user}/approve', [WholeSellerController::class, 'approve'])->name('whole-sellers.approve');
+
+    Route::get('/whole-seller-settings', [WholeSellerSettingController::class, 'index'])->name('whole-seller-settings.index');
+    Route::put('/whole-seller-settings', [WholeSellerSettingController::class, 'update'])->name('whole-seller-settings.update');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

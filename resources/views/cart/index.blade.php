@@ -26,8 +26,20 @@
                     <a href="{{ route('printful-products.index') }}" class="btn btn-gold">Continue Shopping</a>
                 </div>
             @else
+                @php
+                    $wholesalerMinQty = (int) ($wholesalerMinQty ?? 1);
+                    $isWholesalerCheckout = (bool) ($isWholesalerCheckout ?? false);
+                    $wholesalerQtyMessage = $isWholesalerCheckout
+                        ? \App\Models\WholeSellerSetting::cartQuantityValidationMessage($items)
+                        : null;
+                @endphp
                 <div class="cart-layout cart-index-layout" data-scroll-reveal>
                     <div class="cart-items-panel">
+                        @if ($isWholesalerCheckout)
+                            <div class="cart-index-flash {{ $wholesalerQtyMessage ? 'cart-index-flash--error' : '' }}" role="status">
+                                {{ __('Wholesale minimum: at least :min of each product to checkout.', ['min' => $wholesalerMinQty]) }}
+                            </div>
+                        @endif
                         <div class="cart-items-list">
                             @foreach ($items as $cartKey => $item)
                                 @php
@@ -38,6 +50,13 @@
                                         ?? asset('assets/images/placeholders/img-not-available.png');
                                     $lineTotal = (float) $item['price'] * (int) $item['quantity'];
                                     $currency = strtoupper($item['currency'] ?? 'USD');
+                                    $qtyBelowMin = $isWholesalerCheckout && (int) $item['quantity'] < $wholesalerMinQty;
+                                    $originalPrice = (float) ($item['original_price'] ?? $item['price']);
+                                    $unitPrice = (float) $item['price'];
+                                    $showUnitDiscount = $isWholesalerCheckout
+                                        && $originalPrice > $unitPrice
+                                        && (int) ($item['wholesale_discount_percent'] ?? 0) > 0;
+                                    $originalLineTotal = $originalPrice * (int) $item['quantity'];
                                 @endphp
                                 <article class="cart-item cart-index-item">
                                     <a href="{{ route('printful-products.show', $item['product_id']) }}" class="cart-item-image">
@@ -59,8 +78,17 @@
                                                 <span>SKU</span> {{ $item['sku'] ?? '—' }}
                                             </p>
                                             <p class="cart-index-item__price">
-                                                {{ $currency }} {{ number_format((float) $item['price'], 2) }}
+                                                @if ($showUnitDiscount)
+                                                    <span class="cart-price-compare">{{ $currency }} {{ number_format($originalPrice, 2) }}</span>
+                                                    <span class="cart-price-sale">{{ $currency }} {{ number_format($unitPrice, 2) }}</span>
+                                                    <span class="cart-price-off">{{ (int) $item['wholesale_discount_percent'] }}% off</span>
+                                                @else
+                                                    {{ $currency }} {{ number_format($unitPrice, 2) }}
+                                                @endif
                                             </p>
+                                            @if ($qtyBelowMin)
+                                                <p class="cart-index-item__qty-error">{{ __('Minimum quantity for wholesale: :min', ['min' => $wholesalerMinQty]) }}</p>
+                                            @endif
                                         </div>
 
                                         <div class="cart-index-item__actions">
@@ -73,9 +101,9 @@
                                                         type="number"
                                                         id="qty-{{ md5($cartKey) }}"
                                                         name="quantity"
-                                                        class="cart-index-item__qty-input"
+                                                        class="cart-index-item__qty-input{{ $qtyBelowMin ? ' is-invalid' : '' }}"
                                                         value="{{ $item['quantity'] }}"
-                                                        min="1"
+                                                        min="{{ $wholesalerMinQty }}"
                                                         max="99"
                                                         required
                                                     >
@@ -85,6 +113,9 @@
 
                                             <div class="cart-index-item__line-total">
                                                 <span>Line total</span>
+                                                @if ($showUnitDiscount)
+                                                    <span class="cart-price-compare">{{ $currency }} {{ number_format($originalLineTotal, 2) }}</span>
+                                                @endif
                                                 <strong>{{ $currency }} {{ number_format($lineTotal, 2) }}</strong>
                                             </div>
 
@@ -102,10 +133,33 @@
 
                     <aside class="cart-summary cart-index-summary">
                         <h2 class="cart-summary-title">Order Summary</h2>
-                        <div class="cart-summary-row cart-summary-total">
-                            <span>Subtotal</span>
-                            <strong>{{ '$' . number_format((float) $subtotal, 2) }}</strong>
-                        </div>
+                        @php
+                            $wholesaleSummary = $wholesaleSummary ?? [
+                                'original_subtotal' => (float) $subtotal,
+                                'discount_amount' => 0,
+                                'discount_percent' => 0,
+                                'subtotal' => (float) $subtotal,
+                            ];
+                        @endphp
+                        @if ($isWholesalerCheckout && ($wholesaleSummary['discount_amount'] ?? 0) > 0)
+                            <div class="cart-summary-row">
+                                <span>{{ __('Retail subtotal') }}</span>
+                                <strong class="cart-price-compare">{{ '$' . number_format((float) $wholesaleSummary['original_subtotal'], 2) }}</strong>
+                            </div>
+                            <div class="cart-summary-row cart-summary-discount">
+                                <span>{{ __('Wholesale discount') }} ({{ (int) $wholesaleSummary['discount_percent'] }}%)</span>
+                                <strong>−{{ '$' . number_format((float) $wholesaleSummary['discount_amount'], 2) }}</strong>
+                            </div>
+                            <div class="cart-summary-row cart-summary-total">
+                                <span>{{ __('Subtotal') }}</span>
+                                <strong>{{ '$' . number_format((float) $wholesaleSummary['subtotal'], 2) }}</strong>
+                            </div>
+                        @else
+                            <div class="cart-summary-row cart-summary-total">
+                                <span>Subtotal</span>
+                                <strong>{{ '$' . number_format((float) $subtotal, 2) }}</strong>
+                            </div>
+                        @endif
 
                         <a href="{{ route('printful-products.index') }}" class="btn btn-outline-sm cart-continue-btn">Continue Shopping</a>
                         <a href="{{ route('checkout.index') }}" class="btn btn-gold cart-checkout-btn">Proceed to Checkout</a>
@@ -137,6 +191,45 @@
     .cart-index-flash--error {
         background: rgba(248, 113, 113, 0.12);
         border: 1px solid rgba(248, 113, 113, 0.35);
+    }
+
+    .cart-index-item__qty-error {
+        margin: 0.35rem 0 0;
+        font-size: 0.8125rem;
+        color: #f87171;
+    }
+
+    .cart-index-item__qty-input.is-invalid {
+        border-color: #f87171;
+    }
+
+    .cart-price-compare {
+        text-decoration: line-through;
+        color: var(--c-text-muted);
+        font-weight: 500;
+        margin-right: 0.35rem;
+    }
+
+    .cart-price-sale {
+        font-weight: 700;
+        color: var(--c-cream, var(--c-text-primary));
+        margin-right: 0.35rem;
+    }
+
+    .cart-price-off {
+        font-size: 0.8em;
+        color: var(--c-gold);
+        font-weight: 600;
+    }
+
+    .cart-summary-discount strong {
+        color: #4ade80;
+    }
+
+    .cart-index-item__line-total .cart-price-compare {
+        display: block;
+        font-size: 0.85em;
+        margin: 0 0 0.15rem;
     }
 
     .cart-index-empty {

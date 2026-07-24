@@ -50,6 +50,24 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user && $user->isPendingApproval()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __('Your whole seller account is waiting for admin approval. You can sign in after it is approved.'),
+            ]);
+        }
+
+        if ($user && $user->isWholeSeller() && ! $user->isApproved()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'email' => __('Your whole seller account is not approved for login.'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

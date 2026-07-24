@@ -12,6 +12,8 @@ class EmailTemplate extends Model
 
     public const SLUG_ABANDONED_CART = 'abandoned_cart';
 
+    public const SLUG_WHOLESALER_PENDING_APPROVAL = 'wholesaler_pending_approval';
+
     protected $fillable = [
         'slug',
         'name',
@@ -66,6 +68,16 @@ class EmailTemplate extends Model
                 '{{coupon_code}}',
                 '{{discount_in_percent}}',
                 '{{coupon_title}}',
+            ],
+            self::SLUG_WHOLESALER_PENDING_APPROVAL => [
+                '{{customer_name}}',
+                '{{customer_email}}',
+                '{{business_name}}',
+                '{{business_email}}',
+                '{{business_phone}}',
+                '{{business_location}}',
+                '{{business_description}}',
+                '{{site_name}}',
             ],
             default => $common,
         };

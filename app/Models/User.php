@@ -19,11 +19,24 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    public const APPROVAL_PENDING = 'pending';
+
+    public const APPROVAL_APPROVED = 'approved';
+
+    public const APPROVAL_REJECTED = 'rejected';
+
     protected $fillable = [
         'name',
         'email',
         'password',
         'role',
+        'business_name',
+        'business_phone',
+        'business_email',
+        'business_location',
+        'business_description',
+        'approval_status',
+        'approved_at',
     ];
 
     /**
@@ -46,6 +59,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -60,6 +74,30 @@ class User extends Authenticatable
     public function hasRole($role)
     {
         return $this->role === $role;
+    }
+
+    public function isWholeSeller(): bool
+    {
+        return $this->hasRole(config('roles.whole_seller', 'whole_seller'));
+    }
+
+    public function isApproved(): bool
+    {
+        return ($this->approval_status ?? self::APPROVAL_APPROVED) === self::APPROVAL_APPROVED;
+    }
+
+    public function isPendingApproval(): bool
+    {
+        return $this->isWholeSeller()
+            && ($this->approval_status ?? self::APPROVAL_PENDING) === self::APPROVAL_PENDING;
+    }
+
+    public function markApproved(): void
+    {
+        $this->forceFill([
+            'approval_status' => self::APPROVAL_APPROVED,
+            'approved_at' => now(),
+        ])->save();
     }
 
     public function addresses(): HasMany
