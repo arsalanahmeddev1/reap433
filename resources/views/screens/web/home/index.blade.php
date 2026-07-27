@@ -307,6 +307,7 @@
             @endphp
             <article class="product-card product-card--variable" role="listitem" data-category="{{ $categorySlug }}" data-scroll-reveal data-delay="{{ ($loop->index % 4) * 80 }}">
                 <div class="product-image-wrap">
+                    @include('screens.web.partials.favourite-button', ['product' => $product])
                     <img
                         src="{{ $imageUrl }}"
                         alt="REAP433 {{ $product->name }}"

@@ -1,35 +1,33 @@
 <?php
 
-use App\Http\Controllers\BiblicalTriviaController;
-use App\Http\Controllers\BlogController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProductCustomizationController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StoreController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AbandonedCartController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\CouponController;
-use App\Http\Controllers\Admin\ProductCategoryController;
-use App\Http\Controllers\Admin\OrderPrintfulController;
-use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
+use App\Http\Controllers\Admin\OrderPrintfulController;
+use App\Http\Controllers\Admin\PrintfulController;
+use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WholeSellerController;
 use App\Http\Controllers\Admin\WholeSellerSettingController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\BiblicalTriviaController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\UserAddressController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\FavouriteProductController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
-use App\Http\Controllers\ProfileOrderController;
 use App\Http\Controllers\PrintfulProductController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductCustomizationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileOrderController;
 use App\Http\Controllers\SearchController;
-
-
-
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\UserAddressController;
+use Illuminate\Support\Facades\Route;
 
 // web routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -44,6 +42,9 @@ Route::get('/artifacts/{product:slug}', [StoreController::class, 'show'])->name(
 Route::get('/products', [PrintfulProductController::class, 'index'])->name('printful-products.index');
 Route::get('/products/{printfulProduct}', [PrintfulProductController::class, 'show'])->name('printful-products.show');
 
+Route::get('/favourites/continue-login', [FavouriteProductController::class, 'continueLogin'])
+    ->name('favourites.continue-login');
+
 Route::middleware('auth')->group(function () {
     Route::get('/products/{printfulProduct}/customize', [ProductCustomizationController::class, 'show'])
         ->name('printful-products.customize');
@@ -55,6 +56,13 @@ Route::middleware('auth')->group(function () {
         ->name('printful-products.customize.finalize');
     Route::post('/customizations/{customization}/add-to-cart', [ProductCustomizationController::class, 'addToCart'])
         ->name('printful-products.customize.add-to-cart');
+
+    Route::post('/products/{printfulProduct}/favourite', [FavouriteProductController::class, 'store'])
+        ->name('favourites.store');
+    Route::delete('/products/{printfulProduct}/favourite', [FavouriteProductController::class, 'destroy'])
+        ->name('favourites.destroy');
+    Route::post('/products/{printfulProduct}/favourite/toggle', [FavouriteProductController::class, 'toggle'])
+        ->name('favourites.toggle');
 });
 
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -100,6 +108,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/profile/orders', [ProfileOrderController::class, 'index'])->name('profile.orders.index');
     Route::get('/profile/orders/{order}', [ProfileOrderController::class, 'show'])->name('profile.orders.show');
+
+    Route::get('/profile/favourites', [FavouriteProductController::class, 'index'])->name('favourites.index');
 });
 
 // Admin routes

@@ -114,4 +114,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(PrintfulCartItem::class);
     }
+
+    public function favouriteProducts(): HasMany
+    {
+        return $this->hasMany(FavouriteProduct::class);
+    }
+
+    public function favouriteItems()
+    {
+        return $this->belongsToMany(
+            PrintfulProduct::class,
+            'favourite_products',
+            'user_id',
+            'product_id'
+        )->withTimestamps()->whereNull('favourite_products.deleted_at');
+    }
 }

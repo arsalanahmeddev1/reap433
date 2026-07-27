@@ -41,4 +41,19 @@ class PrintfulProduct extends Model
     {
         return $this->hasMany(PrintfulVariant::class);
     }
+
+    public function favouriteRecords(): HasMany
+    {
+        return $this->hasMany(FavouriteProduct::class, 'product_id');
+    }
+
+    public function favouritedByUsers()
+    {
+        return $this->belongsToMany(
+            User::class,
+            'favourite_products',
+            'product_id',
+            'user_id'
+        )->withTimestamps()->whereNull('favourite_products.deleted_at');
+    }
 }

@@ -54,6 +54,10 @@
                             @foreach ($printfulProducts as $product)
                                 <article class="search-printful-card" role="listitem">
                                     <div class="search-printful-card__image-wrap">
+                                        @include('screens.web.partials.favourite-button', [
+                                            'product' => $product,
+                                            'class' => 'favourite-btn--on-card',
+                                        ])
                                         @if ($product->thumbnail_url)
                                             <img
                                                 src="{{ $product->thumbnail_url }}"

@@ -20,6 +20,9 @@
         <a href="{{ route('profile.orders.index') }}" class="profile-nav-link @if (request()->routeIs('profile.orders.*')) is-active @endif">
             {{ __('Orders') }}
         </a>
+        <a href="{{ route('favourites.index') }}" class="profile-nav-link @if (request()->routeIs('favourites.index')) is-active @endif">
+            {{ __('Favourite Products') }}
+        </a>
     </nav>
     <a href="{{ route('cart.index') }}" class="btn btn-outline-sm profile-cart-link">{{ __('View cart') }}</a>
 </aside>

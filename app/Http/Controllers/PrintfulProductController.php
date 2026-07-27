@@ -11,6 +11,13 @@ class PrintfulProductController extends Controller
     {
         $products = PrintfulProduct::query()
             ->withCount('variants')
+            ->when(auth()->check(), function ($query) {
+                $query->withExists([
+                    'favouriteRecords as is_favourite' => function ($q) {
+                        $q->where('user_id', auth()->id());
+                    },
+                ]);
+            })
             ->latest()
             ->paginate(12);
 
@@ -20,6 +27,16 @@ class PrintfulProductController extends Controller
     public function show(PrintfulProduct $printfulProduct): View
     {
         $printfulProduct->load('variants');
+
+        if (auth()->check()) {
+            $printfulProduct->loadExists([
+                'favouriteRecords as is_favourite' => function ($q) {
+                    $q->where('user_id', auth()->id());
+                },
+            ]);
+        } else {
+            $printfulProduct->setAttribute('is_favourite', false);
+        }
 
         return view('products.show', ['product' => $printfulProduct]);
     }

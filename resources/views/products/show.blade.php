@@ -10,6 +10,11 @@
 
             <div class="printful-product-detail">
                 <div class="printful-product-detail__media">
+                    @include('screens.web.partials.favourite-button', [
+                        'product' => $product,
+                        'class' => 'favourite-btn--on-detail',
+                        'isFavourite' => (bool) ($product->is_favourite ?? is_favourite_product((int) $product->id)),
+                    ])
                     @if ($product->thumbnail_url)
                         <img
                             src="{{ $product->thumbnail_url }}"
@@ -162,6 +167,7 @@
     }
 
     .printful-product-detail__media {
+        position: relative;
         background: var(--c-black-soft);
         border: 1px solid var(--c-black-border);
         border-radius: var(--radius-md);

@@ -22,6 +22,11 @@
                     @foreach ($products as $product)
                         <article class="printful-product-card">
                             <div class="printful-product-card__image-wrap">
+                                @include('screens.web.partials.favourite-button', [
+                                    'product' => $product,
+                                    'class' => 'favourite-btn--on-card',
+                                    'isFavourite' => (bool) ($product->is_favourite ?? false),
+                                ])
                                 @if ($product->thumbnail_url)
                                     <img
                                         src="{{ $product->thumbnail_url }}"
@@ -104,6 +109,7 @@
     }
 
     .printful-product-card__image-wrap {
+        position: relative;
         aspect-ratio: 1;
         background: var(--c-black-mid);
         overflow: hidden;
