@@ -195,6 +195,17 @@ class CmsModuleSeeder extends Seeder
             ]
         );
 
+        CmsModule::updateOrCreate(
+            ['route_name' => 'collection-pages.index'],
+            [
+                'name' => 'Collection Pages',
+                'icon' => 'fa-solid fa-layer-group',
+                'sort_order' => 8,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
         $allowed = [
             'admin.dashboard',
             'users.index',
@@ -212,6 +223,7 @@ class CmsModuleSeeder extends Seeder
             'blogs-module',
             'blog-categories.index',
             'blogs.index',
+            'collection-pages.index',
         ];
 
         CmsModule::query()

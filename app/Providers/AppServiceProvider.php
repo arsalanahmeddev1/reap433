@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\View\Composers\CartComposer;
+use App\View\Composers\CollectionNavComposer;
 use App\Models\ProductCustomization;
 use App\Policies\ProductCustomizationPolicy;
 use Illuminate\Support\Facades\Gate;
@@ -26,5 +27,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(ProductCustomization::class, ProductCustomizationPolicy::class);
         View::composer('layouts.web.partials.header', CartComposer::class);
+        View::composer('layouts.web.partials.header', CollectionNavComposer::class);
     }
 }

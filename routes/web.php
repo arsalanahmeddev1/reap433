@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AbandonedCartController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\CollectionPageController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\BiblicalTriviaController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CollectionPageController as StorefrontCollectionPageController;
 use App\Http\Controllers\FavouriteProductController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
@@ -66,6 +68,8 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+Route::get('/collection/{slug}', [StorefrontCollectionPageController::class, 'show'])->name('collection.show');
 
 Route::get('/biblical-trivia', [BiblicalTriviaController::class, 'index'])->name('biblical-trivia.index');
 
@@ -178,6 +182,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/blogs/{blog}/edit', [AdminBlogController::class, 'edit'])->name('blogs.edit');
     Route::put('/blogs/{blog}', [AdminBlogController::class, 'update'])->name('blogs.update');
     Route::delete('/blogs/{blog}', [AdminBlogController::class, 'destroy'])->name('blogs.destroy');
+
+    Route::get('/collection-pages', [CollectionPageController::class, 'index'])->name('collection-pages.index');
+    Route::get('/collection-pages/create', [CollectionPageController::class, 'create'])->name('collection-pages.create');
+    Route::post('/collection-pages', [CollectionPageController::class, 'store'])->name('collection-pages.store');
+    Route::get('/collection-pages/{collectionPage}/edit', [CollectionPageController::class, 'edit'])->name('collection-pages.edit');
+    Route::put('/collection-pages/{collectionPage}', [CollectionPageController::class, 'update'])->name('collection-pages.update');
+    Route::delete('/collection-pages/{collectionPage}', [CollectionPageController::class, 'destroy'])->name('collection-pages.destroy');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:user'])->group(function () {});

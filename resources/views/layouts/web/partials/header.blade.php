@@ -18,7 +18,29 @@
 
       <!-- Desktop Nav -->
       <ul class="nav-links" role="list">
-        <li><a href="#shop" class="nav-link shop-nav">Collection</a></li>
+        <li class="nav-item-dropdown shop-nav">
+          <button
+            type="button"
+            class="nav-link nav-dropdown-toggle"
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-controls="collection-nav-menu"
+          >
+            Collection
+            <svg class="nav-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6,9 12,15 18,9"/></svg>
+          </button>
+          <ul class="nav-dropdown-menu" id="collection-nav-menu" role="menu">
+            @forelse ($collectionNavPages as $page)
+              <li role="none">
+                <a href="{{ route('collection.show', $page->slug) }}" class="nav-dropdown-link" role="menuitem">{{ $page->title }}</a>
+              </li>
+            @empty
+              <li role="none">
+                <a href="{{ route('home') }}#shop" class="nav-dropdown-link" role="menuitem">{{ __('All products') }}</a>
+              </li>
+            @endforelse
+          </ul>
+        </li>
         <li><a href="{{ route('biblical-trivia.index') }}" class="nav-link shop-nav">Cards Game</a></li>
         <li style="display: none;"><a href="#hub" class="nav-link impact-nav">Civic Hub</a></li>
         <li style="display: none;"><a href="#blog" class="nav-link impact-nav">Blog</a></li>
@@ -90,7 +112,20 @@
   <div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Mobile navigation" aria-modal="true" hidden>
     <nav aria-label="Mobile navigation">
       <ul class="mobile-nav-links" role="list">
-        <li><a href="#shop" class="mobile-nav-link">Collection</a></li>
+        <li class="mobile-nav-group">
+          <span class="mobile-nav-link mobile-nav-group-label">Collection</span>
+          <ul class="mobile-nav-sublist" role="list">
+            @forelse ($collectionNavPages as $page)
+              <li>
+                <a href="{{ route('collection.show', $page->slug) }}" class="mobile-nav-sublink">{{ $page->title }}</a>
+              </li>
+            @empty
+              <li>
+                <a href="{{ route('home') }}#shop" class="mobile-nav-sublink">{{ __('All products') }}</a>
+              </li>
+            @endforelse
+          </ul>
+        </li>
         <li><a href="{{ route('biblical-trivia.index') }}" class="mobile-nav-link">Cards Game</a></li>
         <li><a href="#shop" class="mobile-nav-link">New Arrivals</a></li>
         <li><a href="#hub" class="mobile-nav-link">Civic Hub</a></li>
