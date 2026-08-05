@@ -1,5 +1,103 @@
 @extends('layouts.web.master')
 @section('title', 'Home')
+
+@push('meta')
+@verbatim
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "WebSite",
+  "name": "Reap Threads",
+  "url": "https://reapthreads.com/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://reapthreads.com/{search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Reap Threads",
+  "alternateName": "Christian Apparel - Reap433",
+  "url": "https://reapthreads.com/",
+  "logo": "https://reapthreads.com/assets/web/images/logo.png"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ClothingStore",
+  "name": "Reap Threads",
+  "image": "",
+  "@id": "",
+  "url": "https://reapthreads.com/",
+  "telephone": "",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "",
+    "addressLocality": "Grand Prairie",
+    "addressRegion": "TX",
+    "postalCode": "",
+    "addressCountry": "US"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "opens": "00:00",
+    "closes": "23:59"
+  }
+}
+</script>
+@endverbatim
+<meta name="geo.region" content="US" />
+<meta name="geo.position" content="39.78373;-100.445882" />
+<meta name="ICBM" content="39.78373, -100.445882" />
+<meta name="geo.region" content="US-TX" />
+<meta name="geo.position" content="31.263891;-98.545612" />
+<meta name="ICBM" content="31.263891, -98.545612" />
+<meta name="DC.title" content="christian apparel, christian hoodies, christian sweaters, religious t shirts, christian trucker cap" />
+<meta name="geo.region" content="US-TX" />
+<meta name="geo.placename" content="Grand Prairie" />
+<meta name="geo.position" content="32.745965;-96.997785" />
+<meta name="ICBM" content="32.745965, -96.997785" />
+<link rel="alternate" hreflang="x-default" href="https://reapthreads.com/"/>
+<link rel="alternate" hreflang="en-us" href="https://reapthreads.com/"  />
+<meta name="google-site-verification" content="kaPjE5_OTTRpmoKm-6tGAEY1oerKZ-iKyI86XeXE7x4" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TDT8HHT020"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TDT8HHT020');
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NDKZJKMF');</script>
+<!-- End Google Tag Manager -->
+@endpush
+
+@push('body_start')
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NDKZJKMF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+@endpush
+
 @section('content')
 <main id="main">
 
