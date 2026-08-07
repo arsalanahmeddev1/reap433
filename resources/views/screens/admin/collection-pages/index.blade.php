@@ -40,7 +40,13 @@
                                                     @endif
                                                 </td>
                                                 <td>{{ $page->title }}</td>
-                                                <td>{{ $page->productCategory?->name ?? '—' }}</td>
+                                                <td>
+                                                    @if ($page->productCategories->isNotEmpty())
+                                                        {{ $page->productCategories->pluck('name')->join(', ') }}
+                                                    @else
+                                                        {{ $page->productCategory?->name ?? '—' }}
+                                                    @endif
+                                                </td>
                                                 <td><code class="text-reset small">{{ $page->slug }}</code></td>
                                                 <td>
                                                     <div class="common-align gap-2 justify-content-start">

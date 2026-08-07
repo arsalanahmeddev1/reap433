@@ -10,24 +10,23 @@
     @endif
 @endpush
 
+@php
+    $faqs = $collectionPage->normalizedFaqs();
+    $categoryNames = $collectionPage->productCategories->pluck('name')->filter();
+@endphp
+
 @section('content')
 <main id="main" class="printful-products-page collection-page">
     <section class="section-pad">
         <div class="container printful-products-container">
             <div class="printful-products-header">
-                @if ($collectionPage->productCategory)
-                    <span class="section-eyebrow">{{ $collectionPage->productCategory->name }}</span>
+                @if ($categoryNames->isNotEmpty())
+                    <span class="section-eyebrow">{{ $categoryNames->join(' · ') }}</span>
                 @else
                     <span class="section-eyebrow">{{ __('Collection') }}</span>
                 @endif
 
                 <h1 class="printful-products-title">{{ $collectionPage->title }}</h1>
-
-                @if ($collectionPage->description)
-                    <div class="printful-products-subtitle collection-page-description">
-                        {!! $collectionPage->description !!}
-                    </div>
-                @endif
             </div>
 
             @if ($products->isEmpty())
@@ -78,9 +77,92 @@
                     </div>
                 @endif
             @endif
+
+            @if ($collectionPage->description)
+                <div class="collection-page-content">
+                    <div class="collection-page-description">
+                        {!! $collectionPage->description !!}
+                    </div>
+                </div>
+            @endif
+
+            @if (count($faqs) > 0)
+                <div class="collection-page-faqs">
+                    <h2 class="collection-page-faqs-heading">Frequently Asked Questions</h2>
+                    <div class="collection-faq-accordion" id="collectionFaqAccordion">
+                        @foreach ($faqs as $index => $faq)
+                            @php
+                                $question = trim((string) ($faq['question'] ?? ''));
+                                $answer = trim((string) ($faq['answer'] ?? ''));
+                                $itemId = 'collection-faq-' . $index;
+                            @endphp
+                            @if ($question !== '' || $answer !== '')
+                                <div class="collection-faq-item{{ $index === 0 ? ' is-open' : '' }}">
+                                    <button
+                                        type="button"
+                                        class="collection-faq-trigger"
+                                        id="{{ $itemId }}-trigger"
+                                        aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                                        aria-controls="{{ $itemId }}-panel"
+                                        data-faq-trigger
+                                    >
+                                        <h3 class="collection-faq-question">{{ $question !== '' ? $question : __('FAQ') }}</h3>
+                                        <span class="collection-faq-icon" aria-hidden="true">
+                                            <svg class="collection-faq-icon-plus" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                            <svg class="collection-faq-icon-minus" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        </span>
+                                    </button>
+                                    <div
+                                        class="collection-faq-panel"
+                                        id="{{ $itemId }}-panel"
+                                        role="region"
+                                        aria-labelledby="{{ $itemId }}-trigger"
+                                        @if ($index !== 0) hidden @endif
+                                    >
+                                        <div class="collection-faq-answer">{{ $answer }}</div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            @endif
         </div>
     </section>
 </main>
+
+@push('scripts')
+<script>
+(function () {
+    var root = document.getElementById('collectionFaqAccordion');
+    if (!root) return;
+
+    root.querySelectorAll('[data-faq-trigger]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var item = btn.closest('.collection-faq-item');
+            var panel = item ? item.querySelector('.collection-faq-panel') : null;
+            if (!item || !panel) return;
+
+            var willOpen = !item.classList.contains('is-open');
+
+            root.querySelectorAll('.collection-faq-item.is-open').forEach(function (openItem) {
+                openItem.classList.remove('is-open');
+                var openBtn = openItem.querySelector('[data-faq-trigger]');
+                var openPanel = openItem.querySelector('.collection-faq-panel');
+                if (openBtn) openBtn.setAttribute('aria-expanded', 'false');
+                if (openPanel) openPanel.hidden = true;
+            });
+
+            if (willOpen) {
+                item.classList.add('is-open');
+                btn.setAttribute('aria-expanded', 'true');
+                panel.hidden = false;
+            }
+        });
+    });
+}());
+</script>
+@endpush
 
 <style>
     .printful-products-page .printful-products-container {
@@ -101,14 +183,15 @@
         margin: var(--space-sm) 0;
     }
 
-    .printful-products-subtitle {
-        color: var(--c-text-secondary);
-        max-width: 560px;
-        margin: 0 auto;
+    .collection-page-content {
+        margin-top: var(--space-3xl);
+        max-width: 720px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .collection-page-description {
-        max-width: 640px;
+        color: var(--c-text-secondary);
         line-height: 1.6;
     }
 
@@ -124,6 +207,101 @@
         max-width: 100%;
         height: auto;
         border-radius: var(--radius-sm);
+    }
+
+    .collection-page-faqs {
+        margin-top: var(--space-3xl);
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .collection-page-faqs-heading {
+        font-family: var(--font-display);
+        font-size: clamp(1.75rem, 3.5vw, 2.35rem);
+        color: var(--c-text-primary);
+        text-align: center;
+        margin: 0 0 var(--space-xl);
+    }
+
+    .collection-faq-accordion {
+        border: 1px solid var(--c-black-border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        background: var(--c-black-soft);
+    }
+
+    .collection-faq-item + .collection-faq-item {
+        border-top: 1px solid var(--c-black-border);
+    }
+
+    .collection-faq-trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-md);
+        padding: 1.1rem 1.25rem;
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        text-align: left;
+        color: var(--c-text-primary);
+        transition: background var(--t-fast);
+    }
+
+    .collection-faq-trigger:hover {
+        background: rgba(191, 136, 52, 0.08);
+    }
+
+    .collection-faq-question {
+        font-family: var(--font-heading);
+        font-size: 1.05rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin: 0;
+        color: var(--c-text-primary);
+        flex: 1;
+    }
+
+    .collection-faq-icon {
+        flex: 0 0 auto;
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        border: 1px solid rgba(191, 136, 52, 0.45);
+        color: var(--c-gold);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(191, 136, 52, 0.1);
+    }
+
+    .collection-faq-icon-minus {
+        display: none;
+    }
+
+    .collection-faq-item.is-open .collection-faq-icon-plus {
+        display: none;
+    }
+
+    .collection-faq-item.is-open .collection-faq-icon-minus {
+        display: block;
+    }
+
+    .collection-faq-item.is-open .collection-faq-trigger {
+        background: rgba(191, 136, 52, 0.1);
+    }
+
+    .collection-faq-panel {
+        padding: 15px;
+    }
+
+    .collection-faq-answer {
+        color: var(--c-text-secondary);
+        line-height: 1.7;
+        white-space: pre-wrap;
+        font-size: 0.98rem;
     }
 
     .printful-products-grid {
@@ -221,6 +399,10 @@
     .printful-products-empty-hint {
         margin-top: var(--space-md);
         font-size: 0.875rem;
+    }
+
+    .printful-products-pagination {
+        margin-top: var(--space-2xl);
     }
 </style>
 @endsection

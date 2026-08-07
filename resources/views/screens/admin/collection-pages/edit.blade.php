@@ -18,18 +18,14 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Category') }} <span class="text-danger">*</span></label>
-                            <select name="category" class="form-select @error('category') is-invalid @enderror" required>
-                                <option value="">{{ __('Select') }}</option>
-                                @foreach ($categories as $cat)
-                                    <option value="{{ $cat->id }}" @selected(old('category', $collectionPage->category) == $cat->id)>{{ $cat->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('category')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
+                        @include('screens.admin.collection-pages.partials.categories-field', [
+                            'categories' => $categories,
+                            'selectedCategoryIds' => old(
+                                'categories',
+                                $collectionPage->productCategories->pluck('id')->all()
+                                    ?: array_filter([$collectionPage->category])
+                            ),
+                        ])
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Image') }}</label>
                             <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" />
@@ -55,6 +51,9 @@
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
+                        @include('screens.admin.collection-pages.partials.faqs-field', [
+                            'faqItems' => old('faqs', $collectionPage->normalizedFaqs() ?: [['question' => '', 'answer' => '']]),
+                        ])
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('SEO Title') }}</label>
                             <input type="text" name="seo_title" class="form-control @error('seo_title') is-invalid @enderror" value="{{ old('seo_title', $collectionPage->seo_title) }}" maxlength="255" />
@@ -81,6 +80,7 @@
 @endsection
 
 @include('screens.admin.collection-pages.partials.description-quill-scripts')
+@include('screens.admin.collection-pages.partials.categories-faqs-scripts')
 
 @push('scripts')
     <script>

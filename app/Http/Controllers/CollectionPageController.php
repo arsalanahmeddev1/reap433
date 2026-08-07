@@ -11,9 +11,15 @@ class CollectionPageController extends Controller
     public function show(string $slug): View
     {
         $collectionPage = CollectionPage::query()
-            ->with('productCategory')
+            ->with('productCategories')
             ->where('slug', $slug)
             ->firstOrFail();
+
+        $categoryIds = $collectionPage->productCategories->pluck('id');
+
+        if ($categoryIds->isEmpty() && $collectionPage->category) {
+            $categoryIds = collect([$collectionPage->category]);
+        }
 
         $products = PrintfulProduct::query()
             ->withCount('variants')
@@ -24,7 +30,11 @@ class CollectionPageController extends Controller
                     },
                 ]);
             })
-            ->where('category_id', $collectionPage->category)
+            ->when($categoryIds->isNotEmpty(), function ($query) use ($categoryIds) {
+                $query->whereIn('category_id', $categoryIds);
+            }, function ($query) {
+                $query->whereRaw('1 = 0');
+            })
             ->latest()
             ->paginate(12);
 
