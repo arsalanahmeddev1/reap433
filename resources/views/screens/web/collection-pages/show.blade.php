@@ -3,6 +3,7 @@
 @section('title', $collectionPage->seo_title ?: $collectionPage->title)
 
 @push('meta')
+    <meta name="robots" content="noindex, nofollow">
     @if ($collectionPage->seo_description)
         <meta name="description" content="{{ $collectionPage->seo_description }}">
     @elseif ($collectionPage->description)

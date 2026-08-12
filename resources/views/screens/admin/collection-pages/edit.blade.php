@@ -27,6 +27,14 @@
                             ),
                         ])
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Slug') }}</label>
+                            <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $collectionPage->slug) }}" maxlength="255" placeholder="{{ __('Leave blank to auto-generate from title') }}" />
+                            <small class="text-muted">{{ __('URL slug, e.g. multi-category. Leave blank to generate from title.') }}</small>
+                            @error('slug')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Image') }}</label>
                             <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" />
                             @error('image')

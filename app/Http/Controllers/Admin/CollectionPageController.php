@@ -43,7 +43,7 @@ class CollectionPageController extends Controller
 
         $collectionPage = CollectionPage::create([
             'title' => $validated['title'],
-            'slug' => CollectionPage::slugFromTitle($validated['title']),
+            'slug' => $this->resolveSlug($validated),
             'category' => $categoryIds[0] ?? null,
             'image' => $path,
             'description' => $validated['description'] ?? null,
@@ -77,7 +77,7 @@ class CollectionPageController extends Controller
 
     public function update(Request $request, CollectionPage $collectionPage): RedirectResponse|JsonResponse
     {
-        $validated = $this->validatedPayload($request);
+        $validated = $this->validatedPayload($request, $collectionPage);
         $categoryIds = $this->categoryIds($validated);
         $faqs = $this->normalizedFaqs($validated['faqs'] ?? []);
 
@@ -96,7 +96,7 @@ class CollectionPageController extends Controller
 
         $collectionPage->update([
             'title' => $validated['title'],
-            'slug' => CollectionPage::slugFromTitle($validated['title'], $collectionPage->id),
+            'slug' => $this->resolveSlug($validated, $collectionPage->id),
             'category' => $categoryIds[0] ?? null,
             'image' => $path,
             'description' => $validated['description'] ?? null,
@@ -156,10 +156,37 @@ class CollectionPageController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function validatedPayload(Request $request): array
+    private function validatedPayload(Request $request, ?CollectionPage $collectionPage = null): array
     {
         return $request->validate([
             'title' => 'required|string|max:255',
+            'slug' => [
+                'nullable',
+                'string',
+                'max:255',
+                function (string $attribute, mixed $value, \Closure $fail) use ($collectionPage): void {
+                    $slug = trim((string) $value);
+                    if ($slug === '') {
+                        return;
+                    }
+
+                    $normalized = \Illuminate\Support\Str::slug($slug);
+                    if ($normalized === '') {
+                        $fail(__('Enter a valid slug.'));
+
+                        return;
+                    }
+
+                    $exists = CollectionPage::query()
+                        ->where('slug', $normalized)
+                        ->when($collectionPage, fn ($q) => $q->where('id', '!=', $collectionPage->id))
+                        ->exists();
+
+                    if ($exists) {
+                        $fail(__('This slug is already in use.'));
+                    }
+                },
+            ],
             'categories' => 'required|array|min:1',
             'categories.*' => 'integer|exists:product_categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif|max:4096',
@@ -171,6 +198,26 @@ class CollectionPageController extends Controller
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string',
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function resolveSlug(array $validated, ?int $ignoreId = null): string
+    {
+        $raw = trim((string) ($validated['slug'] ?? ''));
+
+        if ($raw === '') {
+            return CollectionPage::slugFromTitle($validated['title'], $ignoreId);
+        }
+
+        $slug = \Illuminate\Support\Str::slug($raw);
+
+        if ($slug === '') {
+            return CollectionPage::slugFromTitle($validated['title'], $ignoreId);
+        }
+
+        return $slug;
     }
 
     /**
