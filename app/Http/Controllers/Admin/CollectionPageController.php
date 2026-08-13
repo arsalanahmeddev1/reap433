@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CollectionPage;
+use App\Models\PrintfulProduct;
 use App\Models\ProductCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,14 +27,16 @@ class CollectionPageController extends Controller
     public function create(): View
     {
         $categories = $this->categories();
+        $uncategorizedProducts = $this->uncategorizedProducts();
 
-        return view('screens.admin.collection-pages.create', compact('categories'));
+        return view('screens.admin.collection-pages.create', compact('categories', 'uncategorizedProducts'));
     }
 
     public function store(Request $request): RedirectResponse|JsonResponse
     {
         $validated = $this->validatedPayload($request);
         $categoryIds = $this->categoryIds($validated);
+        $uncategorizedProductIds = $this->uncategorizedProductIds($validated);
         $faqs = $this->normalizedFaqs($validated['faqs'] ?? []);
 
         $path = null;
@@ -53,6 +56,7 @@ class CollectionPageController extends Controller
         ]);
 
         $collectionPage->productCategories()->sync($categoryIds);
+        $collectionPage->uncategorizedProducts()->sync($uncategorizedProductIds);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -70,15 +74,17 @@ class CollectionPageController extends Controller
     public function edit(CollectionPage $collectionPage): View
     {
         $categories = $this->categories();
-        $collectionPage->load('productCategories');
+        $uncategorizedProducts = $this->uncategorizedProducts();
+        $collectionPage->load(['productCategories', 'uncategorizedProducts']);
 
-        return view('screens.admin.collection-pages.edit', compact('collectionPage', 'categories'));
+        return view('screens.admin.collection-pages.edit', compact('collectionPage', 'categories', 'uncategorizedProducts'));
     }
 
     public function update(Request $request, CollectionPage $collectionPage): RedirectResponse|JsonResponse
     {
         $validated = $this->validatedPayload($request, $collectionPage);
         $categoryIds = $this->categoryIds($validated);
+        $uncategorizedProductIds = $this->uncategorizedProductIds($validated);
         $faqs = $this->normalizedFaqs($validated['faqs'] ?? []);
 
         if ($request->boolean('remove_image') && $collectionPage->image) {
@@ -106,6 +112,7 @@ class CollectionPageController extends Controller
         ]);
 
         $collectionPage->productCategories()->sync($categoryIds);
+        $collectionPage->uncategorizedProducts()->sync($uncategorizedProductIds);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -154,6 +161,20 @@ class CollectionPageController extends Controller
     }
 
     /**
+     * @return \Illuminate\Support\Collection<int, PrintfulProduct>
+     */
+    private function uncategorizedProducts()
+    {
+        return PrintfulProduct::query()
+            ->where(function ($query) {
+                $query->whereNull('category_id')
+                    ->orWhere('category_id', 0);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function validatedPayload(Request $request, ?CollectionPage $collectionPage = null): array
@@ -189,6 +210,24 @@ class CollectionPageController extends Controller
             ],
             'categories' => 'required|array|min:1',
             'categories.*' => 'integer|exists:product_categories,id',
+            'uncategorized_products' => 'nullable|array',
+            'uncategorized_products.*' => [
+                'integer',
+                'exists:printful_products,id',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $isUncategorized = PrintfulProduct::query()
+                        ->where('id', $value)
+                        ->where(function ($query) {
+                            $query->whereNull('category_id')
+                                ->orWhere('category_id', 0);
+                        })
+                        ->exists();
+
+                    if (! $isUncategorized) {
+                        $fail(__('Only products with no category can be selected.'));
+                    }
+                },
+            ],
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif|max:4096',
             'remove_image' => 'sometimes|boolean',
             'description' => 'nullable|string',
@@ -227,6 +266,15 @@ class CollectionPageController extends Controller
     private function categoryIds(array $validated): array
     {
         return array_values(array_unique(array_map('intval', $validated['categories'] ?? [])));
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @return list<int>
+     */
+    private function uncategorizedProductIds(array $validated): array
+    {
+        return array_values(array_unique(array_map('intval', $validated['uncategorized_products'] ?? [])));
     }
 
     /**

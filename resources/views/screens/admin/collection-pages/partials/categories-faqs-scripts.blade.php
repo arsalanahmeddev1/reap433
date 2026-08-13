@@ -15,7 +15,8 @@
         }
 
         /* Select2 multi — dark tags, readable text + clear X */
-        .js-collection-categories + .select2-container {
+        .js-collection-categories + .select2-container,
+        .js-collection-uncategorized-products + .select2-container {
             width: 100% !important;
         }
         .select2-container--default .select2-selection--multiple {
@@ -106,6 +107,16 @@
                     width: '100%',
                     placeholder: @json(__('Select categories')),
                     allowClear: false,
+                    closeOnSelect: false
+                });
+            }
+
+            var $uncategorizedProducts = $('.js-collection-uncategorized-products');
+            if ($uncategorizedProducts.length) {
+                $uncategorizedProducts.select2({
+                    width: '100%',
+                    placeholder: @json(__('Select products with no category')),
+                    allowClear: true,
                     closeOnSelect: false
                 });
             }

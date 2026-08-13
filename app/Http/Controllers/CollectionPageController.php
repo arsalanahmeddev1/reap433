@@ -11,7 +11,7 @@ class CollectionPageController extends Controller
     public function show(string $slug): View
     {
         $collectionPage = CollectionPage::query()
-            ->with('productCategories')
+            ->with(['productCategories', 'uncategorizedProducts:id'])
             ->where('slug', $slug)
             ->firstOrFail();
 
@@ -20,6 +20,8 @@ class CollectionPageController extends Controller
         if ($categoryIds->isEmpty() && $collectionPage->category) {
             $categoryIds = collect([$collectionPage->category]);
         }
+
+        $uncategorizedProductIds = $collectionPage->uncategorizedProducts->pluck('id');
 
         $products = PrintfulProduct::query()
             ->withCount('variants')
@@ -30,10 +32,19 @@ class CollectionPageController extends Controller
                     },
                 ]);
             })
-            ->when($categoryIds->isNotEmpty(), function ($query) use ($categoryIds) {
-                $query->whereIn('category_id', $categoryIds);
-            }, function ($query) {
-                $query->whereRaw('1 = 0');
+            ->where(function ($query) use ($categoryIds, $uncategorizedProductIds) {
+                if ($categoryIds->isNotEmpty()) {
+                    $query->whereIn('category_id', $categoryIds);
+                }
+
+                if ($uncategorizedProductIds->isNotEmpty()) {
+                    $method = $categoryIds->isNotEmpty() ? 'orWhereIn' : 'whereIn';
+                    $query->{$method}('id', $uncategorizedProductIds);
+                }
+
+                if ($categoryIds->isEmpty() && $uncategorizedProductIds->isEmpty()) {
+                    $query->whereRaw('1 = 0');
+                }
             })
             ->latest()
             ->paginate(12);

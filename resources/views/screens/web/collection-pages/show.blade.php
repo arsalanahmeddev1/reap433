@@ -2,13 +2,18 @@
 
 @section('title', $collectionPage->seo_title ?: $collectionPage->title)
 
+@php
+    $pageMetaDescription = filled($collectionPage->seo_description)
+        ? (string) $collectionPage->seo_description
+        : (filled($collectionPage->description)
+            ? \Illuminate\Support\Str::limit(strip_tags($collectionPage->description), 160)
+            : '');
+@endphp
+
+@section('meta_description', $pageMetaDescription)
+
 @push('meta')
     <meta name="robots" content="noindex, nofollow">
-    @if ($collectionPage->seo_description)
-        <meta name="description" content="{{ $collectionPage->seo_description }}">
-    @elseif ($collectionPage->description)
-        <meta name="description" content="{{ \Illuminate\Support\Str::limit(strip_tags($collectionPage->description), 160) }}">
-    @endif
 @endpush
 
 @php

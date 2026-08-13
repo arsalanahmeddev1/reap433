@@ -21,6 +21,10 @@
                             'categories' => $categories,
                             'selectedCategoryIds' => old('categories', []),
                         ])
+                        @include('screens.admin.collection-pages.partials.uncategorized-products-field', [
+                            'uncategorizedProducts' => $uncategorizedProducts,
+                            'selectedUncategorizedProductIds' => old('uncategorized_products', []),
+                        ])
                         <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Slug') }}</label>
                             <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}" maxlength="255" placeholder="{{ __('Leave blank to auto-generate from title') }}" />

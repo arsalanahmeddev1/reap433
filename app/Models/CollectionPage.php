@@ -34,6 +34,16 @@ class CollectionPage extends Model
         )->withTimestamps();
     }
 
+    public function uncategorizedProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            PrintfulProduct::class,
+            'collection_page_printful_product',
+            'collection_page_id',
+            'printful_product_id'
+        )->withTimestamps();
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
