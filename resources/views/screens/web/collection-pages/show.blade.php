@@ -13,7 +13,6 @@
 @section('meta_description', $pageMetaDescription)
 
 @push('meta')
-    <meta name="robots" content="noindex, nofollow">
 @endpush
 
 @php
