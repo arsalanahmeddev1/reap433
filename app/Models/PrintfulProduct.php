@@ -12,6 +12,8 @@ class PrintfulProduct extends Model
         'printful_product_id',
         'external_id',
         'name',
+        'seo_title',
+        'seo_description',
         'category_name',
         'category_id',
         'thumbnail_url',

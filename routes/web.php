@@ -167,6 +167,8 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/printful/sync-products', [PrintfulController::class, 'syncProducts'])->name('admin.printful.sync-products');
     Route::get('/printful/products', [PrintfulController::class, 'index'])->name('admin.printful.products.index');
+    Route::get('/printful/products/{printfulProduct}/edit', [PrintfulController::class, 'edit'])->name('admin.printful.products.edit');
+    Route::put('/printful/products/{printfulProduct}', [PrintfulController::class, 'update'])->name('admin.printful.products.update');
     Route::get('/printful/products/{printfulProduct}', [PrintfulController::class, 'show'])->name('admin.printful.products.show');
 
     Route::get('/blog-categories', [BlogCategoryController::class, 'index'])->name('blog-categories.index');

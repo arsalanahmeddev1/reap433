@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PrintfulProduct;
 use App\Services\PrintfulProductSyncService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class PrintfulController extends Controller
@@ -28,6 +29,36 @@ class PrintfulController extends Controller
         return view('screens.admin.printful.show', [
             'product' => $printfulProduct,
         ]);
+    }
+
+    public function edit(PrintfulProduct $printfulProduct): View
+    {
+        $printfulProduct->load('category');
+
+        return view('screens.admin.printful.edit', [
+            'product' => $printfulProduct,
+        ]);
+    }
+
+    public function update(Request $request, PrintfulProduct $printfulProduct): RedirectResponse
+    {
+        $validated = $request->validate([
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string'],
+        ]);
+
+        $printfulProduct->update([
+            'seo_title' => filled($validated['seo_title'] ?? null)
+                ? trim((string) $validated['seo_title'])
+                : null,
+            'seo_description' => filled($validated['seo_description'] ?? null)
+                ? trim((string) $validated['seo_description'])
+                : null,
+        ]);
+
+        return redirect()
+            ->route('admin.printful.products.edit', $printfulProduct)
+            ->with('success', __('Product SEO updated.'));
     }
 
     public function syncProducts(PrintfulProductSyncService $syncService): RedirectResponse

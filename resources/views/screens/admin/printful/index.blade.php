@@ -71,9 +71,14 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <a class="square-white" href="{{ route('admin.printful.products.show', $product) }}" title="View">
-                                                    <span><i class="fa-solid fa-eye"></i></span>
-                                                </a>
+                                                <div class="common-align gap-2 justify-content-start">
+                                                    <a class="square-white" href="{{ route('admin.printful.products.show', $product) }}" title="View">
+                                                        <span><i class="fa-solid fa-eye"></i></span>
+                                                    </a>
+                                                    <a class="square-white" href="{{ route('admin.printful.products.edit', $product) }}" title="{{ __('Edit SEO') }}">
+                                                        <span><i class="fa-solid fa-pen"></i></span>
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty

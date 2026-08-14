@@ -1,6 +1,8 @@
 @extends('layouts.web.master')
 
-@section('title', $product->name)
+@section('title', $product->seo_title ?: $product->name)
+
+@section('meta_description', (string) ($product->seo_description ?: ''))
 
 @section('content')
 <main id="main" class="printful-product-detail-page">

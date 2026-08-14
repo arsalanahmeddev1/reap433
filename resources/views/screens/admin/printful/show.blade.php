@@ -10,9 +10,12 @@
     @endif
     <div class="row">
         <div class="col-12">
-            <div class="mb-3">
+            <div class="mb-3 d-flex gap-2 flex-wrap">
                 <a href="{{ route('admin.printful.products.index') }}" class="btn btn-light btn-sm">
                     <i class="fa-solid fa-arrow-left pe-1"></i> Back to Printful Products
+                </a>
+                <a href="{{ route('admin.printful.products.edit', $product) }}" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-pen pe-1"></i> {{ __('Edit SEO') }}
                 </a>
             </div>
 
@@ -62,8 +65,15 @@
                                     {{ $product->category_name ?? '-' }}
                                 @endif
                             </p>
-                            <p class="c-o-light mb-0">
+                            <p class="c-o-light mb-1">
                                 <strong>Variants:</strong> {{ $product->variants->count() }}
+                            </p>
+                            <p class="c-o-light mb-1">
+                                <strong>{{ __('SEO Title') }}:</strong> {{ $product->seo_title ?: '—' }}
+                            </p>
+                            <p class="c-o-light mb-0">
+                                <strong>{{ __('Meta Description') }}:</strong>
+                                {{ $product->seo_description ? \Illuminate\Support\Str::limit($product->seo_description, 120) : '—' }}
                             </p>
                         </div>
                     </div>
