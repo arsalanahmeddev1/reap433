@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\OrderPrintfulController;
 use App\Http\Controllers\Admin\PrintfulController;
+use App\Http\Controllers\Admin\SitemapController as AdminSitemapController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WholeSellerController;
@@ -27,12 +28,14 @@ use App\Http\Controllers\ProductCustomizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileOrderController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserAddressController;
 use Illuminate\Support\Facades\Route;
 
 // web routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [SitemapController::class, 'show'])->name('sitemap.show');
 
 // Storefront search — artifacts, Printful products, and journal (database-backed)
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
@@ -191,6 +194,9 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/collection-pages/{collectionPage}/edit', [CollectionPageController::class, 'edit'])->name('collection-pages.edit');
     Route::put('/collection-pages/{collectionPage}', [CollectionPageController::class, 'update'])->name('collection-pages.update');
     Route::delete('/collection-pages/{collectionPage}', [CollectionPageController::class, 'destroy'])->name('collection-pages.destroy');
+
+    Route::get('/sitemap', [AdminSitemapController::class, 'index'])->name('sitemaps.index');
+    Route::put('/sitemap', [AdminSitemapController::class, 'update'])->name('sitemaps.update');
 });
 
 Route::prefix('admin')->middleware(['auth', 'role:user'])->group(function () {});

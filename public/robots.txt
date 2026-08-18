@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://reapthreads.com/sitemap.xml

@@ -206,6 +206,17 @@ class CmsModuleSeeder extends Seeder
             ]
         );
 
+        CmsModule::updateOrCreate(
+            ['route_name' => 'sitemaps.index'],
+            [
+                'name' => 'Sitemap',
+                'icon' => 'fa-solid fa-sitemap',
+                'sort_order' => 9,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
         $allowed = [
             'admin.dashboard',
             'users.index',
@@ -224,6 +235,7 @@ class CmsModuleSeeder extends Seeder
             'blog-categories.index',
             'blogs.index',
             'collection-pages.index',
+            'sitemaps.index',
         ];
 
         CmsModule::query()
