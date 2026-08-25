@@ -1,4 +1,8 @@
 (function () {
   var myElement = document.getElementById("simple-bar");
-  new SimpleBar(myElement, { autoHide: true });
+  if (!myElement || typeof SimpleBar === "undefined") {
+    return;
+  }
+
+  new SimpleBar(myElement, { autoHide: false });
 })();

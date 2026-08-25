@@ -192,6 +192,20 @@ body.dark-only .toggle-sidebar svg {
 
 .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links {
     margin-top: 0;
+    height: calc(100vh - 115px) !important;
+    max-height: calc(100vh - 115px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-wrapper,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-mask,
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-content-wrapper {
+    max-height: calc(100vh - 115px);
+}
+
+.page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .sidebar-main .sidebar-links .simplebar-content-wrapper {
+    overflow-y: auto !important;
 }
 
 body.dark-only .dropdown.custom-dropdown .dropdown-menu .dropdown-item:hover,

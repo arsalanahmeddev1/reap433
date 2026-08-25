@@ -11,6 +11,10 @@ use App\Http\Controllers\Admin\OrderPrintfulController;
 use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\SitemapController as AdminSitemapController;
 use App\Http\Controllers\Admin\ProductCategoryController;
+use App\Http\Controllers\Admin\QuizeCategoryController;
+use App\Http\Controllers\Admin\QuizAnswerController;
+use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Admin\QuizTypeController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WholeSellerController;
 use App\Http\Controllers\Admin\WholeSellerSettingController;
@@ -178,6 +182,26 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/blog-categories', [BlogCategoryController::class, 'store'])->name('blog-categories.store');
     Route::put('/blog-categories/{blogCategory}', [BlogCategoryController::class, 'update'])->name('blog-categories.update');
     Route::delete('/blog-categories/{blogCategory}', [BlogCategoryController::class, 'destroy'])->name('blog-categories.destroy');
+
+    Route::get('/quiz-categories', [QuizeCategoryController::class, 'index'])->name('quiz-categories.index');
+    Route::post('/quiz-categories', [QuizeCategoryController::class, 'store'])->name('quiz-categories.store');
+    Route::put('/quiz-categories/{quizeCategory}', [QuizeCategoryController::class, 'update'])->name('quiz-categories.update');
+    Route::delete('/quiz-categories/{quizeCategory}', [QuizeCategoryController::class, 'destroy'])->name('quiz-categories.destroy');
+
+    Route::get('/quiz-types', [QuizTypeController::class, 'index'])->name('quiz-types.index');
+    Route::post('/quiz-types', [QuizTypeController::class, 'store'])->name('quiz-types.store');
+    Route::put('/quiz-types/{quizType}', [QuizTypeController::class, 'update'])->name('quiz-types.update');
+    Route::delete('/quiz-types/{quizType}', [QuizTypeController::class, 'destroy'])->name('quiz-types.destroy');
+
+    Route::get('/quiz-questions', [QuizQuestionController::class, 'index'])->name('quiz-questions.index');
+    Route::post('/quiz-questions', [QuizQuestionController::class, 'store'])->name('quiz-questions.store');
+    Route::put('/quiz-questions/{quizQuestion}', [QuizQuestionController::class, 'update'])->name('quiz-questions.update');
+    Route::delete('/quiz-questions/{quizQuestion}', [QuizQuestionController::class, 'destroy'])->name('quiz-questions.destroy');
+
+    Route::get('/quiz-answers', [QuizAnswerController::class, 'index'])->name('quiz-answers.index');
+    Route::post('/quiz-answers', [QuizAnswerController::class, 'store'])->name('quiz-answers.store');
+    Route::put('/quiz-answers/{quizAnswer}', [QuizAnswerController::class, 'update'])->name('quiz-answers.update');
+    Route::delete('/quiz-answers/{quizAnswer}', [QuizAnswerController::class, 'destroy'])->name('quiz-answers.destroy');
 
     Route::post('/blog-editor/image', [AdminBlogController::class, 'uploadBlogBodyImage'])->name('blogs.editor-image');
 

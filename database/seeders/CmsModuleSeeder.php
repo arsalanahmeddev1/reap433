@@ -217,6 +217,61 @@ class CmsModuleSeeder extends Seeder
             ]
         );
 
+        $appManagement = CmsModule::updateOrCreate(
+            ['route_name' => 'app-management'],
+            [
+                'name' => 'App Management',
+                'icon' => 'fa-solid fa-mobile',
+                'sort_order' => 10,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'quiz-categories.index'],
+            [
+                'name' => 'Quiz Category',
+                'icon' => 'fa-solid fa-book',
+                'sort_order' => 1,
+                'status' => 'active',
+                'parent_id' => $appManagement->id,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'quiz-types.index'],
+            [
+                'name' => 'Quiz Type',
+                'icon' => 'fa-solid fa-layer-group',
+                'sort_order' => 2,
+                'status' => 'active',
+                'parent_id' => $appManagement->id,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'quiz-questions.index'],
+            [
+                'name' => 'Quiz Question',
+                'icon' => 'fa-solid fa-circle-question',
+                'sort_order' => 3,
+                'status' => 'active',
+                'parent_id' => $appManagement->id,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
+            ['route_name' => 'quiz-answers.index'],
+            [
+                'name' => 'Quiz Answer',
+                'icon' => 'fa-solid fa-list-check',
+                'sort_order' => 4,
+                'status' => 'active',
+                'parent_id' => $appManagement->id,
+            ]
+        );
+
         $allowed = [
             'admin.dashboard',
             'users.index',
@@ -236,6 +291,11 @@ class CmsModuleSeeder extends Seeder
             'blogs.index',
             'collection-pages.index',
             'sitemaps.index',
+            'app-management',
+            'quiz-categories.index',
+            'quiz-types.index',
+            'quiz-questions.index',
+            'quiz-answers.index',
         ];
 
         CmsModule::query()

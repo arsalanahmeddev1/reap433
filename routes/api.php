@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\AnswerController;
+use App\Http\Controllers\Api\QuizeCategoryController;
+use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\Api\QuizTypeController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,8 +28,24 @@ Route::post('/sign-in', [UserController::class, 'signIn']);
 Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
 
 Route::middleware('api.auth')->group(function () {
+    // User
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::put('/update-profile', [UserController::class, 'updateProfile']);
     Route::get('/get-profile', [UserController::class, 'getProfile']);
     Route::post('/logout', [UserController::class, 'logout']);
+
+    // Quiz Categories
+    Route::get('/categories', [QuizeCategoryController::class, 'index']);
+    Route::get('/categories/{slug}', [QuizeCategoryController::class, 'show']);
+
+    // Quiz Types
+    Route::get('/quiz-types', [QuizTypeController::class, 'index']);
+    Route::get('/quiz-types/{slug}', [QuizTypeController::class, 'show']);
+
+    // Quizzes
+    Route::get('/quizzes', [QuizController::class, 'index']);
+    Route::get('/quizzes/{slug}', [QuizController::class, 'show']);
+
+    // Answer
+    Route::post('/answer/verify', [AnswerController::class, 'verify']);
 });

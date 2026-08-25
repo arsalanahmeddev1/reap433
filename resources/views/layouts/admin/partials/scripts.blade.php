@@ -9,7 +9,7 @@
 <script src="{{ asset('assets/libs/js/icons/feather-icon/feather-icon.js') }}"></script>
 
 <!-- Scrollbar js-->
-{{-- <script src="{{ asset('assets/libs/js/scrollbar/simplebar.min.js') }}"></script> --}}
+<script src="{{ asset('assets/libs/js/scrollbar/simplebar.min.js') }}"></script>
 <script src="{{ asset('assets/libs/js/scrollbar/custom.js') }}"></script>
 
 <!-- Sidebar jquery-->

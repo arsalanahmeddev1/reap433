@@ -26,6 +26,10 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             BlogCategorySeeder::class,
             BlogSeeder::class,
+            QuizeCategorySeeder::class,
+            QuizTypeSeeder::class,
+            QuizQuestionSeeder::class,
+            QuizAnswerSeeder::class,
         ]);
     }
 }
