@@ -17,8 +17,6 @@ class QuizAnswerResource extends JsonResource
             'slug' => $this->slug,
             'answers' => $this->answers,
             'description' => $this->description,
-            'xp' => $this->xp,
-            'coins' => $this->coins,
         ];
     }
 }
