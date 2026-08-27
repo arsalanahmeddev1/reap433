@@ -25,7 +25,7 @@ class QuizController extends ApiController
         return $this->success([
             'total_questions' => $quizzes->count(),
             'questions' => QuizQuestionResource::collection($quizzes),
-        ], 'Questions fetched successfully.');
+        ], 'Quiz started');
     }
 
     public function show(string $slug): JsonResponse

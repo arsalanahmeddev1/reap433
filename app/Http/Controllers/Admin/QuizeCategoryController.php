@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\QuizType;
 use App\Models\QuizeCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -15,10 +16,15 @@ class QuizeCategoryController extends Controller
     public function index(): View
     {
         $categories = QuizeCategory::query()
+            ->with('quizTypes')
             ->orderBy('title')
             ->get();
 
-        return view('screens.admin.quiz-categories.index', compact('categories'));
+        $quizTypes = QuizType::query()
+            ->orderBy('title')
+            ->get();
+
+        return view('screens.admin.quiz-categories.index', compact('categories', 'quizTypes'));
     }
 
     public function store(Request $request): JsonResponse|RedirectResponse
@@ -39,12 +45,9 @@ class QuizeCategoryController extends Controller
             'description' => $validated['description'],
             'seo_title' => $validated['seo_title'],
             'seo_description' => $validated['seo_description'],
-            'estimated_time' => $validated['estimated_time'],
-            'difficulty' => $validated['difficulty'],
-            'best_score' => $validated['best_score'],
-            'xp' => $validated['xp'],
-            'coins' => $validated['coins'],
         ]);
+
+        $category->quizTypes()->sync($validated['quiz_type_ids']);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -88,12 +91,9 @@ class QuizeCategoryController extends Controller
             'description' => $validated['description'],
             'seo_title' => $validated['seo_title'],
             'seo_description' => $validated['seo_description'],
-            'estimated_time' => $validated['estimated_time'],
-            'difficulty' => $validated['difficulty'],
-            'best_score' => $validated['best_score'],
-            'xp' => $validated['xp'],
-            'coins' => $validated['coins'],
         ]);
+
+        $quizeCategory->quizTypes()->sync($validated['quiz_type_ids']);
 
         if ($request->expectsJson() || $request->ajax()) {
             return response()->json([
@@ -131,11 +131,7 @@ class QuizeCategoryController extends Controller
      *     description: ?string,
      *     seo_title: ?string,
      *     seo_description: ?string,
-     *     estimated_time: ?string,
-     *     difficulty: ?string,
-     *     best_score: ?int,
-     *     xp: ?int,
-     *     coins: ?int
+     *     quiz_type_ids: array<int, int>
      * }
      */
     private function validatedPayload(Request $request): array
@@ -147,13 +143,12 @@ class QuizeCategoryController extends Controller
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],
-            'estimated_time' => ['nullable', 'string', 'max:255'],
-            'difficulty' => ['nullable', 'string', 'in:Easy,Hard'],
-            'best_score' => ['nullable', 'integer', 'min:0'],
-            'xp' => ['nullable', 'integer', 'min:0'],
-            'coins' => ['nullable', 'integer', 'min:0'],
+            'quiz_type_ids' => ['required', 'array', 'min:1'],
+            'quiz_type_ids.*' => ['integer', 'exists:quiz_type,id'],
         ], [
             'image_url.max' => __('Quiz category image upload max size is 2MB.'),
+            'quiz_type_ids.required' => __('Please select at least one difficulty.'),
+            'quiz_type_ids.min' => __('Please select at least one difficulty.'),
         ]);
 
         return [
@@ -161,16 +156,14 @@ class QuizeCategoryController extends Controller
             'description' => $validated['description'] ?? null,
             'seo_title' => $validated['seo_title'] ?? null,
             'seo_description' => $validated['seo_description'] ?? null,
-            'estimated_time' => $validated['estimated_time'] ?? null,
-            'difficulty' => $validated['difficulty'] ?? null,
-            'best_score' => isset($validated['best_score']) ? (int) $validated['best_score'] : null,
-            'xp' => isset($validated['xp']) ? (int) $validated['xp'] : null,
-            'coins' => isset($validated['coins']) ? (int) $validated['coins'] : null,
+            'quiz_type_ids' => array_map('intval', $validated['quiz_type_ids']),
         ];
     }
 
     private function categoryPayload(QuizeCategory $category): array
     {
+        $category->loadMissing('quizTypes');
+
         return [
             'id' => $category->id,
             'title' => $category->title,
@@ -179,11 +172,8 @@ class QuizeCategoryController extends Controller
             'description' => $category->description,
             'seo_title' => $category->seo_title,
             'seo_description' => $category->seo_description,
-            'estimated_time' => $category->estimated_time,
-            'difficulty' => $category->difficulty,
-            'best_score' => $category->best_score,
-            'xp' => $category->xp,
-            'coins' => $category->coins,
+            'quiz_type_ids' => $category->quizTypes->pluck('id')->values()->all(),
+            'difficulty_titles' => $category->quizTypes->pluck('title')->implode(', '),
         ];
     }
 }

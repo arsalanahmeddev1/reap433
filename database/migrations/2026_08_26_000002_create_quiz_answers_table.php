@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('question_id')->constrained('quiz_question')->cascadeOnDelete();
             $table->string('slug')->unique();
             $table->string('answers');
+            $table->string('bible_title')->nullable();
             $table->text('description')->nullable();
             $table->unsignedInteger('xp')->nullable();
             $table->unsignedInteger('coins')->nullable();

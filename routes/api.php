@@ -43,9 +43,9 @@ Route::middleware('api.auth')->group(function () {
     Route::get('/quiz-types/{slug}', [QuizTypeController::class, 'show']);
 
     // Quizzes
-    Route::get('/quizzes', [QuizController::class, 'index']);
-    Route::get('/quizzes/{slug}', [QuizController::class, 'show']);
+    Route::get('/quiz/start', [QuizController::class, 'index']);
+    Route::get('/quiz/{slug}', [QuizController::class, 'show']);
 
     // Answer
-    Route::post('/answer/verify', [AnswerController::class, 'verify']);
+    Route::post('/quiz/answer', [AnswerController::class, 'verify']);
 });

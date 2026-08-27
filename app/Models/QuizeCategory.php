@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\UniqueSlug;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class QuizeCategory extends Model
@@ -17,6 +18,16 @@ class QuizeCategory extends Model
     public static function slugFromTitle(string $title, ?int $ignoreId = null): string
     {
         return UniqueSlug::generate(self::class, 'slug', $title, $ignoreId);
+    }
+
+    public function quizTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            QuizType::class,
+            'quiz_category_type',
+            'quiz_category_id',
+            'quiz_type_id'
+        );
     }
 
     public function imageUrl(): ?string

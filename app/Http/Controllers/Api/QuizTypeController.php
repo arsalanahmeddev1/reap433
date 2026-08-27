@@ -3,14 +3,25 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\QuizTypeResource;
+use App\Models\QuizCategoryType;
 use App\Models\QuizType;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class QuizTypeController extends ApiController
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $quizTypes = QuizType::query()
+            ->when($request->filled('quiz_category_id'), function ($query) use ($request) {
+                $quizTypeIds = QuizCategoryType::query()
+                    ->where('quiz_category_id', $request->integer('quiz_category_id'))
+                    ->select('quiz_type_id')
+                    ->groupBy('quiz_type_id')
+                    ->pluck('quiz_type_id');
+
+                $query->whereIn('id', $quizTypeIds);
+            })
             ->orderBy('title')
             ->get();
 

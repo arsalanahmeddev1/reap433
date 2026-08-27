@@ -21,12 +21,6 @@ return new class extends Migration
             if (! Schema::hasColumn('quize_categories', 'best_score')) {
                 $table->unsignedInteger('best_score')->nullable()->after('difficulty');
             }
-            if (! Schema::hasColumn('quize_categories', 'xp')) {
-                $table->unsignedInteger('xp')->nullable()->after('best_score');
-            }
-            if (! Schema::hasColumn('quize_categories', 'coins')) {
-                $table->unsignedInteger('coins')->nullable()->after('xp');
-            }
         });
     }
 
@@ -36,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('quize_categories', function (Blueprint $table) {
-            $columns = collect(['estimated_time', 'difficulty', 'best_score', 'xp', 'coins'])
+            $columns = collect(['estimated_time', 'difficulty', 'best_score'])
                 ->filter(fn (string $column) => Schema::hasColumn('quize_categories', $column))
                 ->values()
                 ->all();

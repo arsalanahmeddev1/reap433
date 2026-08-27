@@ -22,8 +22,6 @@ return new class extends Migration
             $table->string('estimated_time')->nullable();
             $table->string('difficulty')->nullable();
             $table->unsignedInteger('best_score')->nullable();
-            $table->unsignedInteger('xp')->nullable();
-            $table->unsignedInteger('coins')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

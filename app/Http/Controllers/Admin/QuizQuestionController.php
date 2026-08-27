@@ -20,7 +20,10 @@ class QuizQuestionController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $categories = QuizeCategory::query()->orderBy('title')->get();
+        $categories = QuizeCategory::query()
+            ->with('quizTypes')
+            ->orderBy('title')
+            ->get();
         $quizTypes = QuizType::query()->orderBy('title')->get();
 
         return view('screens.admin.quiz-questions.index', compact('quizQuestions', 'categories', 'quizTypes'));

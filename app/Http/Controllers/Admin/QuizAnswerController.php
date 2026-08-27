@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\QuizAnswer;
 use App\Models\QuizQuestion;
+use App\Models\QuizeCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,9 +20,16 @@ class QuizAnswerController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $questions = QuizQuestion::query()->orderBy('question')->get();
+        $categories = QuizeCategory::query()
+            ->with('quizTypes')
+            ->orderBy('title')
+            ->get();
 
-        return view('screens.admin.quiz-answers.index', compact('quizAnswers', 'questions'));
+        $questions = QuizQuestion::query()
+            ->orderBy('question')
+            ->get(['id', 'question', 'quiz_category_id', 'quiz_type_id']);
+
+        return view('screens.admin.quiz-answers.index', compact('quizAnswers', 'categories', 'questions'));
     }
 
     public function store(Request $request): JsonResponse|RedirectResponse
@@ -34,6 +42,7 @@ class QuizAnswerController extends Controller
             'question_id' => $validated['question_id'],
             'slug' => $slug,
             'answers' => $validated['answers'],
+            'bible_title' => $validated['bible_title'],
             'description' => $validated['description'],
             'xp' => $validated['xp'],
             'coins' => $validated['coins'],
@@ -67,6 +76,7 @@ class QuizAnswerController extends Controller
             'question_id' => $validated['question_id'],
             'slug' => $slug,
             'answers' => $validated['answers'],
+            'bible_title' => $validated['bible_title'],
             'description' => $validated['description'],
             'xp' => $validated['xp'],
             'coins' => $validated['coins'],
@@ -104,13 +114,14 @@ class QuizAnswerController extends Controller
     }
 
     /**
-     * @return array{question_id: int, answers: string, description: ?string, xp: ?int, coins: ?int, is_right: int}
+     * @return array{question_id: int, answers: string, bible_title: ?string, description: ?string, xp: ?int, coins: ?int, is_right: int}
      */
     private function validatedPayload(Request $request): array
     {
         $validated = $request->validate([
             'question_id' => ['required', 'integer', 'exists:quiz_question,id'],
             'answers' => ['required', 'string', 'max:255'],
+            'bible_title' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'xp' => ['nullable', 'integer', 'min:0'],
             'coins' => ['nullable', 'integer', 'min:0'],
@@ -120,6 +131,7 @@ class QuizAnswerController extends Controller
         return [
             'question_id' => (int) $validated['question_id'],
             'answers' => $validated['answers'],
+            'bible_title' => $validated['bible_title'] ?? null,
             'description' => $validated['description'] ?? null,
             'xp' => isset($validated['xp']) ? (int) $validated['xp'] : null,
             'coins' => isset($validated['coins']) ? (int) $validated['coins'] : null,
@@ -137,12 +149,17 @@ class QuizAnswerController extends Controller
 
     private function quizAnswerPayload(QuizAnswer $quizAnswer): array
     {
+        $quizAnswer->loadMissing('question');
+
         return [
             'id' => $quizAnswer->id,
             'question_id' => $quizAnswer->question_id,
+            'quiz_category_id' => $quizAnswer->question?->quiz_category_id,
+            'quiz_type_id' => $quizAnswer->question?->quiz_type_id,
             'question_text' => $quizAnswer->question?->question,
             'slug' => $quizAnswer->slug,
             'answers' => $quizAnswer->answers,
+            'bible_title' => $quizAnswer->bible_title,
             'description' => $quizAnswer->description,
             'xp' => $quizAnswer->xp,
             'coins' => $quizAnswer->coins,

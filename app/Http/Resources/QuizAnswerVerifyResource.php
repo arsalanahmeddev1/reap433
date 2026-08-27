@@ -17,6 +17,7 @@ class QuizAnswerVerifyResource extends JsonResource
             'question_id' => $this->question_id,
             'slug' => $this->slug,
             'answers' => $this->answers,
+            'bible_title' => $this->bible_title,
             'description' => $this->description,
             'xp' => $this->xp,
             'coins' => $this->coins,

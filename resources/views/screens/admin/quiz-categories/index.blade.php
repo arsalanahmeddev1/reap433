@@ -46,7 +46,7 @@
                                                     @endif
                                                 </td>
                                                 <td class="qc-title">{{ $category->title }}</td>
-                                                <td class="qc-difficulty">{{ $category->difficulty ?: '—' }}</td>
+                                                <td class="qc-difficulty">{{ $category->quizTypes->pluck('title')->implode(', ') ?: '—' }}</td>
                                                 <td class="qc-slug"><code class="text-reset">{{ $category->slug }}</code></td>
                                                 <td>
                                                     <div class="common-align gap-2 justify-content-start">
@@ -58,11 +58,7 @@
                                                             data-title="{{ $category->title }}"
                                                             data-seo-title="{{ $category->seo_title }}"
                                                             data-seo-description="{{ $category->seo_description }}"
-                                                            data-estimated-time="{{ $category->estimated_time }}"
-                                                            data-difficulty="{{ $category->difficulty }}"
-                                                            data-best-score="{{ $category->best_score }}"
-                                                            data-xp="{{ $category->xp }}"
-                                                            data-coins="{{ $category->coins }}"
+                                                            data-quiz-type-ids="{{ $category->quizTypes->pluck('id')->implode(',') }}"
                                                             data-image-url="{{ $category->imageUrl() }}"
                                                         >
                                                             <span><i class="fa-solid fa-pen"></i></span>
@@ -124,32 +120,23 @@
                             <div id="qc_create_description_editor" class="quiz-category-quill-wrap"></div>
                             <textarea id="qc-create-description" name="description" class="d-none"></textarea>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label f-w-500" for="qc-create-estimated-time">{{ __('Estimated Time') }}</label>
-                                <input type="text" class="form-control" id="qc-create-estimated-time" name="estimated_time" maxlength="255" placeholder="{{ __('e.g. 5 min') }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label f-w-500" for="qc-create-difficulty">{{ __('Difficulty') }}</label>
-                                <select class="form-select" id="qc-create-difficulty" name="difficulty">
-                                    <option value="">{{ __('Select difficulty') }}</option>
-                                    <option value="Easy">{{ __('Easy') }}</option>
-                                    <option value="Hard">{{ __('Hard') }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-create-best-score">{{ __('Best Score') }}</label>
-                                <input type="number" class="form-control" id="qc-create-best-score" name="best_score" min="0" step="1" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-create-xp">{{ __('XP') }}</label>
-                                <input type="number" class="form-control" id="qc-create-xp" name="xp" min="0" step="1" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-create-coins">{{ __('Coins') }}</label>
-                                <input type="number" class="form-control" id="qc-create-coins" name="coins" min="0" step="1" />
+                        <div class="mb-3">
+                            <label class="form-label f-w-500">{{ __('Difficulty') }} <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach ($quizTypes as $quizType)
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input qc-create-quiz-type"
+                                            type="checkbox"
+                                            name="quiz_type_ids[]"
+                                            id="qc-create-quiz-type-{{ $quizType->id }}"
+                                            value="{{ $quizType->id }}"
+                                        />
+                                        <label class="form-check-label" for="qc-create-quiz-type-{{ $quizType->id }}">
+                                            {{ $quizType->title }}{{ $quizType->slogan_text ? ' ('.$quizType->slogan_text.')' : '' }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                         <div class="mb-3">
@@ -205,32 +192,23 @@
                             <div id="qc_edit_description_editor" class="quiz-category-quill-wrap"></div>
                             <textarea id="qc-edit-description" name="description" class="d-none"></textarea>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label f-w-500" for="qc-edit-estimated-time">{{ __('Estimated Time') }}</label>
-                                <input type="text" class="form-control" id="qc-edit-estimated-time" name="estimated_time" maxlength="255" placeholder="{{ __('e.g. 5 min') }}" />
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label f-w-500" for="qc-edit-difficulty">{{ __('Difficulty') }}</label>
-                                <select class="form-select" id="qc-edit-difficulty" name="difficulty">
-                                    <option value="">{{ __('Select difficulty') }}</option>
-                                    <option value="Easy">{{ __('Easy') }}</option>
-                                    <option value="Hard">{{ __('Hard') }}</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-edit-best-score">{{ __('Best Score') }}</label>
-                                <input type="number" class="form-control" id="qc-edit-best-score" name="best_score" min="0" step="1" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-edit-xp">{{ __('XP') }}</label>
-                                <input type="number" class="form-control" id="qc-edit-xp" name="xp" min="0" step="1" />
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label f-w-500" for="qc-edit-coins">{{ __('Coins') }}</label>
-                                <input type="number" class="form-control" id="qc-edit-coins" name="coins" min="0" step="1" />
+                        <div class="mb-3">
+                            <label class="form-label f-w-500">{{ __('Difficulty') }} <span class="text-danger">*</span></label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach ($quizTypes as $quizType)
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input qc-edit-quiz-type"
+                                            type="checkbox"
+                                            name="quiz_type_ids[]"
+                                            id="qc-edit-quiz-type-{{ $quizType->id }}"
+                                            value="{{ $quizType->id }}"
+                                        />
+                                        <label class="form-check-label" for="qc-edit-quiz-type-{{ $quizType->id }}">
+                                            {{ $quizType->title }}{{ $quizType->slogan_text ? ' ('.$quizType->slogan_text.')' : '' }}
+                                        </label>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                         <div class="mb-3">
@@ -262,6 +240,13 @@
                 });
             }
 
+            function setQuizTypeCheckboxes(selector, ids) {
+                $(selector).prop('checked', false);
+                (ids || []).forEach(function(id) {
+                    $(selector + '[value="' + id + '"]').prop('checked', true);
+                });
+            }
+
             $(document).on('click', '.js-quiz-category-edit', function() {
                 var btn = $(this);
                 var row = btn.closest('tr');
@@ -275,13 +260,14 @@
                 $('#qc-edit-title').val(btn.data('title'));
                 $('#qc-edit-seo-title').val(btn.data('seo-title') || '');
                 $('#qc-edit-seo-description').val(btn.data('seo-description') || '');
-                $('#qc-edit-estimated-time').val(btn.data('estimated-time') || '');
-                $('#qc-edit-difficulty').val(btn.data('difficulty') || '');
-                $('#qc-edit-best-score').val(btn.data('best-score') ?? '');
-                $('#qc-edit-xp').val(btn.data('xp') ?? '');
-                $('#qc-edit-coins').val(btn.data('coins') ?? '');
                 $('#qc-edit-image').val('');
                 $('#qc-remove-image').prop('checked', false);
+
+                var typeIds = String(btn.attr('data-quiz-type-ids') || '')
+                    .split(',')
+                    .map(function(v) { return v.trim(); })
+                    .filter(function(v) { return v !== ''; });
+                setQuizTypeCheckboxes('.qc-edit-quiz-type', typeIds);
 
                 if (window.setQuizCategoryQuillContent && window.quizCategoryQuillEditors.edit) {
                     setQuizCategoryQuillContent(window.quizCategoryQuillEditors.edit, descriptionHtml);
@@ -310,6 +296,7 @@
                     setQuizCategoryQuillContent(window.quizCategoryQuillEditors.create, '');
                     syncQuizCategoryQuill(window.quizCategoryQuillEditors.create, 'qc-create-description');
                 }
+                $('.qc-create-quiz-type').prop('checked', false);
             });
 
             window.updateCategoryRow = function(data) {
@@ -318,7 +305,7 @@
                     return;
                 }
                 row.find('.qc-title').text(data.title);
-                row.find('.qc-difficulty').text(data.difficulty || '—');
+                row.find('.qc-difficulty').text(data.difficulty_titles || '—');
                 row.find('.qc-slug code').text(data.slug);
                 row.find('template.qc-description-template').html(data.description || '');
                 if (data.image_url) {
@@ -337,11 +324,7 @@
                 editBtn.attr('data-title', data.title);
                 editBtn.attr('data-seo-title', data.seo_title || '');
                 editBtn.attr('data-seo-description', data.seo_description || '');
-                editBtn.attr('data-estimated-time', data.estimated_time || '');
-                editBtn.attr('data-difficulty', data.difficulty || '');
-                editBtn.attr('data-best-score', data.best_score ?? '');
-                editBtn.attr('data-xp', data.xp ?? '');
-                editBtn.attr('data-coins', data.coins ?? '');
+                editBtn.attr('data-quiz-type-ids', (data.quiz_type_ids || []).join(','));
                 editBtn.attr('data-image-url', data.image_url || '');
             };
 

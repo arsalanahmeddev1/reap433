@@ -57,8 +57,11 @@
                                                             class="square-white js-quiz-answer-edit border-0 p-0"
                                                             title="{{ __('Edit') }}"
                                                             data-update-url="{{ route('quiz-answers.update', $quizAnswer) }}"
+                                                            data-quiz-category-id="{{ $quizAnswer->question?->quiz_category_id }}"
+                                                            data-quiz-type-id="{{ $quizAnswer->question?->quiz_type_id }}"
                                                             data-question-id="{{ $quizAnswer->question_id }}"
                                                             data-answers="{{ $quizAnswer->answers }}"
+                                                            data-bible-title="{{ $quizAnswer->bible_title }}"
                                                             data-description="{{ $quizAnswer->description }}"
                                                             data-xp="{{ $quizAnswer->xp }}"
                                                             data-coins="{{ $quizAnswer->coins }}"
@@ -105,12 +108,24 @@
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-create-category">{{ __('Quiz Category') }} <span class="text-danger">*</span></label>
+                            <select class="form-select" id="qa-create-category" required>
+                                <option value="">{{ __('Select category') }}</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-create-type">{{ __('Quiz Type') }} <span class="text-danger">*</span></label>
+                            <select class="form-select" id="qa-create-type" required>
+                                <option value="">{{ __('Select type') }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label f-w-500" for="qa-create-question">{{ __('Question') }} <span class="text-danger">*</span></label>
                             <select class="form-select" id="qa-create-question" name="question_id" required>
                                 <option value="">{{ __('Select question') }}</option>
-                                @foreach ($questions as $question)
-                                    <option value="{{ $question->id }}">{{ $question->question }}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
@@ -118,7 +133,11 @@
                             <input type="text" class="form-control" id="qa-create-answers" name="answers" required maxlength="255" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label f-w-500" for="qa-create-description">{{ __('Description') }}</label>
+                            <label class="form-label f-w-500" for="qa-create-bible-title">{{ __('Bible Title') }}</label>
+                            <input type="text" class="form-control" id="qa-create-bible-title" name="bible_title" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-create-description">{{ __('Bible Description') }}</label>
                             <textarea class="form-control" id="qa-create-description" name="description" rows="3"></textarea>
                         </div>
                         <div class="row">
@@ -160,17 +179,33 @@
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-edit-category">{{ __('Quiz Category') }} <span class="text-danger">*</span></label>
+                            <select class="form-select" id="qa-edit-category" required>
+                                <option value="">{{ __('Select category') }}</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->title }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-edit-type">{{ __('Quiz Type') }} <span class="text-danger">*</span></label>
+                            <select class="form-select" id="qa-edit-type" required>
+                                <option value="">{{ __('Select type') }}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label f-w-500" for="qa-edit-question">{{ __('Question') }} <span class="text-danger">*</span></label>
                             <select class="form-select" id="qa-edit-question" name="question_id" required>
                                 <option value="">{{ __('Select question') }}</option>
-                                @foreach ($questions as $question)
-                                    <option value="{{ $question->id }}">{{ $question->question }}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label f-w-500" for="qa-edit-answers">{{ __('Answer') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="qa-edit-answers" name="answers" required maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qa-edit-bible-title">{{ __('Bible Title') }}</label>
+                            <input type="text" class="form-control" id="qa-edit-bible-title" name="bible_title" maxlength="255" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label f-w-500" for="qa-edit-description">{{ __('Description') }}</label>
@@ -205,8 +240,102 @@
 @endsection
 
 @push('scripts')
+    @php
+        $quizTypesByCategory = [];
+        foreach ($categories as $category) {
+            $quizTypesByCategory[(string) $category->id] = $category->quizTypes
+                ->sortBy('title')
+                ->map(fn ($type) => [
+                    'id' => $type->id,
+                    'title' => $type->title,
+                ])
+                ->values()
+                ->all();
+        }
+
+        $questionsData = $questions->map(fn ($question) => [
+            'id' => $question->id,
+            'question' => $question->question,
+            'quiz_category_id' => $question->quiz_category_id,
+            'quiz_type_id' => $question->quiz_type_id,
+        ])->values()->all();
+    @endphp
     <script>
         $(function() {
+            var quizTypesByCategory = @json($quizTypesByCategory);
+            var questionsData = @json($questionsData);
+
+            function fillQuizTypeSelect($select, categoryId, selectedTypeId) {
+                $select.find('option:not(:first)').remove();
+                $select.val('');
+
+                if (! categoryId || ! quizTypesByCategory[categoryId]) {
+                    return;
+                }
+
+                quizTypesByCategory[categoryId].forEach(function(type) {
+                    $select.append(
+                        $('<option></option>').attr('value', type.id).text(type.title)
+                    );
+                });
+
+                if (selectedTypeId) {
+                    $select.val(String(selectedTypeId));
+                }
+            }
+
+            function fillQuestionSelect($select, categoryId, typeId, selectedQuestionId) {
+                $select.find('option:not(:first)').remove();
+                $select.val('');
+
+                if (! categoryId || ! typeId) {
+                    return;
+                }
+
+                questionsData.forEach(function(question) {
+                    if (
+                        String(question.quiz_category_id) === String(categoryId)
+                        && String(question.quiz_type_id) === String(typeId)
+                    ) {
+                        $select.append(
+                            $('<option></option>').attr('value', question.id).text(question.question)
+                        );
+                    }
+                });
+
+                if (selectedQuestionId) {
+                    $select.val(String(selectedQuestionId));
+                }
+            }
+
+            $('#qa-create-category').on('change', function() {
+                fillQuizTypeSelect($('#qa-create-type'), $(this).val(), '');
+                fillQuestionSelect($('#qa-create-question'), '', '', '');
+            });
+
+            $('#qa-create-type').on('change', function() {
+                fillQuestionSelect(
+                    $('#qa-create-question'),
+                    $('#qa-create-category').val(),
+                    $(this).val(),
+                    ''
+                );
+            });
+
+            $('#qa-edit-category').on('change', function() {
+                fillQuizTypeSelect($('#qa-edit-type'), $(this).val(), '');
+                fillQuestionSelect($('#qa-edit-question'), '', '', '');
+            });
+
+            $('#qa-edit-type').on('change', function() {
+                fillQuestionSelect(
+                    $('#qa-edit-question'),
+                    $('#qa-edit-category').val(),
+                    $(this).val(),
+                    ''
+                );
+            });
+
             if ($.fn.DataTable && $('#quiz-answers-table tbody tr').length > 0 && $('#quiz-answers-table tbody tr td[colspan]').length === 0) {
                 $('#quiz-answers-table').DataTable({
                     order: [[0, 'asc']],
@@ -216,10 +345,16 @@
 
             $(document).on('click', '.js-quiz-answer-edit', function() {
                 var btn = $(this);
+                var categoryId = String(btn.data('quiz-category-id') || '');
+                var typeId = String(btn.data('quiz-type-id') || '');
+                var questionId = String(btn.data('question-id') || '');
 
                 $('#quiz-answer-edit-form').attr('action', btn.data('update-url'));
-                $('#qa-edit-question').val(String(btn.data('question-id') || ''));
+                $('#qa-edit-category').val(categoryId);
+                fillQuizTypeSelect($('#qa-edit-type'), categoryId, typeId);
+                fillQuestionSelect($('#qa-edit-question'), categoryId, typeId, questionId);
                 $('#qa-edit-answers').val(btn.data('answers') || '');
+                $('#qa-edit-bible-title').val(btn.data('bible-title') || '');
                 $('#qa-edit-description').val(btn.data('description') || '');
                 $('#qa-edit-xp').val(btn.data('xp') !== undefined && btn.data('xp') !== '' ? btn.data('xp') : '');
                 $('#qa-edit-coins').val(btn.data('coins') !== undefined && btn.data('coins') !== '' ? btn.data('coins') : '');
@@ -227,6 +362,12 @@
 
                 var modal = new bootstrap.Modal(document.getElementById('crudModal'));
                 modal.show();
+            });
+
+            $('#quizAnswerCreateModal').on('hidden.bs.modal', function() {
+                $('#qa-create-category').val('');
+                fillQuizTypeSelect($('#qa-create-type'), '', '');
+                fillQuestionSelect($('#qa-create-question'), '', '', '');
             });
 
             window.updateCategoryRow = function(data) {
@@ -255,8 +396,11 @@
                     row.find('.qa-is-right').html('<span class="badge bg-secondary">{{ __('No') }}</span>');
                 }
                 var editBtn = row.find('.js-quiz-answer-edit');
+                editBtn.attr('data-quiz-category-id', data.quiz_category_id || '');
+                editBtn.attr('data-quiz-type-id', data.quiz_type_id || '');
                 editBtn.attr('data-question-id', data.question_id || '');
                 editBtn.attr('data-answers', data.answers || '');
+                editBtn.attr('data-bible-title', data.bible_title || '');
                 editBtn.attr('data-description', data.description || '');
                 editBtn.attr('data-xp', data.xp !== null && data.xp !== undefined ? data.xp : '');
                 editBtn.attr('data-coins', data.coins !== null && data.coins !== undefined ? data.coins : '');

@@ -110,9 +110,6 @@
                             <label class="form-label f-w-500" for="qq-create-type">{{ __('Quiz Type') }} <span class="text-danger">*</span></label>
                             <select class="form-select" id="qq-create-type" name="quiz_type_id" required>
                                 <option value="">{{ __('Select type') }}</option>
-                                @foreach ($quizTypes as $quizType)
-                                    <option value="{{ $quizType->id }}">{{ $quizType->title }}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
@@ -166,9 +163,6 @@
                             <label class="form-label f-w-500" for="qq-edit-type">{{ __('Quiz Type') }} <span class="text-danger">*</span></label>
                             <select class="form-select" id="qq-edit-type" name="quiz_type_id" required>
                                 <option value="">{{ __('Select type') }}</option>
-                                @foreach ($quizTypes as $quizType)
-                                    <option value="{{ $quizType->id }}">{{ $quizType->title }}</option>
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3">
@@ -200,8 +194,49 @@
 @endsection
 
 @push('scripts')
+    @php
+        $quizTypesByCategory = [];
+        foreach ($categories as $category) {
+            $quizTypesByCategory[(string) $category->id] = $category->quizTypes
+                ->sortBy('title')
+                ->map(fn ($type) => [
+                    'id' => $type->id,
+                    'title' => $type->title,
+                ])
+                ->values()
+                ->all();
+        }
+    @endphp
     <script>
         $(function() {
+            var quizTypesByCategory = @json($quizTypesByCategory);
+            function fillQuizTypeSelect($select, categoryId, selectedTypeId) {
+                $select.find('option:not(:first)').remove();
+                $select.val('');
+
+                if (! categoryId || ! quizTypesByCategory[categoryId]) {
+                    return;
+                }
+
+                quizTypesByCategory[categoryId].forEach(function(type) {
+                    $select.append(
+                        $('<option></option>').attr('value', type.id).text(type.title)
+                    );
+                });
+
+                if (selectedTypeId) {
+                    $select.val(String(selectedTypeId));
+                }
+            }
+
+            $('#qq-create-category').on('change', function() {
+                fillQuizTypeSelect($('#qq-create-type'), $(this).val(), '');
+            });
+
+            $('#qq-edit-category').on('change', function() {
+                fillQuizTypeSelect($('#qq-edit-type'), $(this).val(), '');
+            });
+
             if ($.fn.DataTable && $('#quiz-questions-table tbody tr').length > 0 && $('#quiz-questions-table tbody tr td[colspan]').length === 0) {
                 $('#quiz-questions-table').DataTable({
                     order: [[0, 'asc']],
@@ -220,7 +255,11 @@
 
                 $('#quiz-question-edit-form').attr('action', btn.data('update-url'));
                 $('#qq-edit-category').val(String(btn.data('quiz-category-id') || ''));
-                $('#qq-edit-type').val(String(btn.data('quiz-type-id') || ''));
+                fillQuizTypeSelect(
+                    $('#qq-edit-type'),
+                    String(btn.data('quiz-category-id') || ''),
+                    String(btn.data('quiz-type-id') || '')
+                );
                 $('#qq-edit-question').val(btn.data('question') || '');
                 $('#qq-edit-seo-title').val(btn.data('seo-title') || '');
                 $('#qq-edit-seo-description').val(btn.data('seo-description') || '');
@@ -241,6 +280,8 @@
                     setQuizQuestionQuillContent(window.quizQuestionQuillEditors.create, '');
                     syncQuizQuestionQuill(window.quizQuestionQuillEditors.create, 'qq-create-description');
                 }
+                $('#qq-create-category').val('');
+                fillQuizTypeSelect($('#qq-create-type'), '', '');
             });
 
             window.updateCategoryRow = function(data) {

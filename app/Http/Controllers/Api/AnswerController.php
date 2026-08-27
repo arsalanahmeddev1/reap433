@@ -55,6 +55,6 @@ class AnswerController extends ApiController
 
         return $this->success([
             'answer' => new QuizAnswerVerifyResource($answer),
-        ], 'Answer verified successfully.');
+        ], 'Answer submitted.');
     }
 }
