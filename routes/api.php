@@ -48,4 +48,5 @@ Route::middleware('api.auth')->group(function () {
 
     // Answer
     Route::post('/quiz/answer', [AnswerController::class, 'verify']);
+    Route::post('/quiz/complete', [AnswerController::class, 'completeQuiz']);
 });

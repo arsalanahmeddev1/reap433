@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Api\CompleteQuizRequest;
 use App\Http\Requests\Api\VerifyAnswerRequest;
 use App\Http\Resources\QuizAnswerVerifyResource;
 use App\Models\QuizAnswer;
@@ -56,5 +57,38 @@ class AnswerController extends ApiController
         return $this->success([
             'answer' => new QuizAnswerVerifyResource($answer),
         ], 'Answer submitted.');
+    }
+
+    public function completeQuiz(CompleteQuizRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $attemptsQuery = UserAttemptQuestionAnswer::query()
+            ->where('user_id', $request->user()->id)
+            ->where('quiz_category_id', $validated['quiz_category_id'])
+            ->where('quiz_type_id', $validated['quiz_type_id'])
+            ->where('is_complete', 0);
+
+        $totalQuestion = (clone $attemptsQuery)->count();
+
+        if ($totalQuestion === 0) {
+            return $this->error('No quiz attempts found to complete.', 404);
+        }
+
+        $answerXp = (int) (clone $attemptsQuery)->sum('answer_xp');
+        $answerCoins = (int) (clone $attemptsQuery)->sum('answer_coins');
+        $correctAnswers = (int) (clone $attemptsQuery)->where('answer_is_right', 1)->count();
+
+        $accuracyPercent = (int) round(($correctAnswers / $totalQuestion) * 100);
+
+        $attemptsQuery->update(['is_complete' => 1]);
+
+        return $this->success([
+            'score' => $answerXp,
+            'answer_xp' => $answerXp,
+            'answer_coins' => $answerCoins,
+            'total_question' => $totalQuestion,
+            'accuracy_percent' => $accuracyPercent,
+        ], 'Quiz completed.');
     }
 }
