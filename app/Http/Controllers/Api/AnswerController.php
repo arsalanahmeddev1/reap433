@@ -84,7 +84,7 @@ class AnswerController extends ApiController
         $attemptsQuery->update(['is_complete' => 1]);
 
         return $this->success([
-            'score' => $answerXp.'/'.$totalQuestion,
+            'score' => $correctAnswers,
             'answer_xp' => $answerXp,
             'answer_coins' => $answerCoins,
             'total_question' => $totalQuestion,
