@@ -80,12 +80,11 @@ class AnswerController extends ApiController
         $correctAnswers = (int) (clone $attemptsQuery)->where('answer_is_right', 1)->count();
 
         $accuracyPercent = (int) round(($correctAnswers / $totalQuestion) * 100);
-        $score = $answerXp / $totalQuestion;
 
         $attemptsQuery->update(['is_complete' => 1]);
 
         return $this->success([
-            'score' => $answerXp + '/' + $totalQuestion,
+            'score' => $answerXp.'/'.$totalQuestion,
             'answer_xp' => $answerXp,
             'answer_coins' => $answerCoins,
             'total_question' => $totalQuestion,
