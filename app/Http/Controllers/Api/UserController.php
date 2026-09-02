@@ -4,19 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Requests\Api\ForgotPasswordRequest;
+use App\Http\Requests\Api\ResetOtpPasswordRequest;
 use App\Http\Requests\Api\SignInRequest;
 use App\Http\Requests\Api\SignUpRequest;
+use App\Http\Requests\Api\SocialLoginRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Http\Resources\UserResource;
+use App\Models\EmailTemplate;
+use App\Models\PasswordOtp;
 use App\Models\User;
+use App\Services\EmailTemplateService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class UserController extends ApiController
 {
@@ -68,17 +73,76 @@ class UserController extends ApiController
 
     public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
     {
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $email = $request->validated('email');
 
-        if ($status !== Password::RESET_LINK_SENT) {
-            throw ValidationException::withMessages([
-                'email' => [__($status)],
-            ]);
+        $user = User::query()->where('email', $email)->first();
+
+        if (! $user) {
+            return $this->error('Email not found.', 404);
         }
 
-        return $this->success(null, __($status));
+        $otp = (string) random_int(100000, 999999);
+        $expiryMinutes = 10;
+
+        PasswordOtp::query()->updateOrCreate(
+            ['email' => $email],
+            [
+                'otp' => $otp,
+                'expires_at' => now()->addMinutes($expiryMinutes),
+            ]
+        );
+
+        $sent = app(EmailTemplateService::class)->send(
+            EmailTemplate::SLUG_FORGOT_PASSWORD_OTP,
+            $email,
+            [
+                'customer_name' => $user->name,
+                'customer_email' => $user->email,
+                'otp' => $otp,
+                'expiry_minutes' => (string) $expiryMinutes,
+                'site_name' => 'REAP433',
+            ]
+        );
+
+        if (! $sent) {
+            return $this->error('Failed to send OTP email. Please try again later.', 500);
+        }
+
+        return $this->success(null, 'OTP sent to your email.');
+    }
+
+    public function resetOtpPassword(ResetOtpPasswordRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $passwordOtp = PasswordOtp::query()
+            ->where('email', $validated['email'])
+            ->where('otp', $validated['otp'])
+            ->first();
+
+        if (! $passwordOtp) {
+            return $this->error('Invalid OTP.', 400);
+        }
+
+        if ($passwordOtp->expires_at->isPast()) {
+            $passwordOtp->delete();
+
+            return $this->error('OTP has expired.', 400);
+        }
+
+        $user = User::query()->where('email', $validated['email'])->first();
+
+        if (! $user) {
+            return $this->error('Email not found.', 404);
+        }
+
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        $passwordOtp->delete();
+
+        return $this->success(null, 'Password reset successfully.');
     }
 
     public function changePassword(ChangePasswordRequest $request): JsonResponse
@@ -125,6 +189,146 @@ class UserController extends ApiController
         return $this->success([
             'user' => new UserResource($user),
         ], 'Profile fetched successfully.');
+    }
+
+    public function socialLogin(SocialLoginRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+        $provider = $validated['provider'];
+
+        $socialUser = $provider === 'google'
+            ? $this->verifyGoogleIdToken($validated['id_token'])
+            : $this->verifyAppleIdToken($validated['id_token']);
+
+        $email = ($socialUser['email'] ?? null)
+            ?: $validated['email'];
+
+        $providerId = ($socialUser['provider_id'] ?? null)
+            ?: ($validated['provider_id'] ?? null)
+            ?: hash('sha256', $provider.'|'.$email);
+
+        $name = ($validated['name'] ?? null)
+            ?: ($socialUser['name'] ?? null)
+            ?: Str::before($email, '@');
+
+        $profileImage = ($validated['profile_image'] ?? null)
+            ?: ($socialUser['profile_image'] ?? null);
+
+        $user = User::query()
+            ->where('provider', $provider)
+            ->where('provider_id', $providerId)
+            ->first();
+
+        if (! $user) {
+            $user = User::query()->where('email', $email)->first();
+        }
+
+        if ($user) {
+            $user->forceFill([
+                'provider' => $provider,
+                'provider_id' => $providerId,
+                'name' => $user->name ?: $name,
+                'profile_image' => $user->profile_image ?: $profileImage,
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ])->save();
+        } else {
+            $user = User::create([
+                'name' => $name,
+                'email' => $email,
+                'profile_image' => $profileImage,
+                'password' => Hash::make(Str::random(32)),
+                'provider' => $provider,
+                'provider_id' => $providerId,
+                'role' => config('roles.user', 'user'),
+                'approval_status' => User::APPROVAL_APPROVED,
+                'approved_at' => now(),
+            ]);
+
+            $user->forceFill([
+                'email_verified_at' => now(),
+            ])->save();
+
+            event(new Registered($user));
+        }
+
+        $token = $user->createToken('api')->plainTextToken;
+
+        return $this->success([
+            'user' => new UserResource($user->fresh()),
+            'token' => $token,
+            'token_type' => 'Bearer',
+        ], 'Signed in successfully.');
+    }
+
+    /**
+     * @return array{provider_id: string, email: ?string, name: ?string, profile_image: ?string}|null
+     */
+    private function verifyGoogleIdToken(string $idToken): ?array
+    {
+        $response = Http::get('https://oauth2.googleapis.com/tokeninfo', [
+            'id_token' => $idToken,
+        ]);
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $payload = $response->json();
+
+        if (empty($payload['sub'])) {
+            return null;
+        }
+
+        return [
+            'provider_id' => (string) $payload['sub'],
+            'email' => $payload['email'] ?? null,
+            'name' => $payload['name'] ?? null,
+            'profile_image' => $payload['picture'] ?? null,
+        ];
+    }
+
+    /**
+     * @return array{provider_id: string, email: ?string, name: ?string, profile_image: ?string}|null
+     */
+    private function verifyAppleIdToken(string $idToken): ?array
+    {
+        $parts = explode('.', $idToken);
+
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        $payload = json_decode($this->base64UrlDecode($parts[1]), true);
+
+        if (! is_array($payload) || empty($payload['sub'])) {
+            return null;
+        }
+
+        if (($payload['iss'] ?? null) !== 'https://appleid.apple.com') {
+            return null;
+        }
+
+        if (isset($payload['exp']) && (int) $payload['exp'] < time()) {
+            return null;
+        }
+
+        return [
+            'provider_id' => (string) $payload['sub'],
+            'email' => $payload['email'] ?? null,
+            'name' => null,
+            'profile_image' => null,
+        ];
+    }
+
+    private function base64UrlDecode(string $value): string
+    {
+        $remainder = strlen($value) % 4;
+
+        if ($remainder) {
+            $value .= str_repeat('=', 4 - $remainder);
+        }
+
+        return (string) base64_decode(strtr($value, '-_', '+/'));
     }
 
     public function logout(Request $request): JsonResponse

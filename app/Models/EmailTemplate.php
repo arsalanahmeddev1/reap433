@@ -14,6 +14,8 @@ class EmailTemplate extends Model
 
     public const SLUG_WHOLESALER_PENDING_APPROVAL = 'wholesaler_pending_approval';
 
+    public const SLUG_FORGOT_PASSWORD_OTP = 'forgot_password_otp';
+
     protected $fillable = [
         'slug',
         'name',
@@ -77,6 +79,13 @@ class EmailTemplate extends Model
                 '{{business_phone}}',
                 '{{business_location}}',
                 '{{business_description}}',
+                '{{site_name}}',
+            ],
+            self::SLUG_FORGOT_PASSWORD_OTP => [
+                '{{customer_name}}',
+                '{{customer_email}}',
+                '{{otp}}',
+                '{{expiry_minutes}}',
                 '{{site_name}}',
             ],
             default => $common,

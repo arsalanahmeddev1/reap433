@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\QuizeCategoryResource;
 use App\Models\QuizeCategory;
+use App\Models\UserAttemptQuestionAnswer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -40,5 +41,24 @@ class QuizeCategoryController extends ApiController
         return $this->success([
             'category' => new QuizeCategoryResource($category),
         ], 'Category fetched successfully.');
+    }
+
+    public function continueQuizCategory(Request $request): JsonResponse
+    {
+        $categoryIds = UserAttemptQuestionAnswer::query()
+            ->where('user_id', $request->user()->id)
+            ->where('is_complete', 0)
+            ->distinct()
+            ->pluck('quiz_category_id');
+
+        $categories = QuizeCategory::query()
+            ->with('quizTypes')
+            ->whereIn('id', $categoryIds)
+            ->orderByDesc('id')
+            ->get();
+
+        return $this->success([
+            'categories' => QuizeCategoryResource::collection($categories),
+        ], 'Continue quiz categories fetched successfully.');
     }
 }

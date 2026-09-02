@@ -58,6 +58,22 @@ class QuizeCategoryResource extends JsonResource
             ? (int) round(($completedQuestions / $totalQuestions) * 100)
             : 0;
 
+        $lastQuestion = null;
+
+        if ($request->user()) {
+            $lastAttempt = UserAttemptQuestionAnswer::query()
+                ->with('question')
+                ->where('user_id', $request->user()->id)
+                ->where('quiz_category_id', $this->id)
+                ->when($quizTypeId, function ($query) use ($quizTypeId) {
+                    $query->where('quiz_type_id', $quizTypeId);
+                })
+                ->latest()
+                ->first();
+
+            $lastQuestion = $lastAttempt?->question;
+        }
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -80,6 +96,11 @@ class QuizeCategoryResource extends JsonResource
                 'completed_questions' => $completedQuestions,
                 'progress_percent' => $progressPercent,
             ],
+            'last_question' => $lastQuestion ? [
+                'id' => $lastQuestion->id,
+                'title' => $lastQuestion->question,
+                'slug' => $lastQuestion->slug,
+            ] : null,
             'seo_title' => $this->seo_title,
             'seo_description' => $this->seo_description,
         ];

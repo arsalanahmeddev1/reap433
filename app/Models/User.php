@@ -31,6 +31,8 @@ class User extends Authenticatable
         'email',
         'profile_image',
         'password',
+        'provider',
+        'provider_id',
         'role',
         'business_name',
         'business_phone',

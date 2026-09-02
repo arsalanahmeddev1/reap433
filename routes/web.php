@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AchievementController;
 use App\Http\Controllers\Admin\AbandonedCartController;
 use App\Http\Controllers\Admin\BlogCategoryController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
@@ -202,6 +203,11 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/quiz-answers', [QuizAnswerController::class, 'store'])->name('quiz-answers.store');
     Route::put('/quiz-answers/{quizAnswer}', [QuizAnswerController::class, 'update'])->name('quiz-answers.update');
     Route::delete('/quiz-answers/{quizAnswer}', [QuizAnswerController::class, 'destroy'])->name('quiz-answers.destroy');
+
+    Route::get('/achievements', [AchievementController::class, 'index'])->name('achievements.index');
+    Route::post('/achievements', [AchievementController::class, 'store'])->name('achievements.store');
+    Route::put('/achievements/{achievement}', [AchievementController::class, 'update'])->name('achievements.update');
+    Route::delete('/achievements/{achievement}', [AchievementController::class, 'destroy'])->name('achievements.destroy');
 
     Route::post('/blog-editor/image', [AdminBlogController::class, 'uploadBlogBodyImage'])->name('blogs.editor-image');
 

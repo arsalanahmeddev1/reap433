@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\UserAttemptQuestionAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,6 +13,11 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $totals = UserAttemptQuestionAnswer::query()
+            ->where('user_id', $this->id)
+            ->selectRaw('COALESCE(SUM(answer_xp), 0) as total_xp, COALESCE(SUM(answer_coins), 0) as total_coins')
+            ->first();
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -19,6 +25,13 @@ class UserResource extends JsonResource
             'profile_image' => $this->profileImageUrl()
                 ?? asset('assets/admin/images/user/user.png'),
             'role' => $this->role,
+            'total_xp' => (int) ($totals->total_xp ?? 0),
+            'total_coins' => (int) ($totals->total_coins ?? 0),
+            'total_streak' => UserAttemptQuestionAnswer::query()
+                ->where('user_id', $this->id)
+                ->where('is_complete', 1)
+                ->distinct()
+                ->count('quiz_category_id'),
         ];
     }
 }

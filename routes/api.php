@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\AnswerController;
+use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\QuizeCategoryController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\QuizTypeController;
@@ -25,7 +27,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/sign-up', [UserController::class, 'signUp']);
 Route::post('/sign-in', [UserController::class, 'signIn']);
+Route::post('/social-login', [UserController::class, 'socialLogin']);
 Route::post('/forgot-password', [UserController::class, 'forgotPassword']);
+Route::post('/forgot-password/reset', [UserController::class, 'resetOtpPassword']);
 
 Route::middleware('api.auth')->group(function () {
     // User
@@ -36,6 +40,7 @@ Route::middleware('api.auth')->group(function () {
 
     // Quiz Categories
     Route::get('/categories', [QuizeCategoryController::class, 'index']);
+    Route::get('/categories/continue', [QuizeCategoryController::class, 'continueQuizCategory']);
     Route::get('/categories/{slug}', [QuizeCategoryController::class, 'show']);
 
     // Quiz Types
@@ -49,4 +54,12 @@ Route::middleware('api.auth')->group(function () {
     // Answer
     Route::post('/quiz/answer', [AnswerController::class, 'verify']);
     Route::post('/quiz/complete', [AnswerController::class, 'completeQuiz']);
+
+    // Progress
+    Route::get('/progress', [ProgressController::class, 'index']);
+
+    // Achievements
+    Route::get('/achievements', [AchievementController::class, 'index']);
+    Route::post('/achievements/claim', [AchievementController::class, 'claim']);
+    Route::get('/achievements/{slug}', [AchievementController::class, 'show']);
 });

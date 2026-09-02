@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             QuizCategoryTypeSeeder::class,
             QuizQuestionSeeder::class,
             QuizAnswerSeeder::class,
+            AchievementSeeder::class,
         ]);
     }
 }
