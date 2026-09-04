@@ -105,6 +105,7 @@ class UserController extends ApiController
                 'site_name' => 'REAP433',
             ]
         );
+        dd($sent);
 
         if (! $sent) {
             return $this->error($sent, 500);
