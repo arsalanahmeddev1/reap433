@@ -9,10 +9,12 @@ use App\Http\Requests\Api\SignInRequest;
 use App\Http\Requests\Api\SignUpRequest;
 use App\Http\Requests\Api\SocialLoginRequest;
 use App\Http\Requests\Api\UpdateProfileRequest;
+use App\Http\Resources\UserRankingResource;
 use App\Http\Resources\UserResource;
 use App\Models\EmailTemplate;
 use App\Models\PasswordOtp;
 use App\Models\User;
+use App\Models\UserAttemptQuestionAnswer;
 use App\Services\EmailTemplateService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
@@ -260,6 +262,30 @@ class UserController extends ApiController
         ], 'Signed in successfully.');
     }
 
+    public function userRanking(): JsonResponse
+    {
+        $users = User::query()
+            ->where('role', config('roles.user', 'user'))
+            ->whereRaw(
+                '(SELECT COALESCE(SUM(answer_xp), 0) FROM user_attempt_question_answer WHERE user_attempt_question_answer.user_id = users.id AND user_attempt_question_answer.deleted_at IS NULL) > 0'
+            )
+            ->orderByDesc(
+                UserAttemptQuestionAnswer::query()
+                    ->selectRaw('COALESCE(SUM(answer_xp), 0)')
+                    ->whereColumn('user_attempt_question_answer.user_id', 'users.id')
+            )
+            ->orderBy('name')
+            ->get()
+            ->values()
+            ->each(function ($user, $index) {
+                $user->rank = $index + 1;
+            });
+
+        return $this->success([
+            'users' => UserRankingResource::collection($users),
+        ], 'User ranking fetched successfully.');
+    }
+
     /**
      * @return array{provider_id: string, email: ?string, name: ?string, profile_image: ?string}|null
      */
@@ -333,7 +359,23 @@ class UserController extends ApiController
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        /** @var User $user */
+        $user = $request->user();
+
+        if ((int) $request->input('is_delete') === 1) {
+            $user->tokens()->delete();
+
+            $oldImage = trim((string) $user->profile_image);
+            if ($oldImage !== '' && ! preg_match('#^https?://#i', $oldImage)) {
+                Storage::disk('public')->delete($oldImage);
+            }
+
+            $user->delete();
+
+            return $this->success(null, 'Account deleted successfully.');
+        }
+
+        $user->currentAccessToken()?->delete();
 
         return $this->success(null, 'Logged out successfully.');
     }

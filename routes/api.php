@@ -36,6 +36,7 @@ Route::middleware('api.auth')->group(function () {
     Route::post('/change-password', [UserController::class, 'changePassword']);
     Route::put('/update-profile', [UserController::class, 'updateProfile']);
     Route::get('/get-profile', [UserController::class, 'getProfile']);
+    Route::get('/user-ranking', [UserController::class, 'userRanking']);
     Route::post('/logout', [UserController::class, 'logout']);
 
     // Quiz Categories
