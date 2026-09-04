@@ -107,7 +107,7 @@ class UserController extends ApiController
         );
 
         if (! $sent) {
-            return $this->error('Failed to send OTP email. Please try again later.', 500);
+            return $this->error($sent, 500);
         }
 
         return $this->success(null, 'OTP sent to your email.');
