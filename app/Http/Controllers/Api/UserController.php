@@ -264,15 +264,37 @@ class UserController extends ApiController
 
     public function userRanking(Request $request): JsonResponse
     {
+        $request->validate([
+            'filter' => ['nullable', 'in:daily,weekly,monthly'],
+        ]);
+
+        $dateFrom = match ($request->input('filter')) {
+            'daily' => now()->startOfDay(),
+            'weekly' => now()->startOfWeek(),
+            'monthly' => now()->startOfMonth(),
+            default => null,
+        };
+
+        $xpWhereRaw = '(SELECT COALESCE(SUM(answer_xp), 0) FROM user_attempt_question_answer WHERE user_attempt_question_answer.user_id = users.id AND user_attempt_question_answer.deleted_at IS NULL';
+        $xpBindings = [];
+
+        if ($dateFrom) {
+            $xpWhereRaw .= ' AND user_attempt_question_answer.created_at >= ?';
+            $xpBindings[] = $dateFrom->toDateTimeString();
+        }
+
+        $xpWhereRaw .= ') > 0';
+
         $rankedUsers = User::query()
             ->where('role', config('roles.user', 'user'))
-            ->whereRaw(
-                '(SELECT COALESCE(SUM(answer_xp), 0) FROM user_attempt_question_answer WHERE user_attempt_question_answer.user_id = users.id AND user_attempt_question_answer.deleted_at IS NULL) > 0'
-            )
+            ->whereRaw($xpWhereRaw, $xpBindings)
             ->orderByDesc(
                 UserAttemptQuestionAnswer::query()
                     ->selectRaw('COALESCE(SUM(answer_xp), 0)')
                     ->whereColumn('user_attempt_question_answer.user_id', 'users.id')
+                    ->when($dateFrom, function ($query) use ($dateFrom) {
+                        $query->where('created_at', '>=', $dateFrom);
+                    })
             )
             ->orderBy('name')
             ->get()

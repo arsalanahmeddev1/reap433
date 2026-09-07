@@ -13,8 +13,18 @@ class UserRankingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $dateFrom = match ($request->input('filter')) {
+            'daily' => now()->startOfDay(),
+            'weekly' => now()->startOfWeek(),
+            'monthly' => now()->startOfMonth(),
+            default => null,
+        };
+
         $totals = UserAttemptQuestionAnswer::query()
             ->where('user_id', $this->id)
+            ->when($dateFrom, function ($query) use ($dateFrom) {
+                $query->where('created_at', '>=', $dateFrom);
+            })
             ->selectRaw('COALESCE(SUM(answer_xp), 0) as total_xp, COALESCE(SUM(answer_coins), 0) as total_coins')
             ->first();
 
@@ -31,6 +41,9 @@ class UserRankingResource extends JsonResource
             'total_streak' => UserAttemptQuestionAnswer::query()
                 ->where('user_id', $this->id)
                 ->where('is_complete', 1)
+                ->when($dateFrom, function ($query) use ($dateFrom) {
+                    $query->where('created_at', '>=', $dateFrom);
+                })
                 ->distinct()
                 ->count('quiz_category_id'),
         ];
