@@ -20,6 +20,7 @@ class CompleteQuizRequest extends FormRequest
         return [
             'quiz_category_id' => ['required', 'integer', 'exists:quize_categories,id'],
             'quiz_type_id' => ['required', 'integer', 'exists:quiz_type,id'],
+            'is_daily_challenge' => ['nullable', 'in:0,1'],
         ];
     }
 }

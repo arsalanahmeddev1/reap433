@@ -81,7 +81,10 @@ class AnswerController extends ApiController
 
         $accuracyPercent = (int) round(($correctAnswers / $totalQuestion) * 100);
 
-        $attemptsQuery->update(['is_complete' => 1]);
+        $attemptsQuery->update([
+            'is_complete' => 1,
+            'is_daily_challenge' => (string) ($validated['is_daily_challenge'] ?? '0'),
+        ]);
 
         return $this->success([
             'score' => $correctAnswers,

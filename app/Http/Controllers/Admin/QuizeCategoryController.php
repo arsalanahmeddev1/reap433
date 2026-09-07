@@ -38,10 +38,16 @@ class QuizeCategoryController extends Controller
             $imagePath = $request->file('image_url')->store('quiz-categories', 'public');
         }
 
+        $iconImagePath = null;
+        if ($request->hasFile('icon_image_url')) {
+            $iconImagePath = $request->file('icon_image_url')->store('quiz-categories', 'public');
+        }
+
         $category = QuizeCategory::create([
             'title' => $validated['title'],
             'slug' => $slug,
             'image_url' => $imagePath,
+            'icon_image_url' => $iconImagePath,
             'description' => $validated['description'],
             'seo_title' => $validated['seo_title'],
             'seo_description' => $validated['seo_description'],
@@ -84,10 +90,27 @@ class QuizeCategoryController extends Controller
             $imagePath = $request->file('image_url')->store('quiz-categories', 'public');
         }
 
+        $iconImagePath = $quizeCategory->icon_image_url;
+
+        if ($request->boolean('remove_icon_image') && $quizeCategory->icon_image_url) {
+            if (! preg_match('#^https?://#i', (string) $quizeCategory->icon_image_url)) {
+                Storage::disk('public')->delete($quizeCategory->icon_image_url);
+            }
+            $iconImagePath = null;
+        }
+
+        if ($request->hasFile('icon_image_url')) {
+            if ($quizeCategory->icon_image_url && ! preg_match('#^https?://#i', (string) $quizeCategory->icon_image_url)) {
+                Storage::disk('public')->delete($quizeCategory->icon_image_url);
+            }
+            $iconImagePath = $request->file('icon_image_url')->store('quiz-categories', 'public');
+        }
+
         $quizeCategory->update([
             'title' => $validated['title'],
             'slug' => $slug,
             'image_url' => $imagePath,
+            'icon_image_url' => $iconImagePath,
             'description' => $validated['description'],
             'seo_title' => $validated['seo_title'],
             'seo_description' => $validated['seo_description'],
@@ -112,6 +135,10 @@ class QuizeCategoryController extends Controller
     {
         if ($quizeCategory->image_url && ! preg_match('#^https?://#i', (string) $quizeCategory->image_url)) {
             Storage::disk('public')->delete($quizeCategory->image_url);
+        }
+
+        if ($quizeCategory->icon_image_url && ! preg_match('#^https?://#i', (string) $quizeCategory->icon_image_url)) {
+            Storage::disk('public')->delete($quizeCategory->icon_image_url);
         }
 
         $quizeCategory->delete();
@@ -140,6 +167,8 @@ class QuizeCategoryController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'image_url' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
             'remove_image' => ['sometimes', 'boolean'],
+            'icon_image_url' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
+            'remove_icon_image' => ['sometimes', 'boolean'],
             'description' => ['nullable', 'string'],
             'seo_title' => ['nullable', 'string', 'max:255'],
             'seo_description' => ['nullable', 'string'],
@@ -147,6 +176,7 @@ class QuizeCategoryController extends Controller
             'quiz_type_ids.*' => ['integer', 'exists:quiz_type,id'],
         ], [
             'image_url.max' => __('Quiz category image upload max size is 2MB.'),
+            'icon_image_url.max' => __('Quiz category icon image upload max size is 2MB.'),
             'quiz_type_ids.required' => __('Please select at least one difficulty.'),
             'quiz_type_ids.min' => __('Please select at least one difficulty.'),
         ]);
@@ -169,6 +199,7 @@ class QuizeCategoryController extends Controller
             'title' => $category->title,
             'slug' => $category->slug,
             'image_url' => $category->imageUrl(),
+            'icon_image_url' => $category->iconImageUrl(),
             'description' => $category->description,
             'seo_title' => $category->seo_title,
             'seo_description' => $category->seo_description,

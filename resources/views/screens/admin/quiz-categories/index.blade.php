@@ -60,6 +60,7 @@
                                                             data-seo-description="{{ $category->seo_description }}"
                                                             data-quiz-type-ids="{{ $category->quizTypes->pluck('id')->implode(',') }}"
                                                             data-image-url="{{ $category->imageUrl() }}"
+                                                            data-icon-image-url="{{ $category->iconImageUrl() }}"
                                                         >
                                                             <span><i class="fa-solid fa-pen"></i></span>
                                                         </button>
@@ -112,6 +113,16 @@
                                 class="form-control"
                                 id="qc-create-image"
                                 name="image_url"
+                                accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
+                            />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qc-create-icon-image">{{ __('Icon Image') }}</label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="qc-create-icon-image"
+                                name="icon_image_url"
                                 accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
                             />
                         </div>
@@ -185,6 +196,21 @@
                             <div id="qc-remove-image-wrap" class="form-check mt-2 d-none">
                                 <input class="form-check-input" type="checkbox" value="1" id="qc-remove-image" name="remove_image" />
                                 <label class="form-check-label" for="qc-remove-image">{{ __('Remove current image') }}</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="qc-edit-icon-image">{{ __('Icon Image') }}</label>
+                            <input
+                                type="file"
+                                class="form-control"
+                                id="qc-edit-icon-image"
+                                name="icon_image_url"
+                                accept="image/jpeg,image/png,image/jpg,image/webp,image/gif"
+                            />
+                            <img id="qc-edit-icon-image-current" class="mt-2 rounded d-none" alt="" width="80" height="80" style="object-fit: cover;" />
+                            <div id="qc-remove-icon-image-wrap" class="form-check mt-2 d-none">
+                                <input class="form-check-input" type="checkbox" value="1" id="qc-remove-icon-image" name="remove_icon_image" />
+                                <label class="form-check-label" for="qc-remove-icon-image">{{ __('Remove current icon image') }}</label>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -262,6 +288,8 @@
                 $('#qc-edit-seo-description').val(btn.data('seo-description') || '');
                 $('#qc-edit-image').val('');
                 $('#qc-remove-image').prop('checked', false);
+                $('#qc-edit-icon-image').val('');
+                $('#qc-remove-icon-image').prop('checked', false);
 
                 var typeIds = String(btn.attr('data-quiz-type-ids') || '')
                     .split(',')
@@ -285,6 +313,17 @@
                 } else {
                     currentImage.addClass('d-none').attr('src', '');
                     removeWrap.addClass('d-none');
+                }
+
+                var iconImageUrl = btn.data('icon-image-url');
+                var currentIconImage = $('#qc-edit-icon-image-current');
+                var removeIconWrap = $('#qc-remove-icon-image-wrap');
+                if (iconImageUrl) {
+                    currentIconImage.attr('src', iconImageUrl).removeClass('d-none');
+                    removeIconWrap.removeClass('d-none');
+                } else {
+                    currentIconImage.addClass('d-none').attr('src', '');
+                    removeIconWrap.addClass('d-none');
                 }
 
                 var modal = new bootstrap.Modal(document.getElementById('crudModal'));
@@ -326,6 +365,7 @@
                 editBtn.attr('data-seo-description', data.seo_description || '');
                 editBtn.attr('data-quiz-type-ids', (data.quiz_type_ids || []).join(','));
                 editBtn.attr('data-image-url', data.image_url || '');
+                editBtn.attr('data-icon-image-url', data.icon_image_url || '');
             };
 
             ajaxUpdate('#quiz-category-edit-form');

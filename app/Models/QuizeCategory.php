@@ -43,4 +43,18 @@ class QuizeCategory extends Model
 
         return asset('storage/'.str_replace('\\', '/', ltrim($raw, '/')));
     }
+
+    public function iconImageUrl(): ?string
+    {
+        $raw = trim((string) $this->icon_image_url);
+        if ($raw === '') {
+            return null;
+        }
+
+        if (preg_match('#^https?://#i', $raw)) {
+            return $raw;
+        }
+
+        return asset('storage/'.str_replace('\\', '/', ltrim($raw, '/')));
+    }
 }

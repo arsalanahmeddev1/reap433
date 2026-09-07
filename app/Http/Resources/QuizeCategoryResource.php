@@ -80,6 +80,8 @@ class QuizeCategoryResource extends JsonResource
             'slug' => $this->slug,
             'image_url' => $this->imageUrl()
                 ?? asset('assets/images/placeholders/img-not-available.png'),
+            'icon_image_url' => $this->iconImageUrl()
+                ?? asset('assets/images/placeholders/img-not-available.png'),
             'description' => $this->description,
             'total_questions' => $totalQuestions,
             'reward' => [

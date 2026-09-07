@@ -262,9 +262,9 @@ class UserController extends ApiController
         ], 'Signed in successfully.');
     }
 
-    public function userRanking(): JsonResponse
+    public function userRanking(Request $request): JsonResponse
     {
-        $users = User::query()
+        $rankedUsers = User::query()
             ->where('role', config('roles.user', 'user'))
             ->whereRaw(
                 '(SELECT COALESCE(SUM(answer_xp), 0) FROM user_attempt_question_answer WHERE user_attempt_question_answer.user_id = users.id AND user_attempt_question_answer.deleted_at IS NULL) > 0'
@@ -280,6 +280,16 @@ class UserController extends ApiController
             ->each(function ($user, $index) {
                 $user->rank = $index + 1;
             });
+
+        $users = $rankedUsers->take(10)->values();
+
+        $currentUserId = $request->user()?->id;
+        if ($currentUserId) {
+            $currentUser = $rankedUsers->firstWhere('id', $currentUserId);
+            if ($currentUser && ! $users->contains('id', $currentUserId)) {
+                $users->push($currentUser);
+            }
+        }
 
         return $this->success([
             'users' => UserRankingResource::collection($users),
