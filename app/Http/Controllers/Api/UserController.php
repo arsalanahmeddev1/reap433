@@ -44,6 +44,8 @@ class UserController extends ApiController
             'role' => config('roles.user', 'user'),
             'approval_status' => User::APPROVAL_APPROVED,
             'approved_at' => now(),
+            'device_type' => $validated['device_type'],
+            'device_token' => $validated['device_token'],
         ]);
 
         event(new Registered($user));
@@ -59,15 +61,22 @@ class UserController extends ApiController
 
     public function signIn(SignInRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
         $request->authenticate();
 
         /** @var User $user */
         $user = Auth::user();
 
+        $user->update([
+            'device_type' => $validated['device_type'],
+            'device_token' => $validated['device_token'],
+        ]);
+
         $token = $user->createToken('api')->plainTextToken;
 
         return $this->success([
-            'user' => new UserResource($user),
+            'user' => new UserResource($user->fresh()),
             'token' => $token,
             'token_type' => 'Bearer',
         ], 'Signed in successfully.');
@@ -406,6 +415,11 @@ class UserController extends ApiController
 
             return $this->success(null, 'Account deleted successfully.');
         }
+
+        $user->update([
+            'device_type' => null,
+            'device_token' => null,
+        ]);
 
         $user->currentAccessToken()?->delete();
 

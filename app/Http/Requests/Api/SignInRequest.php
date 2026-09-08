@@ -25,6 +25,8 @@ class SignInRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'device_type' => ['required', 'string', 'in:android,ios,web'],
+            'device_token' => ['required', 'string', 'max:500'],
         ];
     }
 

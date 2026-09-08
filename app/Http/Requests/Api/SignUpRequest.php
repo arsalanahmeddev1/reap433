@@ -24,6 +24,8 @@ class SignUpRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'profile_image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:2048'],
+            'device_type' => ['required', 'string', 'in:android,ios,web'],
+            'device_token' => ['required', 'string', 'max:500'],
         ];
     }
 

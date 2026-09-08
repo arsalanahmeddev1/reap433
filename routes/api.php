@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AchievementController;
 use App\Http\Controllers\Api\AnswerController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProgressController;
 use App\Http\Controllers\Api\QuizeCategoryController;
 use App\Http\Controllers\Api\QuizController;
@@ -63,4 +64,10 @@ Route::middleware('api.auth')->group(function () {
     Route::get('/achievements', [AchievementController::class, 'index']);
     Route::post('/achievements/claim', [AchievementController::class, 'claim']);
     Route::get('/achievements/{slug}', [AchievementController::class, 'show']);
+
+    // Notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/send', [NotificationController::class, 'send']);
+    Route::post('/notifications/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/device-token', [NotificationController::class, 'storeDeviceToken']);
 });

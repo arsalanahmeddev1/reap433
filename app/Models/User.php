@@ -41,6 +41,8 @@ class User extends Authenticatable
         'business_description',
         'approval_status',
         'approved_at',
+        'device_type',
+        'device_token',
     ];
 
     /**

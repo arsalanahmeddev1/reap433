@@ -47,4 +47,14 @@ return [
         'customization_fee' => (float) env('PRINTFUL_CUSTOMIZATION_FEE', 0),
     ],
 
+    'firebase' => [
+        'credentials' => ($firebaseCredentials = env('FIREBASE_CREDENTIALS'))
+            ? ((preg_match('/^[A-Za-z]:[\\\\\\/]/', $firebaseCredentials) || str_starts_with($firebaseCredentials, '/'))
+                ? $firebaseCredentials
+                : base_path($firebaseCredentials))
+            : null,
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+    ],
+
 ];

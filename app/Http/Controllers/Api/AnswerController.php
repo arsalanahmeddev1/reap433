@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\Api\CompleteQuizRequest;
 use App\Http\Requests\Api\VerifyAnswerRequest;
 use App\Http\Resources\QuizAnswerVerifyResource;
+use App\Models\Notification;
 use App\Models\QuizAnswer;
+use App\Models\QuizeCategory;
 use App\Models\UserAttemptQuestionAnswer;
+use App\Services\FirebaseNotificationService;
 use Illuminate\Http\JsonResponse;
 
 class AnswerController extends ApiController
@@ -85,6 +88,40 @@ class AnswerController extends ApiController
             'is_complete' => 1,
             'is_daily_challenge' => (string) ($validated['is_daily_challenge'] ?? '0'),
         ]);
+
+        $categoryTitle = QuizeCategory::query()
+            ->where('id', $validated['quiz_category_id'])
+            ->value('title') ?: 'The Cross';
+
+        $notificationTitle = 'Quiz completed';
+        $notificationBody = "Great job! You scored {$correctAnswers} / {$totalQuestion} in {$categoryTitle} and earned {$answerXp} XP and {$answerCoins} Coins.";
+
+        $notification = Notification::create([
+            'user_id' => $request->user()->id,
+            'title' => $notificationTitle,
+            'body' => $notificationBody,
+            'type' => 'quiz_complete',
+            'data' => [
+                'quiz_category_id' => (string) $validated['quiz_category_id'],
+                'quiz_type_id' => (string) $validated['quiz_type_id'],
+                'score' => (string) $correctAnswers,
+                'total_question' => (string) $totalQuestion,
+                'answer_xp' => (string) $answerXp,
+                'answer_coins' => (string) $answerCoins,
+            ],
+            'is_read' => false,
+            'status' => 'active',
+        ]);
+
+        app(FirebaseNotificationService::class)->sendToUser(
+            $request->user()->id,
+            $notificationTitle,
+            $notificationBody,
+            array_merge(
+                ['notification_id' => (string) $notification->id],
+                $notification->data ?? []
+            )
+        );
 
         return $this->success([
             'score' => $correctAnswers,
