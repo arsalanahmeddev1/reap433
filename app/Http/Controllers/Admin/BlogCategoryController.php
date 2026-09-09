@@ -7,6 +7,8 @@ use App\Models\BlogCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BlogCategoryController extends Controller
 {
@@ -24,14 +26,14 @@ class BlogCategoryController extends Controller
     {
         $validated = $this->validatedPayload($request);
 
-        $slug = BlogCategory::slugFromName($validated['name']);
-
         $maxOrder = (int) BlogCategory::query()->max('sort_order');
 
         $category = BlogCategory::create([
             'name' => $validated['name'],
-            'slug' => $slug,
+            'slug' => $validated['slug'],
             'status' => $validated['status'],
+            'seo_title' => $validated['seo_title'],
+            'seo_description' => $validated['seo_description'],
             'sort_order' => $maxOrder + 1,
         ]);
 
@@ -50,14 +52,14 @@ class BlogCategoryController extends Controller
 
     public function update(Request $request, BlogCategory $blogCategory): JsonResponse|RedirectResponse
     {
-        $validated = $this->validatedPayload($request);
-
-        $slug = BlogCategory::slugFromName($validated['name'], $blogCategory->id);
+        $validated = $this->validatedPayload($request, $blogCategory->id);
 
         $blogCategory->update([
             'name' => $validated['name'],
-            'slug' => $slug,
+            'slug' => $validated['slug'],
             'status' => $validated['status'],
+            'seo_title' => $validated['seo_title'],
+            'seo_description' => $validated['seo_description'],
         ]);
 
         if ($request->expectsJson() || $request->ajax()) {
@@ -99,18 +101,36 @@ class BlogCategoryController extends Controller
     }
 
     /**
-     * @return array{name: string, status: string}
+     * @return array{name: string, slug: string, status: string, seo_title: ?string, seo_description: ?string}
      */
-    private function validatedPayload(Request $request): array
+    private function validatedPayload(Request $request, ?int $ignoreId = null): array
     {
+        $request->merge([
+            'slug' => Str::slug(trim((string) $request->input('slug', ''))),
+        ]);
+
+        $uniqueRule = Rule::unique('blog_categories', 'slug');
+        if ($ignoreId !== null) {
+            $uniqueRule = $uniqueRule->ignore($ignoreId);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'slug' => ['required', 'string', 'max:255', $uniqueRule],
             'status' => 'required|string|in:active,inactive',
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string'],
+        ], [
+            'slug.unique' => __('Slug is already exist in the records.'),
+            'slug.required' => __('Slug is required.'),
         ]);
 
         return [
             'name' => $validated['name'],
+            'slug' => $validated['slug'],
             'status' => $validated['status'],
+            'seo_title' => $validated['seo_title'] ?? null,
+            'seo_description' => $validated['seo_description'] ?? null,
         ];
     }
 
@@ -121,6 +141,8 @@ class BlogCategoryController extends Controller
             'name' => $c->name,
             'slug' => $c->slug,
             'status' => $c->status,
+            'seo_title' => $c->seo_title,
+            'seo_description' => $c->seo_description,
         ];
     }
 }

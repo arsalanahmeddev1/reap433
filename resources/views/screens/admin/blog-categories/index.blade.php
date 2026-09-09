@@ -53,7 +53,10 @@
                                                             title="{{ __('Edit') }}"
                                                             data-update-url="{{ route('blog-categories.update', $category) }}"
                                                             data-name="{{ $category->name }}"
+                                                            data-slug="{{ $category->slug }}"
                                                             data-status="{{ $category->status }}"
+                                                            data-seo-title="{{ $category->seo_title }}"
+                                                            data-seo-description="{{ $category->seo_description }}"
                                                         >
                                                             <span><i class="fa-solid fa-pen"></i></span>
                                                         </button>
@@ -92,19 +95,31 @@
                     <h5 class="modal-title" id="blogCategoryCreateModalLabel">{{ __('Add category') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ __('Close') }}"></button>
                 </div>
-                <form action="{{ route('blog-categories.store') }}" method="POST" autocomplete="off">
+                <form id="blog-category-create-form" action="{{ route('blog-categories.store') }}" method="POST" autocomplete="off">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label f-w-500" for="bc-create-name">{{ __('Name') }}</label>
                             <input type="text" class="form-control" id="bc-create-name" name="name" required maxlength="255" />
                         </div>
-                        <div class="mb-0">
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="bc-create-slug">{{ __('Slug') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bc-create-slug" name="slug" required maxlength="255" />
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label f-w-500" for="bc-create-status">{{ __('Status') }}</label>
                             <select class="form-select" id="bc-create-status" name="status" required>
                                 <option value="active">{{ __('Active') }}</option>
                                 <option value="inactive">{{ __('Inactive') }}</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="bc-create-seo-title">{{ __('SEO Title') }}</label>
+                            <input type="text" class="form-control" id="bc-create-seo-title" name="seo_title" maxlength="255" />
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label f-w-500" for="bc-create-seo-description">{{ __('SEO Description') }}</label>
+                            <textarea class="form-control" id="bc-create-seo-description" name="seo_description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -131,12 +146,24 @@
                             <label class="form-label f-w-500" for="bc-edit-name">{{ __('Name') }}</label>
                             <input type="text" class="form-control" id="bc-edit-name" name="name" required maxlength="255" />
                         </div>
-                        <div class="mb-0">
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="bc-edit-slug">{{ __('Slug') }} <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="bc-edit-slug" name="slug" required maxlength="255" />
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label f-w-500" for="bc-edit-status">{{ __('Status') }}</label>
                             <select class="form-select" id="bc-edit-status" name="status" required>
                                 <option value="active">{{ __('Active') }}</option>
                                 <option value="inactive">{{ __('Inactive') }}</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label f-w-500" for="bc-edit-seo-title">{{ __('SEO Title') }}</label>
+                            <input type="text" class="form-control" id="bc-edit-seo-title" name="seo_title" maxlength="255" />
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label f-w-500" for="bc-edit-seo-description">{{ __('SEO Description') }}</label>
+                            <textarea class="form-control" id="bc-edit-seo-description" name="seo_description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -168,9 +195,87 @@
                 var btn = $(this);
                 $('#blog-category-edit-form').attr('action', btn.data('update-url'));
                 $('#bc-edit-name').val(btn.data('name'));
+                $('#bc-edit-slug').val(btn.data('slug'));
                 $('#bc-edit-status').val(btn.data('status'));
+                $('#bc-edit-seo-title').val(btn.data('seo-title') || '');
+                $('#bc-edit-seo-description').val(btn.data('seo-description') || '');
+                $('#blog-category-edit-form').find('.invalid-feedback').remove();
+                $('#blog-category-edit-form').find('.is-invalid').removeClass('is-invalid');
                 var modal = new bootstrap.Modal(document.getElementById('crudModal'));
                 modal.show();
+            });
+
+            $('#blog-category-create-form').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var submitBtn = form.find('button[type="submit"]');
+                var btnText = submitBtn.text();
+                var formData = new FormData(this);
+
+                form.find('.invalid-feedback').remove();
+                form.find('.is-invalid').removeClass('is-invalid');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    },
+                    beforeSend: function() {
+                        submitBtn.prop('disabled', true).text(@json(__('Saving...')));
+                    },
+                    success: function(res) {
+                        submitBtn.prop('disabled', false).text(btnText);
+                        form[0].reset();
+                        $('#blogCategoryCreateModal').modal('hide');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: res.message || @json(__('Blog category created.')),
+                            showConfirmButton: false,
+                            timer: 1500,
+                        });
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1600);
+                    },
+                    error: function(xhr) {
+                        submitBtn.prop('disabled', false).text(btnText);
+                        var response = xhr.responseJSON || {};
+                        if (xhr.status === 422) {
+                            var messages = [];
+                            if (response.errors) {
+                                $.each(response.errors, function(key, fieldMessages) {
+                                    var message = fieldMessages[0];
+                                    var input = form.find('[name="' + key + '"]');
+                                    if (input.length) {
+                                        input.addClass('is-invalid');
+                                        input.after('<div class="invalid-feedback d-block">' + message + '</div>');
+                                    }
+                                    if (message) {
+                                        messages.push(message);
+                                    }
+                                });
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: messages.length ? messages.join('<br>') : (response.message || @json(__('Validation failed.'))),
+                            });
+                            return;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: response.message || @json(__('Something went wrong!')),
+                        });
+                    },
+                });
             });
 
             window.updateCategoryRow = function(data) {
@@ -186,7 +291,10 @@
                 );
                 var editBtn = row.find('.js-blog-category-edit');
                 editBtn.attr('data-name', data.name);
+                editBtn.attr('data-slug', data.slug);
                 editBtn.attr('data-status', data.status);
+                editBtn.attr('data-seo-title', data.seo_title || '');
+                editBtn.attr('data-seo-description', data.seo_description || '');
             };
 
             ajaxUpdate('#blog-category-edit-form');

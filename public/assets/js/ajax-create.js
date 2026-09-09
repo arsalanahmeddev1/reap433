@@ -198,6 +198,23 @@ function ajaxCreate(successRedirect = null) {
 
         function handle422(response) {
             showAjaxValidationErrors(form[0], response);
+
+            const messages = [];
+            if (response && response.errors) {
+                $.each(response.errors, function (_key, fieldMessages) {
+                    if (fieldMessages[0]) {
+                        messages.push(fieldMessages[0]);
+                    }
+                });
+            }
+
+            if (messages.length) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    html: messages.join('<br>'),
+                });
+            }
         }
 
         $.ajax({

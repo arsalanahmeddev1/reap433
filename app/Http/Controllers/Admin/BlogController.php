@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class BlogController extends Controller
 {
@@ -35,16 +37,24 @@ class BlogController extends Controller
 
     public function store(Request $request): RedirectResponse|JsonResponse
     {
+        $request->merge([
+            'slug' => Str::slug(trim((string) $request->input('slug', ''))),
+        ]);
+
         $validated = $request->validate([
             'blog_category_id' => 'required|exists:blog_categories,id',
             'title' => 'required|string|max:255',
+            'slug' => ['required', 'string', 'max:255', Rule::unique('blogs', 'slug')],
             'body' => 'required|string',
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string'],
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
+        ], [
+            'slug.unique' => __('Slug is already exist in the records.'),
+            'slug.required' => __('Slug is required.'),
         ]);
-
-        $slug = Blog::slugFromTitle($validated['title']);
 
         $isPublished = $request->boolean('is_published');
         $publishedAt = $validated['published_at'] ?? null;
@@ -60,8 +70,10 @@ class BlogController extends Controller
         Blog::create([
             'blog_category_id' => $validated['blog_category_id'],
             'title' => $validated['title'],
-            'slug' => $slug,
+            'slug' => $validated['slug'],
             'body' => $validated['body'],
+            'seo_title' => $validated['seo_title'] ?? null,
+            'seo_description' => $validated['seo_description'] ?? null,
             'featured_image' => $path,
             'is_published' => $isPublished,
             'published_at' => $isPublished ? $publishedAt : null,
@@ -92,17 +104,25 @@ class BlogController extends Controller
 
     public function update(Request $request, Blog $blog): RedirectResponse|JsonResponse
     {
+        $request->merge([
+            'slug' => Str::slug(trim((string) $request->input('slug', ''))),
+        ]);
+
         $validated = $request->validate([
             'blog_category_id' => 'required|exists:blog_categories,id',
             'title' => 'required|string|max:255',
+            'slug' => ['required', 'string', 'max:255', Rule::unique('blogs', 'slug')->ignore($blog->id)],
             'body' => 'required|string',
+            'seo_title' => ['nullable', 'string', 'max:255'],
+            'seo_description' => ['nullable', 'string'],
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
             'remove_featured_image' => 'sometimes|boolean',
+        ], [
+            'slug.unique' => __('Slug is already exist in the records.'),
+            'slug.required' => __('Slug is required.'),
         ]);
-
-        $slug = Blog::slugFromTitle($validated['title'], $blog->id);
 
         $isPublished = $request->boolean('is_published');
         $publishedAt = $validated['published_at'] ?? $blog->published_at;
@@ -126,8 +146,10 @@ class BlogController extends Controller
         $blog->update([
             'blog_category_id' => $validated['blog_category_id'],
             'title' => $validated['title'],
-            'slug' => $slug,
+            'slug' => $validated['slug'],
             'body' => $validated['body'],
+            'seo_title' => $validated['seo_title'] ?? null,
+            'seo_description' => $validated['seo_description'] ?? null,
             'featured_image' => $path,
             'is_published' => $isPublished,
             'published_at' => $isPublished ? $publishedAt : null,

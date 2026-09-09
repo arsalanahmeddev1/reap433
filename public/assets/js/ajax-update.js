@@ -111,12 +111,14 @@ function ajaxUpdate(formSelector, successRedirect = null) {
                     const globalErrors = [];
                     if (parsed.errors) {
                         $.each(parsed.errors, function (key, messages) {
+                            const message = messages[0];
                             const input = form.find(`[name="${key}"]`);
                             if (input.length) {
                                 input.addClass('is-invalid');
-                                input.after(`<div class="invalid-feedback d-block">${messages[0]}</div>`);
-                            } else {
-                                globalErrors.push(messages[0]);
+                                input.after(`<div class="invalid-feedback d-block">${message}</div>`);
+                            }
+                            if (message) {
+                                globalErrors.push(message);
                             }
                         });
                     }

@@ -37,6 +37,13 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('Slug') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug', $blog->slug) }}" required maxlength="255" />
+                            @error('slug')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Publish date') }}</label>
                             <input
                                 type="datetime-local"
@@ -45,6 +52,20 @@
                                 value="{{ old('published_at', optional($blog->published_at)->format('Y-m-d\TH:i')) }}"
                             />
                             @error('published_at')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('SEO Title') }}</label>
+                            <input type="text" name="seo_title" class="form-control @error('seo_title') is-invalid @enderror" value="{{ old('seo_title', $blog->seo_title) }}" maxlength="255" />
+                            @error('seo_title')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ __('SEO Description') }}</label>
+                            <textarea name="seo_description" class="form-control @error('seo_description') is-invalid @enderror" rows="3">{{ old('seo_description', $blog->seo_description) }}</textarea>
+                            @error('seo_description')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
