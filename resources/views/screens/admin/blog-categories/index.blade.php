@@ -53,7 +53,6 @@
                                                             title="{{ __('Edit') }}"
                                                             data-update-url="{{ route('blog-categories.update', $category) }}"
                                                             data-name="{{ $category->name }}"
-                                                            data-slug="{{ $category->slug }}"
                                                             data-status="{{ $category->status }}"
                                                         >
                                                             <span><i class="fa-solid fa-pen"></i></span>
@@ -100,17 +99,6 @@
                             <label class="form-label f-w-500" for="bc-create-name">{{ __('Name') }}</label>
                             <input type="text" class="form-control" id="bc-create-name" name="name" required maxlength="255" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label f-w-500" for="bc-create-slug">{{ __('Slug') }}</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="bc-create-slug"
-                                name="slug"
-                                maxlength="255"
-                                placeholder="{{ __('Leave empty to auto-generate from name') }}"
-                            />
-                        </div>
                         <div class="mb-0">
                             <label class="form-label f-w-500" for="bc-create-status">{{ __('Status') }}</label>
                             <select class="form-select" id="bc-create-status" name="status" required>
@@ -142,17 +130,6 @@
                         <div class="mb-3">
                             <label class="form-label f-w-500" for="bc-edit-name">{{ __('Name') }}</label>
                             <input type="text" class="form-control" id="bc-edit-name" name="name" required maxlength="255" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label f-w-500" for="bc-edit-slug">{{ __('Slug') }}</label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="bc-edit-slug"
-                                name="slug"
-                                maxlength="255"
-                                placeholder="{{ __('Leave empty to auto-generate from name') }}"
-                            />
                         </div>
                         <div class="mb-0">
                             <label class="form-label f-w-500" for="bc-edit-status">{{ __('Status') }}</label>
@@ -191,7 +168,6 @@
                 var btn = $(this);
                 $('#blog-category-edit-form').attr('action', btn.data('update-url'));
                 $('#bc-edit-name').val(btn.data('name'));
-                $('#bc-edit-slug').val(btn.data('slug'));
                 $('#bc-edit-status').val(btn.data('status'));
                 var modal = new bootstrap.Modal(document.getElementById('crudModal'));
                 modal.show();
@@ -210,7 +186,6 @@
                 );
                 var editBtn = row.find('.js-blog-category-edit');
                 editBtn.attr('data-name', data.name);
-                editBtn.attr('data-slug', data.slug);
                 editBtn.attr('data-status', data.status);
             };
 

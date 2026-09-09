@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BlogCategory;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class BlogCategoryController extends Controller
 {
@@ -20,13 +20,11 @@ class BlogCategoryController extends Controller
         return view('screens.admin.blog-categories.index', compact('categories'));
     }
 
-    public function store(Request $request): JsonResponse|Response
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $this->validatedPayload($request);
 
-        $slug = $validated['slug'] !== ''
-            ? BlogCategory::slugFromName($validated['slug'])
-            : BlogCategory::slugFromName($validated['name']);
+        $slug = BlogCategory::slugFromName($validated['name']);
 
         $maxOrder = (int) BlogCategory::query()->max('sort_order');
 
@@ -50,13 +48,11 @@ class BlogCategoryController extends Controller
             ->with('success', __('Blog category created.'));
     }
 
-    public function update(Request $request, BlogCategory $blogCategory): JsonResponse|Response
+    public function update(Request $request, BlogCategory $blogCategory): JsonResponse|RedirectResponse
     {
         $validated = $this->validatedPayload($request);
 
-        $slug = $validated['slug'] !== ''
-            ? BlogCategory::slugFromName($validated['slug'], $blogCategory->id)
-            : BlogCategory::slugFromName($validated['name'], $blogCategory->id);
+        $slug = BlogCategory::slugFromName($validated['name'], $blogCategory->id);
 
         $blogCategory->update([
             'name' => $validated['name'],
@@ -77,7 +73,7 @@ class BlogCategoryController extends Controller
             ->with('success', __('Blog category updated.'));
     }
 
-    public function destroy(Request $request, BlogCategory $blogCategory): JsonResponse|Response
+    public function destroy(Request $request, BlogCategory $blogCategory): JsonResponse|RedirectResponse
     {
         if ($blogCategory->blogs()->exists()) {
             $message = __('Cannot delete a category that still has posts. Move or delete those posts first.');
@@ -103,19 +99,17 @@ class BlogCategoryController extends Controller
     }
 
     /**
-     * @return array{name: string, slug: string, status: string}
+     * @return array{name: string, status: string}
      */
     private function validatedPayload(Request $request): array
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'slug' => ['nullable', 'string', 'max:255'],
             'status' => 'required|string|in:active,inactive',
         ]);
 
         return [
             'name' => $validated['name'],
-            'slug' => trim((string) ($validated['slug'] ?? '')),
             'status' => $validated['status'],
         ];
     }

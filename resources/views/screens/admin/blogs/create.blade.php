@@ -37,13 +37,6 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Slug') }}</label>
-                            <input type="text" name="slug" class="form-control @error('slug') is-invalid @enderror" value="{{ old('slug') }}" maxlength="255" placeholder="{{ __('Leave empty to auto-generate from title') }}" />
-                            @error('slug')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="col-md-6 mb-3">
                             <label class="form-label">{{ __('Publish date') }}</label>
                             <input type="datetime-local" name="published_at" class="form-control @error('published_at') is-invalid @enderror" value="{{ old('published_at') }}" />
                             @error('published_at')

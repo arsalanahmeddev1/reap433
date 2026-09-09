@@ -38,17 +38,13 @@ class BlogController extends Controller
         $validated = $request->validate([
             'blog_category_id' => 'required|exists:blog_categories,id',
             'title' => 'required|string|max:255',
-            'slug' => ['nullable', 'string', 'max:255'],
             'body' => 'required|string',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
             'published_at' => 'nullable|date',
         ]);
 
-        $slugRaw = trim((string) ($validated['slug'] ?? ''));
-        $slug = $slugRaw !== ''
-            ? Blog::slugFromTitle($slugRaw)
-            : Blog::slugFromTitle($validated['title']);
+        $slug = Blog::slugFromTitle($validated['title']);
 
         $isPublished = $request->boolean('is_published');
         $publishedAt = $validated['published_at'] ?? null;
@@ -99,7 +95,6 @@ class BlogController extends Controller
         $validated = $request->validate([
             'blog_category_id' => 'required|exists:blog_categories,id',
             'title' => 'required|string|max:255',
-            'slug' => ['nullable', 'string', 'max:255'],
             'body' => 'required|string',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
@@ -107,10 +102,7 @@ class BlogController extends Controller
             'remove_featured_image' => 'sometimes|boolean',
         ]);
 
-        $slugRaw = trim((string) ($validated['slug'] ?? ''));
-        $slug = $slugRaw !== ''
-            ? Blog::slugFromTitle($slugRaw, $blog->id)
-            : Blog::slugFromTitle($validated['title'], $blog->id);
+        $slug = Blog::slugFromTitle($validated['title'], $blog->id);
 
         $isPublished = $request->boolean('is_published');
         $publishedAt = $validated['published_at'] ?? $blog->published_at;
