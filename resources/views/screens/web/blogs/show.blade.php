@@ -1,5 +1,7 @@
 @extends('layouts.web.master')
-@section('title', $blog->title)
+@section('title', $blog->seo_title ?: $blog->title)
+
+@section('meta_description', (string) ($blog->seo_description ?: ''))
 
 @section('content')
 <main id="main">

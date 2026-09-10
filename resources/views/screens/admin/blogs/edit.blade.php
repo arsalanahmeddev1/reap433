@@ -71,8 +71,7 @@
                         </div>
                         <div class="col-12 mb-3">
                             <label class="form-label">{{ __('Body') }} <span class="text-danger">*</span></label>
-                            <div id="blog_body_editor" class="blog-quill-wrap @error('body') is-invalid @enderror"></div>
-                            <textarea id="blog_body" name="body" class="d-none @error('body') is-invalid @enderror" required>{{ old('body', $blog->body) }}</textarea>
+                            <textarea id="blog_body" name="body" class="form-control @error('body') is-invalid @enderror" rows="10" required>{{ old('body', $blog->body) }}</textarea>
                             @error('body')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -105,7 +104,7 @@
     </div>
 @endsection
 
-@include('screens.admin.blogs.partials.blog-quill-scripts')
+@include('screens.admin.blogs.partials.blog-editor-scripts')
 
 @push('scripts')
     <script>
