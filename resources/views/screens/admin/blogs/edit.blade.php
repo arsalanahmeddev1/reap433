@@ -44,13 +44,14 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Publish date') }}</label>
+                            <label class="form-label">{{ __('Schedule date') }}</label>
                             <input
-                                type="datetime-local"
+                                type="date"
                                 name="published_at"
                                 class="form-control @error('published_at') is-invalid @enderror"
-                                value="{{ old('published_at', optional($blog->published_at)->format('Y-m-d\TH:i')) }}"
+                                value="{{ old('published_at', optional($blog->published_at)->format('Y-m-d')) }}"
                             />
+                            <small class="text-muted">{{ __('Setting a date will mark the post as published on that day.') }}</small>
                             @error('published_at')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

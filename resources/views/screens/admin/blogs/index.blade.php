@@ -25,7 +25,7 @@
                                             <th><span class="c-o-light f-w-600">{{ __('Title') }}</span></th>
                                             <th><span class="c-o-light f-w-600">{{ __('Category') }}</span></th>
                                             <th><span class="c-o-light f-w-600">{{ __('Slug') }}</span></th>
-                                            <th><span class="c-o-light f-w-600">{{ __('Published') }}</span></th>
+                                            <th><span class="c-o-light f-w-600">{{ __('Status') }}</span></th>
                                             <th><span class="c-o-light f-w-600">{{ __('Actions') }}</span></th>
                                         </tr>
                                     </thead>
@@ -36,10 +36,16 @@
                                                 <td>{{ $blog->category?->name ?? '—' }}</td>
                                                 <td><code class="text-reset small">{{ $blog->slug }}</code></td>
                                                 <td>
-                                                    @if ($blog->is_published)
-                                                        <span class="badge badge-light-success">{{ __('Yes') }}</span>
+                                                    @php($status = $blog->publishStatus())
+                                                    @if ($status === 'published')
+                                                        <span class="badge badge-light-success">{{ __('Published') }}</span>
+                                                    @elseif ($status === 'scheduled')
+                                                        <span class="badge badge-light-warning">{{ __('Scheduled') }}</span>
+                                                        @if ($blog->published_at)
+                                                            <div class="small text-muted mt-1">{{ $blog->published_at->format('M j, Y') }}</div>
+                                                        @endif
                                                     @else
-                                                        <span class="badge badge-light-secondary">{{ __('No') }}</span>
+                                                        <span class="badge badge-light-secondary">{{ __('Draft') }}</span>
                                                     @endif
                                                 </td>
                                                 <td>

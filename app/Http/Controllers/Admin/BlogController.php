@@ -8,6 +8,7 @@ use App\Models\BlogCategory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -50,17 +51,18 @@ class BlogController extends Controller
             'seo_description' => ['nullable', 'string'],
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'nullable|date_format:Y-m-d',
         ], [
             'slug.unique' => __('Slug is already exist in the records.'),
             'slug.required' => __('Slug is required.'),
         ]);
 
         $isPublished = $request->boolean('is_published');
-        $publishedAt = $validated['published_at'] ?? null;
-        if ($isPublished && $publishedAt === null) {
-            $publishedAt = now();
+        // A schedule date means the post is set to publish on that day.
+        if (filled($validated['published_at'] ?? null)) {
+            $isPublished = true;
         }
+        $publishedAt = $this->resolvePublishedAt($validated['published_at'] ?? null, $isPublished);
 
         $path = null;
         if ($request->hasFile('featured_image')) {
@@ -76,7 +78,7 @@ class BlogController extends Controller
             'seo_description' => $validated['seo_description'] ?? null,
             'featured_image' => $path,
             'is_published' => $isPublished,
-            'published_at' => $isPublished ? $publishedAt : null,
+            'published_at' => $publishedAt,
             'created_by' => auth()->id(),
         ]);
 
@@ -117,7 +119,7 @@ class BlogController extends Controller
             'seo_description' => ['nullable', 'string'],
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif,avif',
             'is_published' => 'sometimes|boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'nullable|date_format:Y-m-d',
             'remove_featured_image' => 'sometimes|boolean',
         ], [
             'slug.unique' => __('Slug is already exist in the records.'),
@@ -125,10 +127,15 @@ class BlogController extends Controller
         ]);
 
         $isPublished = $request->boolean('is_published');
-        $publishedAt = $validated['published_at'] ?? $blog->published_at;
-        if ($isPublished && $publishedAt === null) {
-            $publishedAt = now();
+        // A schedule date means the post is set to publish on that day.
+        if (filled($validated['published_at'] ?? null)) {
+            $isPublished = true;
         }
+        $publishedAt = $this->resolvePublishedAt(
+            $validated['published_at'] ?? null,
+            $isPublished,
+            $blog->published_at
+        );
 
         if ($request->boolean('remove_featured_image') && $blog->featured_image) {
             Storage::disk('public')->delete($blog->featured_image);
@@ -152,7 +159,7 @@ class BlogController extends Controller
             'seo_description' => $validated['seo_description'] ?? null,
             'featured_image' => $path,
             'is_published' => $isPublished,
-            'published_at' => $isPublished ? $publishedAt : null,
+            'published_at' => $publishedAt,
             'updated_by' => auth()->id(),
         ]);
 
@@ -200,5 +207,37 @@ class BlogController extends Controller
         }
 
         return redirect()->route('blogs.index')->with('success', __('Blog deleted.'));
+    }
+
+    private function resolvePublishedAt(mixed $publishedAt, bool $isPublished, mixed $fallback = null): ?Carbon
+    {
+        $date = is_string($publishedAt) ? trim($publishedAt) : null;
+
+        // Always persist a chosen schedule date (even if not published yet).
+        if ($date) {
+            $scheduled = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+            // If this calendar day is already "today" for go-live, don't keep a
+            // future midnight timestamp that UTC would still treat as not live.
+            $today = now()->copy()->utc()->addHours(14)->toDateString();
+            if ($date <= $today && $scheduled->greaterThan(now())) {
+                return now();
+            }
+
+            return $scheduled;
+        }
+
+        if (! $isPublished) {
+            return null;
+        }
+
+        if ($fallback instanceof Carbon) {
+            return $fallback->copy()->startOfDay();
+        }
+
+        if (is_string($fallback) && trim($fallback) !== '') {
+            return Carbon::parse($fallback)->startOfDay();
+        }
+
+        return now()->startOfDay();
     }
 }
