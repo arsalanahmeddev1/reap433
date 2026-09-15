@@ -207,11 +207,22 @@ class CmsModuleSeeder extends Seeder
         );
 
         CmsModule::updateOrCreate(
+            ['route_name' => 'site-pages.index'],
+            [
+                'name' => 'Site Pages',
+                'icon' => 'fa-solid fa-file-lines',
+                'sort_order' => 9,
+                'status' => 'active',
+                'parent_id' => 0,
+            ]
+        );
+
+        CmsModule::updateOrCreate(
             ['route_name' => 'sitemaps.index'],
             [
                 'name' => 'Sitemap',
                 'icon' => 'fa-solid fa-sitemap',
-                'sort_order' => 9,
+                'sort_order' => 10,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -222,7 +233,7 @@ class CmsModuleSeeder extends Seeder
             [
                 'name' => 'App Management',
                 'icon' => 'fa-solid fa-mobile',
-                'sort_order' => 10,
+                'sort_order' => 11,
                 'status' => 'active',
                 'parent_id' => 0,
             ]
@@ -290,6 +301,7 @@ class CmsModuleSeeder extends Seeder
             'blog-categories.index',
             'blogs.index',
             'collection-pages.index',
+            'site-pages.index',
             'sitemaps.index',
             'app-management',
             'quiz-categories.index',

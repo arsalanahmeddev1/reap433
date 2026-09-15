@@ -31,6 +31,7 @@ class CmsModulePermissionsSeeder extends Seeder
                 'blog-categories.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'blogs.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'collection-pages.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
+                'site-pages.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],
                 'sitemaps.index' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 1, 'is_delete' => 0],
                 'app-management' => ['is_view' => 1, 'is_add' => 0, 'is_update' => 0, 'is_delete' => 0],
                 'quiz-categories.index' => ['is_view' => 1, 'is_add' => 1, 'is_update' => 1, 'is_delete' => 1],

@@ -72,13 +72,13 @@
         </p>
       </div>
       <div class="footer-bottom-right">
-        <a href="#" class="footer-legal-link">Privacy Policy</a>
+        <a href="{{ route('site-pages.show', 'privacy-policy') }}" class="footer-legal-link">Privacy Policy</a>
         <span class="footer-legal-dot" aria-hidden="true">·</span>
-        <a href="#" class="footer-legal-link">Terms of Service</a>
+        <a href="{{ route('site-pages.show', 'terms-of-service') }}" class="footer-legal-link">Terms of Service</a>
         <span class="footer-legal-dot" aria-hidden="true">·</span>
-        <a href="#" class="footer-legal-link">Trademark Notice</a>
+        <a href="{{ route('site-pages.show', 'trademark-notice') }}" class="footer-legal-link">Trademark Notice</a>
         <span class="footer-legal-dot" aria-hidden="true">·</span>
-        <a href="#" class="footer-legal-link">Accessibility</a>
+        <a href="{{ route('site-pages.show', 'accessibility') }}" class="footer-legal-link">Accessibility</a>
       </div>
     </div>
   </footer>

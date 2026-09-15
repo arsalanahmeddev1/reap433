@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\OrderPrintfulController;
 use App\Http\Controllers\Admin\PrintfulController;
 use App\Http\Controllers\Admin\SitemapController as AdminSitemapController;
+use App\Http\Controllers\Admin\SitePageController;
 use App\Http\Controllers\Admin\ProductCategoryController;
 use App\Http\Controllers\Admin\QuizeCategoryController;
 use App\Http\Controllers\Admin\QuizAnswerController;
@@ -34,6 +35,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfileOrderController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\SitePageController as StorefrontSitePageController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserAddressController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +78,7 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/page/{slug}', [StorefrontSitePageController::class, 'show'])->name('site-pages.show');
 
 Route::get('/collection/{slug}', [StorefrontCollectionPageController::class, 'show'])->name('collection.show');
 
@@ -224,6 +227,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/collection-pages/{collectionPage}/edit', [CollectionPageController::class, 'edit'])->name('collection-pages.edit');
     Route::put('/collection-pages/{collectionPage}', [CollectionPageController::class, 'update'])->name('collection-pages.update');
     Route::delete('/collection-pages/{collectionPage}', [CollectionPageController::class, 'destroy'])->name('collection-pages.destroy');
+
+    Route::get('/site-pages', [SitePageController::class, 'index'])->name('site-pages.index');
+    Route::get('/site-pages/create', [SitePageController::class, 'create'])->name('site-pages.create');
+    Route::post('/site-pages', [SitePageController::class, 'store'])->name('site-pages.store');
+    Route::get('/site-pages/{sitePage}/edit', [SitePageController::class, 'edit'])->name('site-pages.edit');
+    Route::put('/site-pages/{sitePage}', [SitePageController::class, 'update'])->name('site-pages.update');
+    Route::delete('/site-pages/{sitePage}', [SitePageController::class, 'destroy'])->name('site-pages.destroy');
 
     Route::get('/sitemap', [AdminSitemapController::class, 'index'])->name('sitemaps.index');
     Route::put('/sitemap', [AdminSitemapController::class, 'update'])->name('sitemaps.update');

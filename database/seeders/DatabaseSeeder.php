@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             QuizQuestionSeeder::class,
             QuizAnswerSeeder::class,
             AchievementSeeder::class,
+            SitePageSeeder::class,
         ]);
     }
 }

@@ -128,8 +128,10 @@
                     },
                 });
 
-                $(document).on('submit', '#createBlogForm, #editBlogForm', function() {
-                    syncBody();
+                $(document).on('submit', 'form', function() {
+                    if ($(this).find('#blog_body').length) {
+                        syncBody();
+                    }
                 });
             });
         })(jQuery);
