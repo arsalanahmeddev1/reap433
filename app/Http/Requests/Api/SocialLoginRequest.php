@@ -19,7 +19,7 @@ class SocialLoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'provider' => ['required', 'string', Rule::in(['google', 'apple'])],
+            'provider' => ['required', 'string', Rule::in(['google', 'apple', 'facebook'])],
             'id_token' => ['required', 'string'],
             'provider_id' => ['nullable', 'string', 'max:255'],
             'name' => ['nullable', 'string', 'max:255'],

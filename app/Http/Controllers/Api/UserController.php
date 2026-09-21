@@ -207,9 +207,12 @@ class UserController extends ApiController
         $validated = $request->validated();
         $provider = $validated['provider'];
 
-        $socialUser = $provider === 'google'
-            ? $this->verifyGoogleIdToken($validated['id_token'])
-            : $this->verifyAppleIdToken($validated['id_token']);
+        $socialUser = match ($provider) {
+            'google' => $this->verifyGoogleIdToken($validated['id_token']),
+            'apple' => $this->verifyAppleIdToken($validated['id_token']),
+            'facebook' => $this->verifyFacebookAccessToken($validated['id_token']),
+            default => null,
+        };
 
         $email = ($socialUser['email'] ?? null)
             ?: $validated['email'];
@@ -384,6 +387,36 @@ class UserController extends ApiController
             'email' => $payload['email'] ?? null,
             'name' => null,
             'profile_image' => null,
+        ];
+    }
+
+    /**
+     * Facebook SDK returns an access token (sent in id_token).
+     *
+     * @return array{provider_id: string, email: ?string, name: ?string, profile_image: ?string}|null
+     */
+    private function verifyFacebookAccessToken(string $accessToken): ?array
+    {
+        $response = Http::get('https://graph.facebook.com/me', [
+            'fields' => 'id,name,email,picture.type(large)',
+            'access_token' => $accessToken,
+        ]);
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $payload = $response->json();
+
+        if (empty($payload['id'])) {
+            return null;
+        }
+
+        return [
+            'provider_id' => (string) $payload['id'],
+            'email' => $payload['email'] ?? null,
+            'name' => $payload['name'] ?? null,
+            'profile_image' => $payload['picture']['data']['url'] ?? null,
         ];
     }
 
