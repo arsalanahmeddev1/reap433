@@ -1,6 +1,6 @@
 /* Reap Threads — "The Cross" trivia PWA service worker.
    Bump CACHE version whenever you change the app so devices pull the update. */
-const CACHE = "reap-cross-v1";
+const CACHE = "reap-cross-v2";
 const SHELL = [
   "index.html",
   "manifest.json",
