@@ -283,6 +283,17 @@ class CmsModuleSeeder extends Seeder
             ]
         );
 
+        CmsModule::updateOrCreate(
+            ['route_name' => 'achievements.index'],
+            [
+                'name' => 'Achievements',
+                'icon' => 'fa-solid fa-trophy',
+                'sort_order' => 5,
+                'status' => 'active',
+                'parent_id' => $appManagement->id,
+            ]
+        );
+
         $allowed = [
             'admin.dashboard',
             'users.index',
@@ -308,6 +319,7 @@ class CmsModuleSeeder extends Seeder
             'quiz-types.index',
             'quiz-questions.index',
             'quiz-answers.index',
+            'achievements.index',
         ];
 
         CmsModule::query()
