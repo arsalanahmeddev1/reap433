@@ -34,10 +34,16 @@ class SitePageSeeder extends Seeder
                 'description' => null,
                 'seo_description' => null,
             ],
+            [
+                'title' => 'Delete Your Account',
+                'slug' => 'account-deletion',
+                'description' => $this->htmlFromFile('account-deletion.html'),
+                'seo_description' => 'Request deletion of your REAP433 mobile app account and associated personal data.',
+            ],
         ];
 
         foreach ($rows as $row) {
-            $slug = Str::slug($row['title']);
+            $slug = $row['slug'] ?? Str::slug($row['title']);
 
             SitePage::updateOrCreate(
                 ['slug' => $slug],

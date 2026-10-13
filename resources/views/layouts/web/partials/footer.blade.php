@@ -79,6 +79,8 @@
         <a href="{{ route('site-pages.show', 'trademark-notice') }}" class="footer-legal-link">Trademark Notice</a>
         <span class="footer-legal-dot" aria-hidden="true">·</span>
         <a href="{{ route('site-pages.show', 'accessibility') }}" class="footer-legal-link">Accessibility</a>
+        <span class="footer-legal-dot" aria-hidden="true">·</span>
+        <a href="{{ route('site-pages.show', 'account-deletion') }}" class="footer-legal-link">Account Deletion</a>
       </div>
     </div>
   </footer>
