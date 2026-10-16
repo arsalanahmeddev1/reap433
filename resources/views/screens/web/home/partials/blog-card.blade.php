@@ -1,6 +1,7 @@
 @php
     $isFeatured = $isFeatured ?? false;
     $delay = $delay ?? 0;
+    $useScrollReveal = $useScrollReveal ?? true;
     $categorySlug = $blog->category?->slug ?? '';
     $imageUrl = $blog->featuredImageUrl() ?? 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&q=80&auto=format&fit=crop';
     $excerpt = \Illuminate\Support\Str::limit(strip_tags((string) $blog->body), $isFeatured ? 200 : 140);
@@ -11,8 +12,7 @@
     class="blog-card {{ $isFeatured ? 'blog-featured' : 'blog-standard' }}"
     role="listitem"
     data-cat="{{ $categorySlug }}"
-    data-scroll-reveal
-    data-delay="{{ $delay }}"
+    @if ($useScrollReveal) data-scroll-reveal data-delay="{{ $delay }}" @endif
 >
     <div class="blog-image-wrap">
         <img

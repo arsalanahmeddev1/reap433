@@ -7,9 +7,9 @@
 <main id="main">
     <section class="civic-hub section-pad blog-detail-section" aria-labelledby="blog-detail-title">
         <div class="container blog-detail-container">
-            <a href="{{ route('home') }}#hub" class="blog-detail-back">
+            <a href="{{ route('blog.index') }}" class="blog-detail-back">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="15,18 9,12 15,6"/></svg>
-                {{ __('Back to Civic Hub') }}
+                {{ __('Back to All Articles') }}
             </a>
 
             <article class="blog-detail" data-scroll-reveal>

@@ -77,6 +77,8 @@ Route::middleware('auth')->group(function () {
         ->name('favourites.toggle');
 });
 
+Route::get('/journal', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/journal/posts', [BlogController::class, 'posts'])->name('blog.posts');
 Route::get('/journal/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/page/{slug}', [StorefrontSitePageController::class, 'show'])->name('site-pages.show');
 

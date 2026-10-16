@@ -572,7 +572,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
 
         <div class="hub-cta-row" data-scroll-reveal>
-          <a href="#blog" class="btn btn-outline">
+          <a href="{{ route('blog.index') }}" class="btn btn-outline">
             Read All Articles
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12,5 19,12 12,19"/></svg>
           </a>
