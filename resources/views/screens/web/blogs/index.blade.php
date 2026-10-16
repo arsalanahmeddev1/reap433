@@ -75,19 +75,20 @@
         return pretty.pathname + (pretty.search || '');
     }
 
-    function loadPosts(cat, pageUrl) {
-        var url = new URL(pageUrl || postsUrl, window.location.origin);
-        if (!pageUrl) {
-            url.searchParams.delete('page');
-        }
-        if (cat && cat !== 'all') {
+    function loadPosts(cat, page) {
+        var url = new URL(postsUrl, window.location.origin);
+        cat = cat || 'all';
+
+        if (cat !== 'all') {
             url.searchParams.set('category', cat);
-        } else {
-            url.searchParams.delete('category');
+        }
+
+        if (page && String(page) !== '1') {
+            url.searchParams.set('page', page);
         }
 
         root.classList.add('is-loading');
-        setActive(cat || 'all');
+        setActive(cat);
 
         fetch(url.toString(), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
@@ -98,29 +99,32 @@
             })
             .then(function (data) {
                 root.innerHTML = data.html || '';
-                var active = data.activeCategory || cat || 'all';
+                var active = data.activeCategory || cat;
                 setActive(active);
-                window.history.replaceState({}, '', prettyUrl(active, url.searchParams.get('page')));
+                window.history.replaceState({}, '', prettyUrl(active, data.page || page || 1));
+                root.scrollIntoView({ behavior: 'smooth', block: 'start' });
             })
             .catch(function () {
-                window.location.href = prettyUrl(cat || 'all');
+                window.location.href = prettyUrl(cat, page || 1);
             })
             .finally(function () { root.classList.remove('is-loading'); });
     }
 
     filters.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            loadPosts(btn.getAttribute('data-cat') || 'all');
+            loadPosts(btn.getAttribute('data-cat') || 'all', 1);
         });
     });
 
     root.addEventListener('click', function (e) {
         var link = e.target.closest('.storefront-pagination a');
-        if (!link) return;
+        if (!link || !link.getAttribute('href')) return;
         e.preventDefault();
+
         var active = document.querySelector('.journal-filter.active');
         var cat = active ? active.getAttribute('data-cat') : 'all';
-        loadPosts(cat, link.href);
+        var page = new URL(link.href, window.location.origin).searchParams.get('page') || 1;
+        loadPosts(cat, page);
     });
 })();
 </script>

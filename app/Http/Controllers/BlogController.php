@@ -15,7 +15,7 @@ class BlogController extends Controller
     {
         $categories = $this->activeCategories();
         $activeCategory = $this->normalizeCategoryQuery($request);
-        $blogs = $this->paginatedBlogs($request, route('blog.index'));
+        $blogs = $this->paginatedBlogs($request);
 
         return view('screens.web.blogs.index', [
             'categories' => $categories,
@@ -29,7 +29,7 @@ class BlogController extends Controller
      */
     public function posts(Request $request): JsonResponse
     {
-        $blogs = $this->paginatedBlogs($request, route('blog.posts'));
+        $blogs = $this->paginatedBlogs($request);
         $activeCategory = $this->normalizeCategoryQuery($request);
 
         $html = view('screens.web.blogs.partials.posts-results', [
@@ -39,6 +39,7 @@ class BlogController extends Controller
         return response()->json([
             'html' => $html,
             'activeCategory' => $activeCategory,
+            'page' => $blogs->currentPage(),
         ]);
     }
 
@@ -69,7 +70,7 @@ class BlogController extends Controller
         return is_string($activeCategory) && $activeCategory !== '' ? $activeCategory : null;
     }
 
-    private function paginatedBlogs(Request $request, string $path): LengthAwarePaginator
+    private function paginatedBlogs(Request $request): LengthAwarePaginator
     {
         $activeCategory = $this->normalizeCategoryQuery($request);
 
@@ -82,7 +83,7 @@ class BlogController extends Controller
             $blogsQuery->whereHas('category', fn ($q) => $q->where('slug', $activeCategory));
         }
 
-        $blogs = $blogsQuery->paginate(9)->withPath($path);
+        $blogs = $blogsQuery->paginate(8)->withPath(route('blog.index'));
 
         $append = [];
         if ($activeCategory !== null && $activeCategory !== 'all') {
