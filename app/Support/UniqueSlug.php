@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class UniqueSlug
@@ -14,6 +15,10 @@ class UniqueSlug
     {
         $base = Str::slug(trim($source));
         $base = $base !== '' ? $base : 'item';
+
+        // MySQL unique indexes still apply to soft-deleted rows; keep slugs short enough for suffixes.
+        $base = Str::limit($base, 240, '');
+
         $slug = $base;
         $suffix = 1;
 
@@ -31,6 +36,11 @@ class UniqueSlug
     protected static function exists(string $modelClass, string $column, string $slug, ?int $ignoreId): bool
     {
         $query = $modelClass::query()->where($column, $slug);
+
+        // Soft-deleted rows still occupy unique DB indexes.
+        if (in_array(SoftDeletes::class, class_uses_recursive($modelClass), true)) {
+            $query->withTrashed();
+        }
 
         if ($ignoreId !== null) {
             $query->where('id', '!=', $ignoreId);

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\QuizAnswer;
 use App\Models\QuizQuestion;
 use App\Models\QuizeCategory;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,18 +37,7 @@ class QuizAnswerController extends Controller
     {
         $validated = $this->validatedPayload($request);
 
-        $slug = QuizAnswer::slugFromAnswer($validated['answers']);
-
-        $quizAnswer = QuizAnswer::create([
-            'question_id' => $validated['question_id'],
-            'slug' => $slug,
-            'answers' => $validated['answers'],
-            'bible_title' => $validated['bible_title'],
-            'description' => $validated['description'],
-            'xp' => $validated['xp'],
-            'coins' => $validated['coins'],
-            'is_right' => $validated['is_right'],
-        ]);
+        $quizAnswer = $this->createWithUniqueSlug($validated);
 
         if ($validated['is_right']) {
             $this->clearOtherRightAnswers($quizAnswer);
@@ -137,6 +127,33 @@ class QuizAnswerController extends Controller
             'coins' => isset($validated['coins']) ? (int) $validated['coins'] : null,
             'is_right' => (int) $validated['is_right'],
         ];
+    }
+
+    /**
+     * @param  array{question_id: int, answers: string, bible_title: ?string, description: ?string, xp: ?int, coins: ?int, is_right: int}  $validated
+     */
+    private function createWithUniqueSlug(array $validated): QuizAnswer
+    {
+        $lastException = null;
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            try {
+                return QuizAnswer::create([
+                    'question_id' => $validated['question_id'],
+                    'slug' => QuizAnswer::slugFromAnswer($validated['answers']),
+                    'answers' => $validated['answers'],
+                    'bible_title' => $validated['bible_title'],
+                    'description' => $validated['description'],
+                    'xp' => $validated['xp'],
+                    'coins' => $validated['coins'],
+                    'is_right' => $validated['is_right'],
+                ]);
+            } catch (UniqueConstraintViolationException $e) {
+                $lastException = $e;
+            }
+        }
+
+        throw $lastException;
     }
 
     private function clearOtherRightAnswers(QuizAnswer $quizAnswer): void
