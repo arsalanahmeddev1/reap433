@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "609527170566",
+    "project_id": "reap433-8b52a",
+    "storage_bucket": "reap433-8b52a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609527170566:android:be595861599616b2496587",
+        "android_client_info": {
+          "package_name": "com.reap433.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "609527170566-eldtvlvqkd35o68igs5lpb8tbe4tv5pu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reap433.app",
+            "certificate_hash": "21b4406f6ed6080043a09e7f60239b1edfd65498"
+          }
+        },
+        {
+          "client_id": "609527170566-ii90dl2d099c1vopq8mrls3oj1plgr7b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reap433.app",
+            "certificate_hash": "ea64f4d1f60d9324c1ae920f75b6c17d0a92b356"
+          }
+        },
+        {
+          "client_id": "609527170566-3a8bvbkeb664go1s1dl1lnuu1ptikkpn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1w-taiZDmdJIcDgFeeunG_v5UXVIRgpg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "609527170566-3a8bvbkeb664go1s1dl1lnuu1ptikkpn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "609527170566-np7kvl7hbv0e4hv3rmdlj39sbk4oem7l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.reap433.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

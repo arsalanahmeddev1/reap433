@@ -1,24 +1,62 @@
-*.log
+# Dart and Flutter
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+**/build/
+
+# Flutter generated files
+.flutter-plugins-dependencies
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/ephemeral/
+
+# Android generated files
+.gradle/
+**/.gradle/
+android/local.properties
+android/**/captures/
+android/**/outputs/
+android/**/intermediates/
+
+# iOS generated files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# macOS files
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Environment and secrets
 .env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.fleet
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-/public/build
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-Homestead.json
-Homestead.yaml
-Thumbs.db
+.env.*
+!.env.example
+key.properties
+**/key.properties
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+*.pem
+
+# Firebase service account credentials
+service-account*.json
+*-service-account*.json
